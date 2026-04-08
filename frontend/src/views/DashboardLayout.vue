@@ -15,6 +15,9 @@
           <span class="nav-ico">⬡</span>All Projects
           <span class="nav-count">{{ store.projects.length }}</span>
         </router-link>
+        <router-link to="/guide" class="nav-item" active-class="active">
+          <span class="nav-ico" style="color:#f6ad55;">?</span>Guide
+        </router-link>
 
         <div class="nav-section" style="margin-top:6px;">Κατηγορία</div>
         <router-link to="/projects?category=finance" class="nav-item" active-class="active">
@@ -40,8 +43,8 @@
           :to="`/projects?companyId=${co.id}`"
           class="nav-item" active-class="active"
         >
-          <span class="nav-ico" :style="`color:${co.color};`">·</span>
-          {{ co.name }}
+          <span class="nav-ico" :style="`color:${co.color};`">{{ coIcon(co.code) }}</span>
+          {{ coShortName(co.name) }}
           <span class="nav-count">{{ co.projectCount || 0 }}</span>
         </router-link>
       </nav>
@@ -159,6 +162,24 @@ const form = ref({ title: '', companyId: '', category: '', budget: '', deadline:
 onMounted(async () => {
   await Promise.all([store.fetchProjects(), store.fetchCompanies()])
 })
+
+// Company icon ανά code
+function coIcon(code) {
+  const icons = { PF: '★', CW: '⚓', WM: '⊙', VS: '▲', OS: '·' }
+  return icons[code] || '·'
+}
+
+// Σύντομο όνομα εταιρείας για sidebar
+function coShortName(name) {
+  const shorts = {
+    'Polaris Financial Services': 'Polaris Financial',
+    'Crossworld Marine Services': 'Crossworld Marine',
+    'WiMAS Training Center': 'WiMAS',
+    'Varship Management': 'Varship',
+    'Oceansoft': 'Oceansoft',
+  }
+  return shorts[name] || name.split(' ').slice(0, 2).join(' ')
+}
 
 const initials = computed(() => {
   const name = auth.user?.fullName || ''
