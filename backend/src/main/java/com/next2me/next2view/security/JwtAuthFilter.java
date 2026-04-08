@@ -25,6 +25,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
+    private static final List<String> PUBLIC_PATHS = List.of(
+        "/auth/login",
+        "/auth/refresh",
+        "/auth/logout",
+        "/actuator/health",
+        "/actuator/info",
+        "/swagger-ui",
+        "/v3/api-docs"
+    );
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -50,14 +60,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private Optional<String> extractToken(HttpServletRequest request) {
-        // 1. Try HttpOnly cookie (preferred)
         if (request.getCookies() != null) {
             return Arrays.stream(request.getCookies())
                     .filter(c -> "access_token".equals(c.getName()))
                     .map(Cookie::getValue)
                     .findFirst();
         }
-        // 2. Fallback: Authorization header (for API clients)
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             return Optional.of(header.substring(7));
@@ -68,8 +76,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/auth/login")
-                || path.startsWith("/auth/refresh")
-                || path.startsWith("/actuator/health");
+        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
     }
 }
