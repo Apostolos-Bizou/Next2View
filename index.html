@@ -1,0 +1,3480 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next2View — Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f0f2f7;
+  --surface:#ffffff;
+  --surface2:#f7f8fb;
+  --surface3:#eef0f5;
+  --border:rgba(0,0,0,0.08);
+  --border-bright:rgba(0,0,0,0.14);
+  --sidebar-bg:#1c2333;
+  --sidebar-border:rgba(255,255,255,0.07);
+  --sidebar-text:#a8b0c4;
+  --sidebar-text-dim:#5a6478;
+  --sidebar-active-bg:rgba(99,179,237,0.12);
+  --sidebar-active-border:#63b3ed;
+  --text:#1a202c;
+  --text-dim:#718096;
+  --text-mid:#4a5568;
+  --accent:#3b82f6;
+  --accent-glow:rgba(59,130,246,0.10);
+  --accent-dim:rgba(59,130,246,0.08);
+  --finance:#059669;
+  --finance-dim:rgba(5,150,105,0.10);
+  --legal:#d97706;
+  --legal-dim:rgba(217,119,6,0.10);
+  --dev:#7c3aed;
+  --dev-dim:rgba(124,58,237,0.10);
+  --marketing:#db2777;
+  --marketing-dim:rgba(219,39,119,0.10);
+  --red:#dc2626;
+  --red-dim:rgba(220,38,38,0.09);
+  --yellow:#d97706;
+  --yellow-dim:rgba(217,119,6,0.09);
+  --green:#059669;
+  --green-dim:rgba(5,150,105,0.09);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;overflow-x:hidden;}
+.shell{display:flex;min-height:100vh;}
+
+/* ════ SIDEBAR ════ */
+.sidebar{
+  width:228px;background:var(--sidebar-bg);
+  border-right:1px solid var(--sidebar-border);
+  display:flex;flex-direction:column;flex-shrink:0;
+  position:sticky;top:0;height:100vh;
+}
+.logo{padding:20px 18px 16px;border-bottom:1px solid var(--sidebar-border);}
+.logo-mark{font-family:'Nunito Sans',sans-serif;font-size:8px;color:var(--sidebar-active-border);letter-spacing:3px;text-transform:uppercase;margin-bottom:3px;}
+.logo-name{font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+.logo-name span{color:var(--sidebar-active-border);}
+
+.nav{padding:12px 0;flex:1;overflow-y:auto;}
+.nav-section{font-family:'Nunito Sans',sans-serif;font-size:8px;letter-spacing:2px;color:var(--sidebar-text-dim);padding:10px 18px 4px;text-transform:uppercase;}
+.nav-item{
+  display:flex;align-items:center;gap:9px;
+  padding:10px 18px;cursor:pointer;transition:all 0.15s;
+  font-size:13px;font-weight:600;color:var(--sidebar-text);
+  border-left:2px solid transparent;
+}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,0.06);}
+.nav-item.active{
+  color:#fff;
+  border-left-color:var(--sidebar-active-border);
+  background:var(--sidebar-active-bg);
+}
+.nav-ico{font-size:13px;width:15px;text-align:center;}
+.nav-count{
+  margin-left:auto;font-family:'Nunito Sans',sans-serif;font-size:8px;
+  background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:8px;
+  color:var(--sidebar-text-dim);
+}
+
+.sidebar-actions{padding:10px 14px;border-top:1px solid var(--sidebar-border);display:flex;flex-direction:column;gap:6px;}
+.btn-sidebar{
+  width:100%;padding:8px 12px;
+  background:rgba(99,179,237,0.12);border:1px solid rgba(99,179,237,0.25);
+  border-radius:6px;color:var(--sidebar-active-border);
+  font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;text-align:center;
+}
+.btn-sidebar:hover{background:rgba(99,179,237,0.22);}
+
+.sidebar-user{
+  padding:12px 16px;border-top:1px solid var(--sidebar-border);
+  display:flex;align-items:center;gap:9px;
+}
+.avatar{
+  width:28px;height:28px;background:var(--sidebar-active-border);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#1c2333;flex-shrink:0;
+}
+.user-name{font-size:11px;font-weight:600;color:#fff;}
+.user-role{font-size:9px;color:var(--sidebar-text-dim);font-family:'Nunito Sans',sans-serif;}
+
+/* ════ MAIN ════ */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{
+  padding:18px 32px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);
+  box-shadow:0 1px 3px rgba(0,0,0,0.06);
+}
+.page-title{font-size:20px;font-weight:900;color:var(--text);}
+.page-subtitle{font-size:12px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-top:3px;font-weight:600;}
+.topbar-right{display:flex;gap:8px;align-items:center;}
+.chip{
+  padding:5px 12px;border-radius:16px;font-size:10px;font-weight:700;
+  cursor:pointer;border:1px solid var(--border-bright);
+  background:transparent;color:var(--text-mid);
+  transition:all 0.15s;font-family:'Nunito',sans-serif;letter-spacing:0.3px;
+}
+.chip:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.chip.finance.active{background:var(--finance);border-color:var(--finance);color:#fff;}
+.chip.legal.active{background:var(--legal);border-color:var(--legal);color:#fff;}
+.chip.dev.active{background:var(--dev);border-color:var(--dev);color:#fff;}
+.chip.marketing.active{background:var(--marketing);border-color:var(--marketing);color:#fff;}
+
+/* ════ VIEWS ════ */
+.view{display:none;flex:1;overflow-y:auto;}
+.view.active{display:block;}
+.content{padding:26px 32px;}
+
+/* ════ KPI STRIP ════ */
+.kpi-strip{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:20px;}
+.kpi{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:20px 16px;position:relative;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);transition:box-shadow 0.2s;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+}
+.kpi:hover{box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.kpi.total::before{background:var(--accent);}
+.kpi.finance::before{background:var(--finance);}
+.kpi.legal::before{background:var(--legal);}
+.kpi.dev::before{background:var(--dev);}
+.kpi.marketing::before{background:var(--marketing);}
+.kpi.alert::before{background:var(--red);}
+.kpi-lbl{font-family:'Nunito Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;font-weight:700;}
+.kpi-val{font-size:36px;font-weight:900;line-height:1;margin-bottom:6px;}
+.kpi.total .kpi-val{color:var(--accent);}
+.kpi.finance .kpi-val{color:var(--finance);}
+.kpi.legal .kpi-val{color:var(--legal);}
+.kpi.dev .kpi-val{color:var(--dev);}
+.kpi.marketing .kpi-val{color:var(--marketing);}
+.kpi.alert .kpi-val{color:var(--red);}
+.kpi-sub{font-size:11px;color:var(--text-dim);font-weight:500;}
+
+/* ════ PANEL ════ */
+.panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:14px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.ph{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2);}
+.ph-title{font-size:15px;font-weight:800;color:var(--text);}
+.ph-badge{font-family:'Nunito Sans',sans-serif;font-size:8px;padding:3px 8px;border-radius:8px;letter-spacing:1px;}
+.pb{padding:18px 22px;}
+
+/* ════ GRIDS ════ */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+
+/* ════ CAT CARDS ════ */
+.cat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;cursor:pointer;transition:all 0.2s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.cat-card:hover{box-shadow:0 6px 18px rgba(0,0,0,0.1);transform:translateY(-2px);}
+.cat-card-head{padding:16px 18px 12px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;align-items:center;text-align:center;}
+.cat-card-icon{font-size:20px;margin-bottom:7px;}
+.cat-card-name{font-size:13px;font-weight:800;margin-bottom:2px;}
+.cat-card-count{font-size:9px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;}
+.cat-card-pct{font-size:32px;font-weight:900;margin-bottom:2px;}
+.cat-card-bar{height:4px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-top:8px;width:100%;}
+.cat-card-fill{height:100%;border-radius:2px;}
+.cat-card-body{padding:11px 18px;}
+.proj-mini{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;cursor:pointer;}
+.proj-mini:last-child{border-bottom:none;}
+.proj-mini:hover .proj-mini-name{color:var(--accent);}
+.proj-mini-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.proj-mini-name{flex:1;color:var(--text-mid);}
+.proj-mini-pct{font-family:'Nunito Sans',sans-serif;font-size:10px;font-weight:600;}
+
+/* ════ PROJECT TABLE ════ */
+.proj-tbl{width:100%;border-collapse:collapse;}
+.proj-tbl th{font-family:'Nunito Sans',sans-serif;font-size:10px;letter-spacing:1.5px;color:var(--text-dim);text-align:left;padding:0 8px 14px 0;border-bottom:2px solid var(--border);font-weight:700;text-transform:uppercase;}
+.proj-tbl td{padding:18px 12px 18px 0;border-bottom:1px solid var(--border);vertical-align:middle;}
+.proj-tbl tr:last-child td{border-bottom:none;}
+.proj-tbl tr.proj-row{cursor:pointer;transition:all 0.12s;}
+.proj-tbl tr.proj-row:hover td{background:var(--accent-dim);}
+.pname{font-size:16px;font-weight:800;color:var(--text);}
+.pco{font-size:12px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-top:3px;font-weight:600;}
+.cat-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;padding:4px 10px;border-radius:10px;font-family:'Nunito Sans',sans-serif;letter-spacing:0.3px;}
+.cat-pill.finance{background:var(--finance-dim);color:var(--finance);}
+.cat-pill.legal{background:var(--legal-dim);color:var(--legal);}
+.cat-pill.dev{background:var(--dev-dim);color:var(--dev);}
+.cat-pill.marketing{background:var(--marketing-dim);color:var(--marketing);}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;}
+.sdot.g{background:var(--green);box-shadow:0 0 5px rgba(5,150,105,0.4);}
+.sdot.y{background:var(--yellow);box-shadow:0 0 5px rgba(217,119,6,0.4);}
+.sdot.r{background:var(--red);box-shadow:0 0 5px rgba(220,38,38,0.4);}
+.pct-mono{font-family:'Nunito Sans',sans-serif;font-size:18px;font-weight:800;}
+.mbar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-top:6px;width:100px;}
+.mbar-fill{height:100%;border-radius:2px;}
+
+/* ════ ENTITY ROWS ════ */
+.co-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:all 0.15s;}
+.co-row:last-child{border-bottom:none;}
+.co-row:hover{color:var(--accent);}
+.co-av{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.co-info{flex:1;}
+.co-name{font-size:15px;font-weight:800;}
+.co-meta{font-size:11px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-top:3px;font-weight:600;}
+.co-barw{width:90px;}
+.co-bar{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;}
+.co-pct{font-size:18px;font-weight:900;min-width:44px;text-align:right;}
+
+/* ════ DEADLINES ════ */
+.dl-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer;}
+.dl-row:last-child{border-bottom:none;}
+.dl-date{font-family:'Nunito Sans',sans-serif;font-size:11px;color:var(--text-dim);min-width:72px;font-weight:600;}
+.dl-label{flex:1;font-weight:700;font-size:13px;}
+.dl-co{font-size:11px;color:var(--text-dim);font-weight:600;}
+.dl-days{font-family:'Nunito Sans',sans-serif;font-size:11px;font-weight:800;padding:4px 9px;border-radius:5px;}
+.dl-days.u{background:var(--red-dim);color:var(--red);}
+.dl-days.w{background:var(--yellow-dim);color:var(--yellow);}
+.dl-days.ok{background:var(--green-dim);color:var(--green);}
+
+/* ════ ACTIVITY ════ */
+.act-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.act-item:last-child{border-bottom:none;}
+.act-dot{width:10px;height:10px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.act-txt{font-size:13px;line-height:1.6;flex:1;color:var(--text-mid);font-weight:500;}
+.act-time{font-size:11px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;flex-shrink:0;margin-top:3px;font-weight:600;}
+
+/* ════ TIMELINE (Gantt) ════ */
+.tl-outer{overflow-x:auto;border-radius:0 0 10px 10px;}
+.tl-head{display:flex;border-bottom:2px solid var(--border);background:var(--surface2);position:sticky;top:0;z-index:10;}
+.tl-label-col{width:260px;min-width:260px;padding:11px 16px;font-family:'Nunito Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);font-weight:800;text-transform:uppercase;border-right:1px solid var(--border);flex-shrink:0;}
+.tl-week{flex:1;min-width:80px;padding:8px 4px;text-align:center;border-right:1px solid rgba(0,0,0,0.05);}
+.tl-week-num{font-family:'Nunito Sans',sans-serif;font-size:10px;font-weight:800;color:var(--text-dim);}
+.tl-week-date{font-size:9px;color:var(--text-dim);margin-top:2px;font-weight:600;}
+.tl-week.cur{background:rgba(59,130,246,0.06);}
+.tl-week.cur .tl-week-num{color:var(--accent);font-weight:900;}
+.tl-week.cur .tl-week-date{color:var(--accent);}
+
+.tl-proj-row{
+  display:flex;align-items:center;min-height:46px;
+  background:var(--surface3);border-bottom:1px solid var(--border);
+  position:relative;
+}
+.tl-proj-label{
+  width:260px;min-width:260px;padding:10px 16px;
+  border-right:1px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:800;color:var(--text);cursor:pointer;
+}
+.tl-proj-label:hover{color:var(--accent);}
+.tl-proj-badge{font-size:9px;font-weight:700;padding:3px 7px;border-radius:8px;}
+
+.tl-mod-row{display:flex;align-items:center;min-height:42px;border-bottom:1px solid var(--border);background:var(--surface2);}
+.tl-mod-label{
+  width:260px;min-width:260px;padding:7px 16px;
+  border-right:1px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--text);
+}
+.tl-mod-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+.tl-task-row{display:flex;align-items:center;min-height:44px;border-bottom:1px solid rgba(0,0,0,0.05);background:var(--surface);}
+.tl-task-row:hover{background:var(--accent-dim);}
+.tl-task-label{
+  width:260px;min-width:260px;padding:6px 16px 6px 34px;
+  border-right:1px solid var(--border);flex-shrink:0;
+  font-size:12px;color:var(--text-mid);font-weight:500;
+}
+
+.tl-cells{display:flex;flex:1;}
+.tl-cell{flex:1;min-width:80px;border-right:1px solid rgba(0,0,0,0.05);position:relative;min-height:44px;}
+.tl-cell.cur{background:rgba(59,130,246,0.04);border-right:1px solid rgba(59,130,246,0.25);}
+
+.tl-bar{
+  position:absolute;top:50%;transform:translateY(-50%);
+  height:28px;border-radius:6px;
+  display:flex;align-items:center;padding:0 10px;
+  font-size:11px;font-weight:700;letter-spacing:0.2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  cursor:pointer;transition:filter 0.15s;z-index:5;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+.tl-bar:hover{filter:brightness(1.06);box-shadow:0 3px 10px rgba(0,0,0,0.18);}
+.tl-bar.finance{background:rgba(5,150,105,0.18);border:2px solid rgba(5,150,105,0.55);color:#047857;font-weight:800;}
+.tl-bar.legal{background:rgba(217,119,6,0.16);border:2px solid rgba(217,119,6,0.5);color:#b45309;font-weight:800;}
+.tl-bar.dev{background:rgba(124,58,237,0.14);border:2px solid rgba(124,58,237,0.5);color:#6d28d9;font-weight:800;}
+.tl-bar.marketing{background:rgba(219,39,119,0.14);border:2px solid rgba(219,39,119,0.5);color:#be185d;font-weight:800;}
+.tl-bar.done{background:rgba(0,0,0,0.04);border:2px solid rgba(0,0,0,0.15);color:var(--text-dim);font-weight:600;opacity:0.7;}
+.tl-bar.blocked{background:rgba(220,38,38,0.12);border:2px solid rgba(220,38,38,0.5);color:#b91c1c;font-weight:800;}
+
+/* current week vertical line */
+.tl-now-marker{
+  position:absolute;top:0;bottom:0;width:2px;
+  background:var(--accent);opacity:0.4;pointer-events:none;z-index:20;
+}
+
+/* ════ DETAIL VIEW ════ */
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);margin-bottom:18px;}
+.breadcrumb span{cursor:pointer;transition:color 0.15s;}
+.breadcrumb span:hover{color:var(--accent);}
+.bc-sep{color:var(--border-bright);}
+
+.contract-header{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,0.06);}
+.contract-header::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;}
+.contract-header.finance::before{background:var(--finance);}
+.contract-header.legal::before{background:var(--legal);}
+.contract-header.dev::before{background:var(--dev);}
+.contract-header.marketing::before{background:var(--marketing);}
+.ch-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.ch-title{font-size:20px;font-weight:800;margin-bottom:4px;}
+.ch-meta{font-size:10px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;display:flex;gap:14px;}
+.ch-badge{font-size:9px;font-weight:700;padding:4px 10px;border-radius:6px;font-family:'Nunito Sans',sans-serif;letter-spacing:1px;}
+.ch-badge.finance{background:var(--finance-dim);color:var(--finance);}
+.ch-badge.legal{background:var(--legal-dim);color:var(--legal);}
+.ch-badge.dev{background:var(--dev-dim);color:var(--dev);}
+.ch-badge.marketing{background:var(--marketing-dim);color:var(--marketing);}
+.contract-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.cs-item{background:var(--surface2);border-radius:8px;padding:11px 13px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.cs-lbl{font-family:'Nunito Sans',sans-serif;font-size:8px;letter-spacing:1.5px;color:var(--text-dim);text-transform:uppercase;margin-bottom:4px;font-weight:700;}
+.cs-val{font-size:18px;font-weight:800;}
+.cs-sub{font-size:9px;color:var(--text-dim);margin-top:1px;}
+
+.overall-progress{background:var(--surface2);border-radius:8px;padding:13px 15px;border:1px solid var(--border);margin-bottom:13px;}
+.op-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.op-label{font-size:11px;font-weight:600;}
+.op-pct{font-size:21px;font-weight:800;}
+.op-bar{height:7px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.op-fill{height:100%;border-radius:4px;transition:width 0.8s ease;}
+
+.module-group{background:var(--surface);border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
+.mg-header{padding:11px 15px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--surface2);}
+.mg-expand{font-size:9px;color:var(--text-dim);transition:transform 0.2s;}
+.mg-expand.open{transform:rotate(90deg);}
+.mg-name{font-size:12px;font-weight:700;flex:1;}
+.mg-pct{font-family:'Nunito Sans',sans-serif;font-size:12px;font-weight:700;}
+.mg-bar-wrap{width:80px;}
+.mg-bar{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.mg-bar-fill{height:100%;border-radius:2px;}
+.mg-tasks-count{font-size:9px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;}
+
+.task-list{padding:0 15px;}
+.task-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.task-item:last-child{border-bottom:none;}
+.task-check{width:15px;height:15px;border-radius:3px;border:1.5px solid var(--border-bright);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:8px;}
+.task-check.done{background:var(--green);border-color:var(--green);color:#fff;}
+.task-check.block{background:var(--red-dim);border-color:var(--red);}
+.task-name{flex:1;font-size:11px;font-weight:500;}
+.task-name.done{color:var(--text-dim);text-decoration:line-through;}
+.task-assignee{font-size:9px;font-family:'Nunito Sans',sans-serif;color:var(--text-dim);background:var(--surface2);padding:2px 6px;border-radius:4px;}
+.task-pct-wrap{display:flex;align-items:center;gap:6px;}
+.task-pct{font-family:'Nunito Sans',sans-serif;font-size:10px;font-weight:600;min-width:26px;text-align:right;}
+.task-bar{width:48px;height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.task-bar-fill{height:100%;border-radius:2px;}
+.task-note{font-size:9px;color:var(--red);font-family:'Nunito Sans',sans-serif;margin-top:2px;}
+
+/* ── TASK COMMENT ── */
+.task-comment-btn{
+  font-size:14px;cursor:pointer;opacity:0.3;
+  transition:opacity 0.15s,transform 0.15s;
+  padding:2px 4px;border-radius:4px;flex-shrink:0;
+}
+.task-comment-btn:hover{opacity:0.8;transform:scale(1.15);}
+.task-comment-btn.has-comment{opacity:1;filter:none;}
+.task-comment-preview{
+  font-size:11px;color:var(--text-dim);font-style:italic;
+  margin-top:4px;padding:4px 8px;
+  background:var(--surface2);border-radius:5px;
+  border-left:3px solid var(--accent-dim);
+  font-family:'Nunito Sans',sans-serif;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px;
+}
+.task-comment-box{
+  width:100%;margin-top:10px;padding:12px 14px;
+  background:var(--surface2);border:1px solid var(--border-bright);
+  border-radius:8px;border-left:3px solid var(--accent);
+  animation:slideDown 0.15s ease;
+}
+@keyframes slideDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.task-comment-input{
+  width:100%;background:var(--surface);
+  border:1px solid var(--border-bright);border-radius:6px;
+  padding:10px 12px;color:var(--text);
+  font-family:'Nunito',sans-serif;font-size:13px;font-weight:500;
+  line-height:1.6;resize:vertical;min-height:80px;
+  transition:border-color 0.15s;
+}
+.task-comment-input:focus{outline:none;border-color:var(--accent);}
+.task-comment-input::placeholder{color:var(--text-dim);}
+.btn-comment-save{
+  padding:6px 14px;background:var(--accent);border-radius:5px;
+  color:#fff;font-size:11px;font-weight:700;cursor:pointer;
+  font-family:'Nunito',sans-serif;transition:background 0.15s;
+}
+.btn-comment-save:hover{background:#2563eb;}
+.btn-comment-cancel{
+  padding:6px 14px;background:var(--surface3);border:1px solid var(--border-bright);
+  border-radius:5px;color:var(--text-dim);font-size:11px;font-weight:600;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.15s;
+}
+.btn-comment-cancel:hover{color:var(--text);}
+
+.spec-list{list-style:none;}
+.spec-item{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.spec-item:last-child{border-bottom:none;}
+.spec-num{font-size:9px;color:var(--text-dim);min-width:17px;margin-top:1px;}
+.spec-text{flex:1;line-height:1.5;}
+.spec-check{font-size:11px;flex-shrink:0;}
+
+.ceo-note{background:var(--accent-dim);border-left:3px solid var(--accent);border-radius:0 7px 7px 0;padding:9px 13px;margin-bottom:7px;font-size:11px;line-height:1.6;color:var(--text-mid);}
+.ceo-note-date{font-size:9px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:2px;}
+
+.payment-bar{height:9px;background:var(--surface3);border-radius:5px;overflow:hidden;margin:8px 0 4px;display:flex;}
+.pay-paid{background:var(--green);}
+.pay-pending{background:var(--yellow);}
+.pay-remaining{background:var(--surface3);}
+.pay-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;}
+.pay-leg-item{display:flex;align-items:center;gap:4px;font-size:9px;font-family:'Nunito Sans',sans-serif;color:var(--text-dim);}
+.pay-leg-dot{width:8px;height:8px;border-radius:2px;}
+.fin-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.fin-row:last-child{border-bottom:none;}
+.fin-key{color:var(--text-dim);}
+.fin-val{font-family:'Nunito Sans',sans-serif;font-weight:600;}
+.fin-val.accent{color:var(--accent);}
+.fin-val.green{color:var(--green);}
+.fin-val.yellow{color:var(--yellow);}
+.fin-val.red{color:var(--red);}
+
+/* alert banner */
+.stale-banner{background:var(--red-dim);border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:13px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;}
+.stale-txt{color:var(--red);flex:1;}
+
+/* cat breakdown */
+.cat-blk{background:var(--surface2);border-radius:7px;padding:14px 12px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.cat-blk-lbl{font-size:9px;font-family:'Nunito Sans',sans-serif;letter-spacing:1.5px;margin-bottom:6px;text-transform:uppercase;font-weight:700;}
+.cat-blk-lbl.finance{color:var(--finance);}
+.cat-blk-lbl.legal{color:var(--legal);}
+.cat-blk-lbl.dev{color:var(--dev);}
+.cat-blk-lbl.marketing{color:var(--marketing);}
+.cat-blk-pct{font-size:30px;font-weight:900;margin-bottom:2px;}
+.cat-blk-pct.finance{color:var(--finance);}
+.cat-blk-pct.legal{color:var(--legal);}
+.cat-blk-pct.dev{color:var(--dev);}
+.cat-blk-pct.marketing{color:var(--marketing);}
+.cat-blk-sub{font-size:11px;color:var(--text-dim);font-weight:500;}
+.cat-big-bar{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;margin-top:9px;width:100%;}
+.cat-big-fill{height:100%;border-radius:2px;}
+
+/* vel */
+.vel-row{display:flex;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:11px;}
+.vel-row:last-child{border-bottom:none;}
+.vel-lbl{flex:1;color:var(--text-mid);}
+.vel-barw{width:90px;margin:0 10px;}
+.vel-bar{height:3px;background:var(--surface3);border-radius:2px;overflow:hidden;}
+.vel-fill{height:100%;border-radius:2px;}
+.vel-pct{font-family:'Nunito Sans',sans-serif;font-size:10px;font-weight:600;min-width:44px;text-align:right;}
+
+/* ════ MODAL ════ */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,15,30,0.5);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:620px;max-width:96vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,0.2);animation:mIn 0.18s ease;}
+@keyframes mIn{from{opacity:0;transform:translateY(8px) scale(0.97)}to{opacity:1;transform:none}}
+.modal-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface2);position:sticky;top:0;z-index:10;border-radius:12px 12px 0 0;}
+.modal-title{font-size:14px;font-weight:700;color:var(--text);}
+.modal-close{width:26px;height:26px;border-radius:5px;background:var(--surface3);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-dim);font-size:13px;transition:all 0.15s;}
+.modal-close:hover{color:var(--red);border-color:var(--red);}
+.modal-body{padding:20px 22px;}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:9px;position:sticky;bottom:0;background:var(--surface);}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;background:var(--surface2);border:1px solid var(--border-bright);border-radius:6px;padding:9px 11px;color:var(--text);font-family:'Nunito',sans-serif;font-size:12px;transition:border-color 0.15s;}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+.field textarea{min-height:70px;resize:vertical;}
+.field select option{background:var(--surface2);}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.form-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);padding-bottom:7px;border-bottom:1px solid var(--border);margin-bottom:12px;margin-top:6px;}
+
+.btn-primary{padding:8px 20px;background:var(--accent);border:1px solid var(--accent);border-radius:6px;color:#fff;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;}
+.btn-primary:hover{background:#2563eb;}
+.btn-secondary{padding:8px 20px;background:transparent;border:1px solid var(--border-bright);border-radius:6px;color:var(--text-mid);font-family:'Nunito',sans-serif;font-size:10px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn-secondary:hover{border-color:var(--border-bright);color:var(--text);}
+.add-row-btn{display:flex;align-items:center;gap:5px;padding:5px 0;font-size:10px;color:var(--accent);cursor:pointer;font-weight:700;border:none;background:none;font-family:'Nunito',sans-serif;margin-top:5px;transition:color 0.15s;}
+.add-row-btn:hover{color:#2563eb;}
+
+/* module builder */
+.module-builder{border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:8px;}
+.mb-builder-head{display:flex;align-items:center;gap:8px;padding:9px 13px;background:var(--surface2);cursor:pointer;}
+.mb-builder-name{flex:1;font-size:12px;font-weight:600;}
+.mb-builder-body{padding:11px 13px;display:none;}
+.module-builder.open .mb-builder-body{display:block;}
+.module-builder.open .mb-expand-ico{transform:rotate(90deg);}
+.mb-expand-ico{font-size:8px;color:var(--text-dim);transition:transform 0.2s;}
+.tb-row{display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);}
+.tb-row:last-child{border-bottom:none;}
+.tb-row input{border-radius:4px;font-size:11px;padding:6px 8px;}
+.tb-nm{flex:2;}
+.tb-who{flex:1;}
+.tb-date{width:86px;}
+.tb-pct{width:52px;}
+.btn-ico{width:24px;height:24px;border-radius:4px;background:var(--surface3);border:1px solid var(--border-bright);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--text-dim);transition:all 0.15s;flex-shrink:0;}
+.btn-ico:hover{color:var(--accent);border-color:var(--accent);}
+.btn-ico.del:hover{color:var(--red);border-color:var(--red);}
+
+/* manage */
+.manage-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.manage-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.mc-head{padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;}
+.mc-title{font-size:12px;font-weight:700;}
+.mc-body{padding:14px 18px;}
+.ent-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.ent-row:last-child{border-bottom:none;}
+.ent-av{width:38px;height:38px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;}
+.ent-info{flex:1;}
+.ent-name{font-size:14px;font-weight:700;}
+.ent-meta{font-size:12px;color:var(--text-dim);margin-top:2px;font-weight:500;}
+.ent-acts{display:flex;gap:5px;}
+
+/* badges */
+.badge{font-size:8px;font-weight:700;padding:3px 7px;border-radius:7px;}
+.badge.blue{background:var(--accent-dim);color:var(--accent);}
+.badge.red{background:var(--red-dim);color:var(--red);}
+.badge.green{background:var(--green-dim);color:var(--green);}
+
+/* empty */
+.empty-state{text-align:center;padding:36px 20px;color:var(--text-dim);font-size:12px;}
+.empty-ico{font-size:28px;margin-bottom:8px;opacity:0.4;}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.15);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">Next2me Group</div>
+    <div class="logo-name">Next<span>2</span>View</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-section">CEO View</div>
+    <div class="nav-item active" onclick="showView('overview',this)"><span class="nav-ico">◈</span>Dashboard</div>
+    <div class="nav-item" onclick="showView('projects',this)"><span class="nav-ico">⬡</span>All Projects<span class="nav-count" id="nc-all">0</span></div>
+    <div class="nav-item" onclick="showView('guide',this)"><span class="nav-ico" style="color:#10b981;">?</span>Guide</div>
+
+    <div class="nav-section" style="margin-top:6px;">Κατηγορία</div>
+    <div class="nav-item" onclick="showCatView('finance',this)"><span class="nav-ico" style="color:var(--finance);">$</span>Finance<span class="nav-count" id="nc-fin">0</span></div>
+    <div class="nav-item" onclick="showCatView('legal',this)"><span class="nav-ico" style="color:var(--legal);">⚖</span>Legal<span class="nav-count" id="nc-leg">0</span></div>
+    <div class="nav-item" onclick="showCatView('dev',this)"><span class="nav-ico" style="color:var(--dev);">⌨</span>Developing<span class="nav-count" id="nc-dev">0</span></div>
+    <div class="nav-item" onclick="showCatView('marketing',this)"><span class="nav-ico" style="color:var(--marketing);">◈</span>Marketing<span class="nav-count" id="nc-mkt">0</span></div>
+
+    <div class="nav-section" style="margin-top:6px;" id="co-nav-section">Εταιρείες</div>
+    <div id="co-nav-items"></div>
+  </nav>
+  <div style="padding:10px 14px 0;border-top:1px solid var(--sidebar-border);display:flex;align-items:center;justify-content:space-between;">
+    <div style="font-size:9px;letter-spacing:1.5px;color:var(--sidebar-text-dim);text-transform:uppercase;font-family:'Nunito Sans',sans-serif;font-weight:700;">Notifications</div>
+    <div class="notif-bell-wrap" onclick="toggleNotifDropdown()" id="notif-bell">
+      <span class="notif-bell-icon">🔔</span>
+      <span class="notif-badge hidden" id="notif-badge">0</span>
+    </div>
+  </div>
+  <div class="sidebar-actions">
+    <div class="btn-sidebar btn-ai" onclick="openAIReport()" style="background:rgba(139,92,246,0.15);border-color:rgba(139,92,246,0.35);color:#a78bfa;font-size:12px;gap:7px;display:flex;align-items:center;justify-content:center;">
+      <span style="font-size:16px;">✦</span> AI Report
+    </div>
+    <div class="btn-sidebar" onclick="openModal('project')">+ New Project</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div class="btn-sidebar" style="font-size:9px;" onclick="openModal('company')">+ Company</div>
+      <div class="btn-sidebar" style="font-size:9px;" onclick="openModal('user')">+ User</div>
+    </div>
+  </div>
+  <div class="sidebar-user">
+    <div class="avatar">ΑΒ</div>
+    <div><div class="user-name" id="ceo-name">Απόστολος</div><div class="user-role">CEO · Full Access</div></div>
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="page-title">Group Dashboard</div>
+      <div class="page-subtitle" id="page-sub">All companies · All categories · CEO view</div>
+    </div>
+    <div class="topbar-right" id="topbar-chips"></div>
+  </div>
+
+  <!-- ══ OVERVIEW / DASHBOARD ══ -->
+  <div id="view-overview" class="view active">
+  <div class="content">
+
+    <div class="stale-banner" id="stale-banner" style="display:none;">
+      <span>⚠</span><span class="stale-txt" id="stale-txt"></span>
+    </div>
+
+    <div class="kpi-strip" id="kpi-strip"></div>
+
+    <div class="g2">
+      <div class="panel">
+        <div class="ph"><div class="ph-title">Εταιρείες</div><div class="ph-badge badge blue" id="co-badge">0</div></div>
+        <div class="pb" id="co-list"></div>
+      </div>
+      <div>
+        <div class="panel" style="margin-bottom:14px;">
+          <div class="ph"><div class="ph-title">Ανά Κατηγορία</div></div>
+          <div class="pb">
+            <div class="g4" id="cat-breakdown" style="grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:0;"></div>
+          </div>
+        </div>
+        <div class="g2" style="margin-bottom:0;">
+          <div class="panel" style="margin-bottom:0;">
+            <div class="ph"><div class="ph-title">Deadlines</div><div class="ph-badge badge red" id="urgent-badge">0</div></div>
+            <div class="pb" id="deadlines-list"></div>
+          </div>
+          <div class="panel" style="margin-bottom:0;">
+            <div class="ph"><div class="ph-title">Activity</div></div>
+            <div class="pb" id="activity-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE ON DASHBOARD -->
+    <div class="panel" style="margin-bottom:0;">
+      <div class="ph">
+        <div class="ph-title">Project Timeline — All Active</div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="tl-filter-cat" onchange="renderDashTimeline()" style="background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;padding:4px 9px;color:var(--text-mid);font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;">
+            <option value="">Όλες κατηγορίες</option>
+            <option value="finance">Finance</option>
+            <option value="legal">Legal</option>
+            <option value="dev">Developing</option>
+            <option value="marketing">Marketing</option>
+          </select>
+          <div class="ph-badge badge blue" id="tl-proj-count">0 projects</div>
+        </div>
+      </div>
+      <div class="tl-outer" id="dash-timeline"></div>
+    </div>
+
+  </div>
+  </div>
+
+  <!-- ══ ALL PROJECTS ══ -->
+  <div id="view-projects" class="view">
+  <div class="content">
+    <div class="panel">
+      <div class="ph">
+        <div class="ph-title">All Projects</div>
+        <div style="display:flex;gap:8px;">
+          <select id="flt-cat" onchange="renderProjTable()" style="background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;padding:5px 10px;color:var(--text-mid);font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;">
+            <option value="">Όλες κατηγορίες</option>
+            <option value="finance">Finance</option>
+            <option value="legal">Legal</option>
+            <option value="dev">Developing</option>
+            <option value="marketing">Marketing</option>
+          </select>
+          <select id="flt-co" onchange="renderProjTable()" style="background:var(--surface2);border:1px solid var(--border-bright);border-radius:5px;padding:5px 10px;color:var(--text-mid);font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;">
+            <option value="">Όλες εταιρείες</option>
+          </select>
+          <div class="badge blue" id="proj-count-badge">0</div>
+        </div>
+      </div>
+      <div class="pb" style="padding:0 18px;">
+        <table class="proj-tbl">
+          <thead><tr>
+            <th style="width:200px;">Project</th>
+            <th style="width:90px;">Κατηγορία</th>
+            <th style="width:72px;">Status</th>
+            <th style="width:108px;">Progress</th>
+            <th style="width:76px;">Budget</th>
+            <th style="width:64px;">Tasks</th>
+            <th style="width:84px;">Deadline</th>
+            <th style="width:68px;">Update</th>
+          </tr></thead>
+          <tbody id="proj-tbody"></tbody>
+        </table>
+        <div id="proj-empty" class="empty-state" style="display:none;"><div class="empty-ico">⬡</div><div>Δεν υπάρχουν projects.</div></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ══ DETAIL ══ -->
+  <div id="view-detail" class="view">
+  <div class="content" id="detail-content"></div>
+  </div>
+
+  <!-- ══ MANAGE ══ -->
+  <div id="view-manage" class="view">
+  <div class="content">
+    <div class="manage-grid">
+      <div class="manage-card">
+        <div class="mc-head"><div class="mc-title">Companies</div><div class="btn-ico" onclick="openModal('company')" style="width:auto;padding:0 10px;font-size:10px;font-weight:700;">+ Add</div></div>
+        <div class="mc-body" id="manage-companies"></div>
+      </div>
+      <div class="manage-card">
+        <div class="mc-head"><div class="mc-title">Users</div><div class="btn-ico" onclick="openModal('user')" style="width:auto;padding:0 10px;font-size:10px;font-weight:700;">+ Add</div></div>
+        <div class="mc-body" id="manage-users"></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+  <!-- ══ GUIDE VIEW ══ -->
+  <div id="view-guide" class="view">
+  <div class="content" style="max-width:100%;">
+
+    <!-- HEADER -->
+    <div style="background:linear-gradient(135deg,#ecfdf5 0%,#d1fae5 100%);border:1px solid #a7f3d0;border-radius:14px;padding:28px 32px;margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#059669;margin-bottom:8px;font-family:'Nunito Sans',sans-serif;">NEXT2VIEW</div>
+      <div style="font-size:28px;font-weight:900;color:#064e3b;margin-bottom:6px;">📘 Οδηγός Χρήσης</div>
+      <div style="font-size:14px;color:#065f46;">Πλήρης οδηγός για κάθε λειτουργία της πλατφόρμας. Επίλεξε κατηγορία παρακάτω.</div>
+    </div>
+
+    <!-- GUIDE TABS -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;">
+      <div class="guide-tab active" onclick="switchGuideTab('g-overview',this)">◈ Dashboard</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-companies',this)">🏢 Εταιρείες</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-projects',this)">⬡ Projects</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-tasks',this)">✅ Tasks</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-contracts',this)">📄 Συμβάσεις</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-ai',this)" style="background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#7c3aed;">✦ AI Features</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-notifs',this)" style="background:rgba(220,38,38,0.07);border-color:rgba(220,38,38,0.25);color:var(--red);">🔔 Notifications</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-roles',this)">👤 Roles</div>
+      <div class="guide-tab" onclick="switchGuideTab('g-glossary',this)">📖 Γλωσσάριο</div>
+    </div>
+
+    <!-- ── TAB: DASHBOARD ── -->
+    <div id="g-overview" class="guide-panel active">
+      <div class="g-section-title">◈ Dashboard — Η Κεντρική Σελίδα</div>
+      <div class="g-desc">Το Dashboard είναι η πρώτη σελίδα που βλέπεις μόλις μπεις στο Next2View. Από εδώ έχεις άμεση εικόνα για όλες τις εταιρείες και τα projects χωρίς να χρειαστεί να ψάξεις πουθενά.</div>
+
+      <div class="g-subsection">📊 KPI Strip — Τα 6 βασικά νούμερα</div>
+      <div class="g-step-grid">
+        <div class="g-card"><div class="g-card-icon" style="background:#eff6ff;color:#3b82f6;">%</div><div class="g-card-title">Overall</div><div class="g-card-desc">Μέσος όρος % ολοκλήρωσης όλων των active projects του group.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#ecfdf5;color:#059669;">$</div><div class="g-card-title">Finance</div><div class="g-card-desc">Μέσο % ολοκλήρωσης όλων των Finance projects.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#fffbeb;color:#d97706;">⚖</div><div class="g-card-title">Legal</div><div class="g-card-desc">Μέσο % ολοκλήρωσης όλων των Legal projects.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#f5f3ff;color:#7c3aed;">⌨</div><div class="g-card-title">Developing</div><div class="g-card-desc">Μέσο % ολοκλήρωσης όλων των Dev projects.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#fdf2f8;color:#db2777;">◈</div><div class="g-card-title">Marketing</div><div class="g-card-desc">Μέσο % ολοκλήρωσης όλων των Marketing projects.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#fef2f2;color:#dc2626;">⚠</div><div class="g-card-title">At Risk</div><div class="g-card-desc">Αριθμός projects που χρειάζονται άμεση προσοχή (blocked, stale, deadline σε κίνδυνο).</div></div>
+      </div>
+
+      <div class="g-tip">💡 <strong>Tip:</strong> Αν το "At Risk" δείχνει &gt;0, κοίτα το κόκκινο banner στην κορυφή — σου λέει ακριβώς ποια projects έχουν πρόβλημα.</div>
+
+      <div class="g-subsection">🏢 Panel Εταιρειών</div>
+      <div class="g-desc">Δείχνει κάθε εταιρεία με τον αριθμό projects και το % ολοκλήρωσης. Κάνε κλικ σε μία εταιρεία για να δεις μόνο τα projects της.</div>
+
+      <div class="g-subsection">📅 Upcoming Deadlines</div>
+      <div class="g-desc">Τα επόμενα 5 deadlines ταξινομημένα χρονολογικά με χρωματική ένδειξη:</div>
+      <div class="g-badge-row">
+        <span class="g-badge red">🔴 &lt;7 ημέρες — Urgent</span>
+        <span class="g-badge yellow">🟡 7-14 ημέρες — Προσοχή</span>
+        <span class="g-badge green">🟢 &gt;14 ημέρες — OK</span>
+      </div>
+
+      <div class="g-subsection">📅 Timeline Gantt</div>
+      <div class="g-desc">Στο κάτω μέρος του Dashboard βλέπεις όλα τα projects σε εβδομαδιαίο Gantt chart. Η μπλε κάθετη γραμμή δείχνει την <strong>τρέχουσα εβδομάδα</strong>. Μπορείς να φιλτράρεις ανά κατηγορία με το dropdown πάνω δεξιά.</div>
+      <div class="g-tip">💡 <strong>Tip:</strong> Κάνε κλικ στον τίτλο ενός project στο Gantt για να πας απευθείας στη σελίδα του.</div>
+    </div>
+
+    <!-- ── TAB: ΕΤΑΙΡΕΙΕΣ ── -->
+    <div id="g-companies" class="guide-panel">
+      <div class="g-section-title">🏢 Διαχείριση Εταιρειών</div>
+      <div class="g-desc">Οι εταιρείες είναι η βάση της οργάνωσης. Κάθε project ανήκει σε μία εταιρεία.</div>
+
+      <div class="g-subsection">➕ Πώς προσθέτω νέα εταιρεία</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div><strong>Πάτα "+ Company"</strong> στο κάτω μέρος του sidebar αριστερά.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Συμπλήρωσε το <strong>όνομα εταιρείας</strong> (π.χ. "Polaris Financial Services").</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Βάλε ένα <strong>Short Code</strong> 2-3 γραμμάτων (π.χ. "PF") — εμφανίζεται ως avatar.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Επίλεξε <strong>χρώμα</strong> για να ξεχωρίζει οπτικά.</div></div>
+        <div class="g-step"><span class="g-step-num">5</span><div>Πάτα <strong>"Save Company"</strong>. Εμφανίζεται αμέσως στο Dashboard και στο sidebar.</div></div>
+      </div>
+
+      <div class="g-subsection">🗑 Πώς διαγράφω εταιρεία</div>
+      <div class="g-desc">Πήγαινε στο <strong>Manage</strong> (sidebar) → Companies → πάτα ✕ δίπλα στην εταιρεία. Προσοχή: τα projects της εταιρείας δεν διαγράφονται αυτόματα.</div>
+
+      <div class="g-tip">💡 <strong>Tip:</strong> Το χρώμα κάθε εταιρείας εμφανίζεται συνεπώς παντού — dashboard, progress bars, labels. Επίλεξε χρώματα που ξεχωρίζουν μεταξύ τους.</div>
+    </div>
+
+    <!-- ── TAB: PROJECTS ── -->
+    <div id="g-projects" class="guide-panel">
+      <div class="g-section-title">⬡ Διαχείριση Projects</div>
+      <div class="g-desc">Κάθε project αντιπροσωπεύει μία εργασία ή ανάπτυξη που παρακολουθείς. Ένα project έχει κατηγορία, budget, deadline, modules και tasks.</div>
+
+      <div class="g-subsection">➕ Πώς δημιουργώ νέο project</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Πάτα <strong>"+ New Project"</strong> στο sidebar ή στην κορυφή δεξιά.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Συμπλήρωσε τον <strong>τίτλο</strong> (π.χ. "IMO CII Compliance 2026").</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Επίλεξε <strong>Εταιρεία</strong> και <strong>Κατηγορία</strong> (Finance / Legal / Developing / Marketing).</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Βάλε <strong>Budget</strong> (€) και <strong>Deadline</strong> (ημερομηνία).</div></div>
+        <div class="g-step"><span class="g-step-num">5</span><div>Γράψε σύντομη <strong>περιγραφή σύμβασης</strong> — τι αφορά το project.</div></div>
+        <div class="g-step"><span class="g-step-num">6</span><div>Πρόσθεσε <strong>Specifications</strong> — checklist με τα deliverables (π.χ. "Υποβολή εγγράφων Flag State").</div></div>
+        <div class="g-step"><span class="g-step-num">7</span><div>Δημιούργησε <strong>Modules</strong> — οι φάσεις του project (π.χ. "Assessment Phase", "Submission", "Training").</div></div>
+        <div class="g-step"><span class="g-step-num">8</span><div>Μέσα σε κάθε Module πρόσθεσε <strong>Tasks</strong> με assignee, deadline και % ολοκλήρωσης.</div></div>
+        <div class="g-step"><span class="g-step-num">9</span><div>Πάτα <strong>"Save Project"</strong>. Εμφανίζεται αμέσως στο Dashboard και στο Timeline.</div></div>
+      </div>
+
+      <div class="g-subsection">✏️ Πώς επεξεργάζομαι project</div>
+      <div class="g-desc">Από το <strong>Project Detail</strong> (κλικ σε project) → πάτα το ✎ εικονίδιο πάνω δεξιά στο contract header. Ανοίγει το ίδιο form με όλα τα στοιχεία προγεμισμένα.</div>
+
+      <div class="g-subsection">🔍 Πώς φιλτράρω projects</div>
+      <div class="g-desc">Στο <strong>"All Projects"</strong> view υπάρχουν 2 dropdowns πάνω δεξιά: ένα για κατηγορία και ένα για εταιρεία. Μπορείς επίσης να κάνεις κλικ σε κατηγορία ή εταιρεία από το sidebar.</div>
+
+      <div class="g-subsection">📊 Status ενός project</div>
+      <div class="g-badge-row">
+        <span class="g-badge green">🟢 On Track — Στο σωστό δρόμο</span>
+        <span class="g-badge yellow">🟡 Delayed — Καθυστέρηση</span>
+        <span class="g-badge red">🔴 At Risk — Blocked ή deadline κοντά με χαμηλό %</span>
+        <span class="g-badge red">🔴 Stale — Δεν ενημερώθηκε &gt;5 ημέρες</span>
+      </div>
+      <div class="g-tip">💡 <strong>Tip:</strong> Το status υπολογίζεται αυτόματα. Δεν χρειάζεται να το ορίσεις χειροκίνητα.</div>
+    </div>
+
+    <!-- ── TAB: TASKS ── -->
+    <div id="g-tasks" class="guide-panel">
+      <div class="g-section-title">✅ Tasks & Modules</div>
+      <div class="g-desc">Τα Tasks είναι οι μικρότερες μονάδες εργασίας. Οργανώνονται σε <strong>Modules</strong> (φάσεις). Το % κάθε Module = μέσος όρος tasks. Το % κάθε Project = μέσος όρος modules.</div>
+
+      <div class="g-subsection">📐 Δομή: Project → Module → Task</div>
+      <div class="g-hierarchy">
+        <div class="g-hier-item" style="background:#eff6ff;border-color:#bfdbfe;">⬡ <strong>Project</strong> — π.χ. "ATLANTIS ERP" <span style="color:#64748b;font-size:12px;">(88% = μέσος όρος modules)</span></div>
+        <div class="g-hier-item" style="margin-left:24px;background:#ecfdf5;border-color:#a7f3d0;">▣ <strong>Module</strong> — π.χ. "Core Modules" <span style="color:#64748b;font-size:12px;">(100% = μέσος όρος tasks)</span></div>
+        <div class="g-hier-item" style="margin-left:48px;background:#f8fafc;border-color:#e2e8f0;">· <strong>Task</strong> — π.χ. "Dashboard" <span style="color:#059669;font-size:12px;">✓ 100%</span></div>
+        <div class="g-hier-item" style="margin-left:48px;background:#f8fafc;border-color:#e2e8f0;">· <strong>Task</strong> — π.χ. "Payroll calculator" <span style="color:#d97706;font-size:12px;">40%</span></div>
+      </div>
+
+      <div class="g-subsection">📝 Πώς ενημερώνω ένα task</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Πήγαινε στο <strong>Project Detail</strong> (κλικ στο project).</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Κάνε κλικ στον τίτλο ενός <strong>Module</strong> για να το ανοίξεις/κλείσεις.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Βλέπεις κάθε task με: <strong>checkmark</strong>, όνομα, assignee, progress bar και %.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Για να αλλάξεις %, πήγαινε <strong>Edit Project</strong> (✎) → αλλάζεις το % του task → Save.</div></div>
+      </div>
+
+      <div class="g-subsection">💬 Πώς προσθέτω σχόλιο σε task</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Στο Project Detail, άνοιξε ένα Module.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Πάτα το <strong>💬 εικονίδιο</strong> δεξιά σε κάθε task.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Γράψε το σχόλιο και πάτα <strong>"Αποθήκευση"</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Το σχόλιο εμφανίζεται ως preview κάτω από το task name και το AI το λαμβάνει υπόψη στις αναφορές.</div></div>
+      </div>
+
+      <div class="g-subsection">🚫 Πώς σημαδεύω ένα task ως Blocked</div>
+      <div class="g-desc">Στο Edit Project → βάλε στο task note τη λέξη <strong>"BLOCK"</strong> και την αιτία (π.χ. "BLOCK — αναμένει έγγραφα από Flag State"). Το task εμφανίζεται με κόκκινο εικονίδιο και το project περνά σε status "At Risk".</div>
+
+      <div class="g-tip">💡 <strong>Tip:</strong> Ένα task με 100% θεωρείται αυτόματα ✓ Done. Δεν χρειάζεται να κάνεις τίποτα άλλο.</div>
+    </div>
+
+    <!-- ── TAB: CONTRACTS ── -->
+    <div id="g-contracts" class="guide-panel">
+      <div class="g-section-title">📄 Διαχείριση Συμβάσεων</div>
+      <div class="g-desc">Κάθε project μπορεί να έχει ανεβασμένη την υπογεγραμμένη του σύμβαση. Το AI εξάγει αυτόματα τα βασικά στοιχεία και τα εμφανίζει ως δομημένη καρτέλα.</div>
+
+      <div class="g-subsection">⬆️ Πώς ανεβάζω σύμβαση</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Πήγαινε στο <strong>Project Detail</strong> του project που θέλεις.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Βρες το panel <strong>"Υπογεγραμμένη Σύμβαση"</strong> στη δεξιά στήλη.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Πάτα <strong>"Ανέβασε τώρα"</strong> ή κάνε <strong>drag & drop</strong> το αρχείο.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Υποστηριζόμενες μορφές: <strong>PDF, JPG, PNG</strong> έως 10MB.</div></div>
+        <div class="g-step"><span class="g-step-num">5</span><div>Μόλις ανέβει, το AI ξεκινά αυτόματα την <strong>εξαγωγή στοιχείων</strong>.</div></div>
+      </div>
+
+      <div class="g-subsection">📋 Τι εξάγει αυτόματα το AI</div>
+      <div class="g-step-grid">
+        <div class="g-card"><div class="g-card-icon" style="background:#eff6ff;color:#3b82f6;">👤</div><div class="g-card-title">Μέρη</div><div class="g-card-desc">Τα συμβαλλόμενα μέρη (εταιρεία + πελάτης).</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#ecfdf5;color:#059669;">€</div><div class="g-card-title">Αξία</div><div class="g-card-desc">Συμβατική αξία και νόμισμα.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#fffbeb;color:#d97706;">📅</div><div class="g-card-title">Ημερομηνίες</div><div class="g-card-desc">Έναρξη και λήξη/deadline.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#f5f3ff;color:#7c3aed;">📝</div><div class="g-card-title">Υποχρεώσεις</div><div class="g-card-desc">Κύριες υποχρεώσεις αριθμημένες.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#fef2f2;color:#dc2626;">⚠</div><div class="g-card-title">Ρήτρες</div><div class="g-card-desc">Ποινές καθυστέρησης αν υπάρχουν.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#f0fdf4;color:#16a34a;">⚖</div><div class="g-card-title">Δίκαιο</div><div class="g-card-desc">Εφαρμοστέο δίκαιο και δικαιοδοσία.</div></div>
+      </div>
+
+      <!-- ── LIVE MOCKUP ── -->
+      <div class="g-subsection">👁 Παράδειγμα — Έτσι φαίνεται η καρτέλα σύμβασης</div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:14px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;font-family:'Nunito Sans',sans-serif;margin-bottom:12px;">📱 ΠΡΟΕΠΙΣΚΟΠΗΣΗ — Αποτέλεσμα AI εξαγωγής</div>
+
+        <!-- Mockup card -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+
+          <!-- Top accent + header -->
+          <div style="height:3px;background:#d97706;"></div>
+          <div style="padding:13px 18px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:15px;">📋</span>
+              <span style="font-size:13px;font-weight:800;color:var(--text);">Στοιχεία Σύμβασης</span>
+              <span style="font-size:9px;font-weight:700;padding:3px 9px;border-radius:8px;background:var(--green-dim);color:var(--green);">✓ Υπογεγραμμένη</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <span style="font-size:10px;font-weight:700;padding:5px 12px;border-radius:6px;background:rgba(124,58,237,0.1);color:var(--dev);border:1px solid rgba(124,58,237,0.25);cursor:default;">✦ AI Ανάλυση Σύμβασης</span>
+              <span style="font-size:10px;font-weight:700;padding:5px 12px;border-radius:6px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.25);cursor:default;">🖨 Export / Print</span>
+              <span style="font-size:10px;font-weight:700;padding:5px 12px;border-radius:6px;background:var(--surface3);color:var(--text-dim);border:1px solid var(--border);cursor:default;">↺ Ανανέωση</span>
+            </div>
+          </div>
+
+          <!-- Grid body -->
+          <div style="padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+
+            <!-- Αντικείμενο full -->
+            <div style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">Αντικείμενο Σύμβασης</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.6;">Παροχή υπηρεσιών ανάπτυξης ολοκληρωμένου ERP συστήματος διαχείρισης πληρωμάτων και στόλου για θαλάσσιες μεταφορές, περιλαμβανομένης εκπαίδευσης χρηστών και υποστήριξης 12 μηνών.</div>
+            </div>
+
+            <!-- Μέρη full -->
+            <div style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:8px;">Συμβαλλόμενα Μέρη</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:12px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.2);">👤 Crossworld Marine Services Inc.</span>
+                <span style="font-size:12px;font-weight:600;padding:4px 12px;border-radius:12px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.2);">👤 Oceansoft Ltd.</span>
+              </div>
+            </div>
+
+            <!-- Αξία -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">Αξία Σύμβασης</div>
+              <div style="font-size:22px;font-weight:900;color:#d97706;">€45,000 EUR</div>
+            </div>
+
+            <!-- Πληρωμή -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">Όροι Πληρωμής</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">30% προκαταβολή, 40% παράδοση beta, 30% τελική παράδοση</div>
+            </div>
+
+            <!-- Έναρξη -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">📅 Ημερομηνία Έναρξης</div>
+              <div style="font-size:14px;font-weight:700;color:var(--accent);">1 Φεβρουαρίου 2026</div>
+            </div>
+
+            <!-- Λήξη -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">🏁 Ημερομηνία Λήξης</div>
+              <div style="font-size:14px;font-weight:700;color:var(--red);">20 Απριλίου 2026</div>
+            </div>
+
+            <!-- Υποχρεώσεις full -->
+            <div style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:8px;">Κύριες Υποχρεώσεις</div>
+              <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:18px;">1.</span><span>Ανάπτυξη και παράδοση πλήρους ERP με modules Dashboard, Roster, RFA Hub, Payroll, Sign-Off</span></div>
+              <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:18px;">2.</span><span>Εκπαίδευση χρηστών (min 3 ημέρες on-site) πριν την τελική παράδοση</span></div>
+              <div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:18px;">3.</span><span>Τεχνική υποστήριξη 12 μηνών μετά την παράδοση, SLA 24 ωρών</span></div>
+              <div style="display:flex;gap:10px;padding:6px 0;font-size:13px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:18px;">4.</span><span>Παράδοση πλήρους τεκμηρίωσης και source code σε ασφαλές αποθετήριο</span></div>
+            </div>
+
+            <!-- Ρήτρες full -->
+            <div style="grid-column:1/-1;background:var(--red-dim);border:1px solid rgba(220,38,38,0.2);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">⚠ Ρήτρες / Ποινές</div>
+              <div style="font-size:13px;font-weight:600;color:var(--red);line-height:1.6;">Καθυστέρηση παράδοσης: 0.5% της συμβατικής αξίας ανά εβδομάδα υπέρβασης, μέχρι 10% του συνόλου. Μη συμμόρφωση SLA: πίστωση 5% ανά παράβαση.</div>
+            </div>
+
+            <!-- Δίκαιο -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">⚖️ Εφαρμοστέο Δίκαιο</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Κυπριακό δίκαιο — Δικαστήρια Λεμεσού</div>
+            </div>
+
+            <!-- Ιδιαίτεροι όροι -->
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;">
+              <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:6px;">✨ Ιδιαίτεροι Όροι</div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Αποκλειστικότητα χρήσης κώδικα για 24 μήνες. NDA ισχύς 5 ετών μετά λήξη.</div>
+            </div>
+
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:10px;font-style:italic;">↑ Αυτό βλέπεις μετά την αυτόματη εξαγωγή AI — δεν χρειάζεται να πληκτρολογήσεις τίποτα χειροκίνητα.</div>
+      </div>
+
+      <div class="g-subsection">🖨 Πώς εκτυπώνω / κάνω export PDF</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Μόλις εξαχθούν τα στοιχεία, εμφανίζεται κουμπί <strong>"🖨 Export / Print"</strong> στο header της καρτέλας.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Πάτα το κουμπί — ανοίγει νέα σελίδα με print-ready layout.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Πάτα <strong>"Εκτύπωση / Αποθήκευση ως PDF"</strong> → από το dialog του browser επίλεξε <strong>"Save as PDF"</strong>.</div></div>
+      </div>
+
+      <div class="g-tip">💡 <strong>Tip:</strong> Αν τα στοιχεία δεν εξαχθούν σωστά (π.χ. scan χαμηλής ποιότητας), πάτα <strong>"↺ Ανανέωση"</strong> για νέα εξαγωγή.</div>
+    </div>
+
+    <!-- ── TAB: AI ── -->
+    <div id="g-ai" class="guide-panel">
+      <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #c4b5fd;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;gap:14px;">
+        <span style="font-size:32px;">✦</span>
+        <div>
+          <div style="font-size:16px;font-weight:800;color:#4c1d95;">AI Features — Powered by Claude</div>
+          <div style="font-size:13px;color:#6d28d9;margin-top:2px;">Τρεις AI λειτουργίες ενσωματωμένες στο Next2View. Απαιτούν σύνδεση στο internet και έγκυρο API key.</div>
+        </div>
+      </div>
+
+      <!-- AI 1: CEO Report -->
+      <div class="g-ai-block" style="border-color:rgba(139,92,246,0.3);">
+        <div class="g-ai-header" style="background:rgba(139,92,246,0.08);">
+          <span style="font-size:20px;">✦</span>
+          <div>
+            <div class="g-ai-title" style="color:#5b21b6;">AI CEO Report</div>
+            <div class="g-ai-sub">Ανάλυση ολόκληρου του portfolio με ένα κλικ</div>
+          </div>
+        </div>
+        <div class="g-ai-body">
+          <div class="g-subsection" style="margin-top:0;">Πώς το χρησιμοποιώ</div>
+          <div class="g-steps">
+            <div class="g-step"><span class="g-step-num" style="background:#5b21b6;">1</span><div>Πάτα <strong>"✦ AI Report"</strong> στο κάτω μέρος του sidebar.</div></div>
+            <div class="g-step"><span class="g-step-num" style="background:#5b21b6;">2</span><div>Το AI διαβάζει αυτόματα <strong>όλα τα projects</strong>, tasks, deadlines, finances, blockers και σχόλια.</div></div>
+            <div class="g-step"><span class="g-step-num" style="background:#5b21b6;">3</span><div>Σε 5-10 δευτερόλεπτα εμφανίζεται πλήρης αναφορά.</div></div>
+          </div>
+          <div class="g-subsection">Τι περιλαμβάνει η αναφορά</div>
+          <div class="g-badge-row" style="flex-wrap:wrap;gap:8px;">
+            <span class="g-badge blue">🔵 Γενική Εικόνα Portfolio</span>
+            <span class="g-badge red">🔴 Κρίσιμα — Άμεση Δράση</span>
+            <span class="g-badge yellow">🟡 Προσοχή — Παρακολούθηση</span>
+            <span class="g-badge green">🟢 Θετικά</span>
+            <span class="g-badge purple">📋 Top 5 CEO Action Items</span>
+            <span class="g-badge blue">💰 Οικονομική Σύνοψη</span>
+          </div>
+          <div class="g-tip" style="margin-top:12px;">💡 Πάτα <strong>"↺ Refresh"</strong> για νέα ανάλυση μετά από ενημερώσεις.</div>
+        </div>
+      </div>
+
+      <!-- AI 2: Contract Summary -->
+      <div class="g-ai-block" style="border-color:rgba(5,150,105,0.3);margin-top:14px;">
+        <div class="g-ai-header" style="background:rgba(5,150,105,0.06);">
+          <span style="font-size:20px;">📄</span>
+          <div>
+            <div class="g-ai-title" style="color:#065f46;">AI Εξαγωγή Στοιχείων Σύμβασης</div>
+            <div class="g-ai-sub">Αυτόματη ανάγνωση PDF σύμβασης → δομημένη καρτέλα</div>
+          </div>
+        </div>
+        <div class="g-ai-body">
+          <div class="g-desc">Μόλις ανεβάσεις σύμβαση, το AI τη διαβάζει και εξάγει αυτόματα: μέρη, αξία, ημερομηνίες, υποχρεώσεις, ρήτρες, εφαρμοστέο δίκαιο. Εμφανίζονται ως δομημένη καρτέλα στο Project Detail.</div>
+          <div class="g-tip">💡 Λειτουργεί με <strong>PDF, JPG και PNG</strong>. Καλύτερα αποτελέσματα με καθαρά, ψηφιακά PDF (όχι scans χαμηλής ποιότητας).</div>
+
+          <!-- LIVE MOCKUP inside AI tab -->
+          <div style="margin-top:16px;">
+            <div style="font-size:11px;font-weight:700;color:#065f46;letter-spacing:1px;text-transform:uppercase;font-family:'Nunito Sans',sans-serif;margin-bottom:10px;">👁 Έτσι φαίνεται το αποτέλεσμα</div>
+            <div style="background:var(--surface);border:1px solid rgba(5,150,105,0.25);border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+              <div style="height:3px;background:#d97706;"></div>
+              <div style="padding:12px 16px;background:var(--surface2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+                <div style="display:flex;align-items:center;gap:9px;">
+                  <span style="font-size:14px;">📋</span>
+                  <span style="font-size:12px;font-weight:800;color:var(--text);">Στοιχεία Σύμβασης</span>
+                  <span style="font-size:9px;font-weight:700;padding:3px 8px;border-radius:7px;background:var(--green-dim);color:var(--green);">✓ Υπογεγραμμένη</span>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:5px;background:rgba(124,58,237,0.1);color:var(--dev);border:1px solid rgba(124,58,237,0.2);">✦ AI Ανάλυση</span>
+                  <span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.2);">🖨 Export</span>
+                  <span style="font-size:10px;font-weight:700;padding:4px 10px;border-radius:5px;background:var(--surface3);color:var(--text-dim);border:1px solid var(--border);">↺ Ανανέωση</span>
+                </div>
+              </div>
+              <div style="padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:9px;">
+                <div style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">Αντικείμενο Σύμβασης</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.6;">Παροχή υπηρεσιών ανάπτυξης ολοκληρωμένου ERP συστήματος διαχείρισης πληρωμάτων και στόλου για θαλάσσιες μεταφορές, περιλαμβανομένης εκπαίδευσης χρηστών και υποστήριξης 12 μηνών.</div>
+                </div>
+                <div style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:7px;">Συμβαλλόμενα Μέρη</div>
+                  <div style="display:flex;gap:7px;flex-wrap:wrap;">
+                    <span style="font-size:11px;font-weight:600;padding:4px 11px;border-radius:11px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.2);">👤 Crossworld Marine Services Inc.</span>
+                    <span style="font-size:11px;font-weight:600;padding:4px 11px;border-radius:11px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.2);">👤 Oceansoft Ltd.</span>
+                  </div>
+                </div>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">Αξία Σύμβασης</div>
+                  <div style="font-size:20px;font-weight:900;color:#d97706;">€45,000 EUR</div>
+                </div>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">Όροι Πληρωμής</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text);">30% προκαταβολή, 40% παράδοση beta, 30% τελική παράδοση</div>
+                </div>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">📅 Ημερομηνία Έναρξης</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--accent);">1 Φεβρουαρίου 2026</div>
+                </div>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">🏁 Ημερομηνία Λήξης</div>
+                  <div style="font-size:13px;font-weight:700;color:var(--red);">20 Απριλίου 2026</div>
+                </div>
+                <div style="grid-column:1/-1;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:7px;">Κύριες Υποχρεώσεις</div>
+                  <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:16px;">1.</span><span>Ανάπτυξη και παράδοση πλήρους ERP με modules Dashboard, Roster, RFA Hub, Payroll, Sign-Off</span></div>
+                  <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:16px;">2.</span><span>Εκπαίδευση χρηστών (min 3 ημέρες on-site) πριν την τελική παράδοση</span></div>
+                  <div style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:16px;">3.</span><span>Τεχνική υποστήριξη 12 μηνών μετά την παράδοση, SLA 24 ωρών</span></div>
+                  <div style="display:flex;gap:8px;padding:5px 0;font-size:12px;font-weight:500;color:var(--text);"><span style="color:#d97706;font-weight:800;min-width:16px;">4.</span><span>Παράδοση πλήρους τεκμηρίωσης και source code σε ασφαλές αποθετήριο</span></div>
+                </div>
+                <div style="grid-column:1/-1;background:var(--red-dim);border:1px solid rgba(220,38,38,0.2);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">⚠ Ρήτρες / Ποινές</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--red);line-height:1.6;">Καθυστέρηση παράδοσης: 0.5% της συμβατικής αξίας ανά εβδομάδα υπέρβασης, μέχρι 10% του συνόλου. Μη συμμόρφωση SLA: πίστωση 5% ανά παράβαση.</div>
+                </div>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">⚖️ Εφαρμοστέο Δίκαιο</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text);">Κυπριακό δίκαιο — Δικαστήρια Λεμεσού</div>
+                </div>
+                <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:11px 13px;">
+                  <div style="font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-bottom:5px;">✨ Ιδιαίτεροι Όροι</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--text);">Αποκλειστικότητα χρήσης κώδικα για 24 μήνες. NDA ισχύς 5 ετών μετά λήξη.</div>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-top:8px;font-style:italic;">↑ Το αποτέλεσμα εμφανίζεται αυτόματα στο Project Detail μόλις το AI εξαγάγει τα στοιχεία.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AI 3: Contract Analysis -->
+      <div class="g-ai-block" style="border-color:rgba(217,119,6,0.3);margin-top:14px;">
+        <div class="g-ai-header" style="background:rgba(217,119,6,0.06);">
+          <span style="font-size:20px;">📄✦</span>
+          <div>
+            <div class="g-ai-title" style="color:#78350f;">AI Ανάλυση Σύμβασης vs Πρόοδος</div>
+            <div class="g-ai-sub">Σύγκριση συμφωνηθέντων με την πραγματική κατάσταση</div>
+          </div>
+        </div>
+        <div class="g-ai-body">
+          <div class="g-steps">
+            <div class="g-step"><span class="g-step-num" style="background:#d97706;">1</span><div>Ανέβασε πρώτα τη σύμβαση του project.</div></div>
+            <div class="g-step"><span class="g-step-num" style="background:#d97706;">2</span><div>Πάτα <strong>"✦ AI Ανάλυση Σύμβασης"</strong> στο header του contract panel.</div></div>
+            <div class="g-step"><span class="g-step-num" style="background:#d97706;">3</span><div>Το AI συγκρίνει τη σύμβαση με την τρέχουσα πρόοδο και επιστρέφει ετυμηγορία.</div></div>
+          </div>
+          <div class="g-badge-row" style="margin-top:10px;">
+            <span class="g-badge green">🟢 Εντός Σύμβασης</span>
+            <span class="g-badge yellow">🟡 Σε Κίνδυνο</span>
+            <span class="g-badge red">🔴 Εκτός Σύμβασης</span>
+          </div>
+          <div class="g-desc" style="margin-top:10px;">Επίσης δίνει <strong>πρόβλεψη ολοκλήρωσης</strong> με βάση τον τρέχοντα ρυθμό και προτεινόμενες ενέργειες.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TAB: NOTIFICATIONS ── -->
+    <div id="g-notifs" class="guide-panel">
+      <div class="g-section-title">🔔 Σύστημα Notifications</div>
+      <div class="g-desc">Το Next2View σε ειδοποιεί αυτόματα για κάθε κρίσιμο event — χωρίς να χρειάζεται να κοιτάς συνέχεια το dashboard. Κάθε 5 λεπτά ελέγχονται όλα τα active projects.</div>
+
+      <div class="g-subsection">🔔 Το Bell Icon</div>
+      <div class="g-desc">Το 🔔 εμφανίζεται στο κάτω μέρος του sidebar. Όταν υπάρχουν νέα notifications, εμφανίζεται κόκκινο badge με τον αριθμό των αδιάβαστων. Κάνε κλικ για να ανοίξεις το panel.</div>
+
+      <div class="g-tip">💡 Το badge <strong>παλμοδεί</strong> για να τραβήξει την προσοχή σου. Μόλις ανοίξεις το panel, τα notifications σημαδεύονται ως διαβασμένα.</div>
+
+      <div class="g-subsection">⚡ 5 Αυτόματα Triggers</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+
+        <div style="background:var(--red-dim);border:1px solid rgba(220,38,38,0.2);border-left:4px solid var(--red);border-radius:0 8px 8px 0;padding:14px 16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:20px;">🚨</span>
+            <div style="font-size:13px;font-weight:800;color:var(--red);">Deadline Risk</div>
+            <span style="font-size:10px;background:var(--red);color:#fff;padding:2px 8px;border-radius:8px;font-weight:700;">ΚΡΙΣΙΜΟ</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;font-weight:500;"><strong>Πότε:</strong> Λιγότερες από 7 ημέρες στο deadline και πρόοδος κάτω από 80%.<br><strong>Τι σημαίνει:</strong> Το project κινδυνεύει να μην παραδοθεί εγκαίρως. Απαιτείται άμεση δράση.</div>
+        </div>
+
+        <div style="background:var(--yellow-dim);border:1px solid rgba(217,119,6,0.2);border-left:4px solid var(--yellow);border-radius:0 8px 8px 0;padding:14px 16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:20px;">😴</span>
+            <div style="font-size:13px;font-weight:800;color:var(--yellow);">Stale Project</div>
+            <span style="font-size:10px;background:var(--yellow);color:#fff;padding:2px 8px;border-radius:8px;font-weight:700;">ΠΡΟΣΟΧΗ</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;font-weight:500;"><strong>Πότε:</strong> Το project δεν έχει ενημερωθεί για περισσότερο από 5 ημέρες.<br><strong>Τι σημαίνει:</strong> Το αρμόδιο τμήμα δεν αναφέρει πρόοδο. Κάποιος δεν κάνει τη δουλειά του.</div>
+        </div>
+
+        <div style="background:var(--accent-dim);border:1px solid rgba(59,130,246,0.2);border-left:4px solid var(--accent);border-radius:0 8px 8px 0;padding:14px 16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:20px;">⏱</span>
+            <div style="font-size:13px;font-weight:800;color:var(--accent);">Time vs Progress Gap</div>
+            <span style="font-size:10px;background:var(--accent);color:#fff;padding:2px 8px;border-radius:8px;font-weight:700;">ΠΡΟΣΟΧΗ</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;font-weight:500;"><strong>Πότε:</strong> Έχει περάσει πάνω από το 70% του συνολικού χρόνου αλλά η πρόοδος είναι κάτω από 50%.<br><strong>Τι σημαίνει:</strong> Ο ρυθμός ανάπτυξης δεν φτάνει για να τελειώσει εγκαίρως. Χρειάζεται επιτάχυνση.</div>
+        </div>
+
+        <div style="background:var(--marketing-dim);border:1px solid rgba(219,39,119,0.2);border-left:4px solid var(--marketing);border-radius:0 8px 8px 0;padding:14px 16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:20px;">🚫</span>
+            <div style="font-size:13px;font-weight:800;color:var(--marketing);">Blocked Task</div>
+            <span style="font-size:10px;background:var(--marketing);color:#fff;padding:2px 8px;border-radius:8px;font-weight:700;">ΚΡΙΣΙΜΟ</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;font-weight:500;"><strong>Πότε:</strong> Οποιοδήποτε task έχει σημανθεί ως "BLOCK" με αιτία.<br><strong>Τι σημαίνει:</strong> Κάτι εξωτερικό μπλοκάρει την εξέλιξη. Χρειάζεται παρέμβαση από τον CEO.</div>
+        </div>
+
+        <div style="background:var(--finance-dim);border:1px solid rgba(5,150,105,0.2);border-left:4px solid var(--finance);border-radius:0 8px 8px 0;padding:14px 16px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+            <span style="font-size:20px;">💰</span>
+            <div style="font-size:13px;font-weight:800;color:var(--finance);">Under-billed</div>
+            <span style="font-size:10px;background:var(--finance);color:#fff;padding:2px 8px;border-radius:8px;font-weight:700;">ΧΡΗΜΑΤΙΚΟ</span>
+          </div>
+          <div style="font-size:12px;color:var(--text-mid);line-height:1.6;font-weight:500;"><strong>Πότε:</strong> Η πρόοδος του project ξεπερνά κατά 30%+ αυτό που έχεις χρεώσει.<br><strong>Τι σημαίνει:</strong> Δουλεύεις αλλά δεν χρεώνεις. Κίνδυνος απώλειας εσόδων — έλεγξε τις πληρωμές.</div>
+        </div>
+
+      </div>
+
+      <div class="g-subsection">📩 Toast Notifications</div>
+      <div class="g-desc">Κάθε νέο notification εμφανίζεται ως <strong>toast</strong> κάτω δεξιά της οθόνης για 5 δευτερόλεπτα. Κάνε κλικ πάνω του για να πας απευθείας στο project που αφορά.</div>
+
+      <div class="g-subsection">🌐 Browser Push Notifications</div>
+      <div class="g-desc">Μόλις ανοίξεις το Next2View, ο browser σου ζητά permission για notifications. Αν αποδεχτείς:</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Λαμβάνεις notifications <strong>ακόμα και αν το tab είναι σε background</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Στο <strong>κινητό</strong> (Android Chrome / iOS Safari 16.4+) εμφανίζονται ως <strong>push notifications</strong> στο σύστημα.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Μετά το deploy στο <strong>Azure</strong>, λειτουργούν πλήρως ακόμα και με κλειστό browser.</div></div>
+      </div>
+
+      <div class="g-tip">💡 <strong>Αν δεν είδες το αίτημα permission:</strong> Πήγαινε στις ρυθμίσεις του browser → Site Settings → Notifications → Επέτρεψε για αυτή τη σελίδα.</div>
+
+      <div class="g-subsection">🗑 Διαχείριση Notifications</div>
+      <div class="g-step-grid">
+        <div class="g-card"><div class="g-card-icon" style="background:#fef2f2;color:var(--red);">🔔</div><div class="g-card-title">Άνοιγμα panel</div><div class="g-card-desc">Κλικ στο bell icon στο sidebar. Βλέπεις όλα τα notifications με χρωματική κωδικοποίηση.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#eff6ff;color:var(--accent);">👆</div><div class="g-card-title">Πήγαινε στο project</div><div class="g-card-desc">Κλικ σε οποιοδήποτε notification σε πηγαίνει απευθείας στο Project Detail.</div></div>
+        <div class="g-card"><div class="g-card-icon" style="background:#ecfdf5;color:var(--green);">✓</div><div class="g-card-title">Clear All</div><div class="g-card-desc">Πάτα "Clear all" στο panel για να καθαρίσεις όλα τα notifications.</div></div>
+      </div>
+
+      <div class="g-tip">⏰ <strong>Συχνότητα ελέγχου:</strong> Κάθε <strong>5 λεπτά</strong> αυτόματα. Ο έλεγχος γίνεται και αμέσως μόλις ανοίξεις την εφαρμογή.</div>
+    </div>
+
+    <!-- ── TAB: ROLES ── -->
+    <div id="g-roles" class="guide-panel">
+      <div class="g-section-title">👤 Roles & Δικαιώματα</div>
+      <div class="g-desc">Το Next2View έχει 3 επίπεδα πρόσβασης. Κάθε χρήστης έχει ακριβώς αυτά που χρειάζεται — τίποτα παραπάνω.</div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0;">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:18px;">
+          <div style="font-size:24px;margin-bottom:8px;">👑</div>
+          <div style="font-size:14px;font-weight:800;color:#1e3a8a;margin-bottom:8px;">CEO</div>
+          <div style="font-size:12px;color:#1e40af;line-height:1.8;">✓ Πλήρης πρόσβαση<br>✓ Όλες οι εταιρείες<br>✓ AI Reports<br>✓ CEO private notes<br>✓ Manage users<br>✓ Manage companies<br>✓ Διαγραφή projects</div>
+        </div>
+        <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:18px;">
+          <div style="font-size:24px;margin-bottom:8px;">🏢</div>
+          <div style="font-size:14px;font-weight:800;color:#064e3b;margin-bottom:8px;">Department Head</div>
+          <div style="font-size:12px;color:#065f46;line-height:1.8;">✓ Δικά του projects<br>✓ Update tasks<br>✓ Upload contracts<br>✓ AI Contract Analysis<br>✗ CEO Report<br>✗ CEO notes<br>✗ Manage users</div>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:18px;">
+          <div style="font-size:24px;margin-bottom:8px;">👁</div>
+          <div style="font-size:14px;font-weight:800;color:#334155;margin-bottom:8px;">Viewer</div>
+          <div style="font-size:12px;color:#475569;line-height:1.8;">✓ Δει projects<br>✓ Δει tasks<br>✗ Δεν αλλάζει τίποτα<br>✗ Δεν ανεβάζει files<br>✗ Δεν έχει AI access<br>✗ Δεν βλέπει CEO notes</div>
+        </div>
+      </div>
+
+      <div class="g-subsection">➕ Πώς προσθέτω νέο χρήστη</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Πάτα <strong>"+ User"</strong> στο sidebar.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Συμπλήρωσε <strong>Όνομα</strong> και <strong>Ρόλο</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Επίλεξε <strong>Εταιρεία</strong> και <strong>Department</strong> (Finance/Legal/Dev/Marketing/Management).</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Πάτα <strong>"Save User"</strong>. Ο χρήστης εμφανίζεται στο Manage.</div></div>
+      </div>
+
+      <div class="g-tip">💡 <strong>Tip:</strong> Ο CEO role έχει πρόσβαση στα <strong>CEO Private Notes</strong> — σχόλια που μπαίνουν στο Project Detail και δεν τα βλέπει κανένας άλλος χρήστης.</div>
+    </div>
+
+    <!-- ── TAB: GLOSSARY ── -->
+    <div id="g-glossary" class="guide-panel">
+      <div class="g-section-title">📖 Γλωσσάριο</div>
+      <div class="g-desc">Βασικοί όροι που χρησιμοποιούνται στο Next2View.</div>
+
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <div class="g-gloss-row"><div class="g-gloss-term">Project</div><div class="g-gloss-def">Μία εργασία ή ανάπτυξη που παρακολουθείς (π.χ. "IMO CII Compliance", "HireBase MVP"). Κάθε project ανήκει σε εταιρεία και κατηγορία.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Module</div><div class="g-gloss-def">Φάση ή ενότητα ενός project (π.χ. "Assessment Phase", "Frontend UI"). Περιέχει tasks.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Task</div><div class="g-gloss-def">Η μικρότερη μονάδα εργασίας. Έχει assignee, deadline και % ολοκλήρωσης (0-100%).</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">% Completion</div><div class="g-gloss-def">Task % → Module % (μέσος όρος tasks) → Project % (μέσος όρος modules). Υπολογίζεται αυτόματα.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Status</div><div class="g-gloss-def">Αυτόματη κατάσταση project: On Track / Delayed / At Risk / Stale. Βασίζεται στο %, deadline και blockers.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Stale</div><div class="g-gloss-def">Project που δεν έχει ενημερωθεί για περισσότερο από 5 ημέρες. Εμφανίζεται με κόκκινο warning.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Blocked</div><div class="g-gloss-def">Task που δεν μπορεί να προχωρήσει λόγω εξωτερικού παράγοντα. Σημαδεύεται με "BLOCK" στο note.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">At Risk</div><div class="g-gloss-def">Project με blocked task, ή deadline &lt;7 ημέρες με χαμηλό %, ή stale &gt;5 ημέρες.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">KPI</div><div class="g-gloss-def">Key Performance Indicator — τα βασικά νούμερα που βλέπεις στα cards του Dashboard.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Gantt Timeline</div><div class="g-gloss-def">Εβδομαδιαίο γράφημα που δείχνει πότε τρέχει κάθε task. Η μπλε γραμμή = σήμερα.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Contract Summary</div><div class="g-gloss-def">Αυτόματη εξαγωγή βασικών στοιχείων από ανεβασμένη σύμβαση (PDF/εικόνα) μέσω AI.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">CEO Notes</div><div class="g-gloss-def">Private σημειώσεις του CEO σε κάθε project. Δεν τις βλέπουν άλλοι χρήστες.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">SAS Token</div><div class="g-gloss-def">Προσωρινό, ασφαλές link για πρόσβαση σε αρχεία (π.χ. συμβάσεις). Ισχύει 1 ώρα.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Notification</div><div class="g-gloss-def">Αυτόματη ειδοποίηση για κρίσιμο event (deadline, blocked task, stale project κλπ). Εμφανίζεται ως toast και στο bell panel.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Toast</div><div class="g-gloss-def">Προσωρινή ειδοποίηση που εμφανίζεται κάτω δεξιά για 5 δευτερόλεπτα. Κλικ πάνω της για να πας στο project.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Under-billed</div><div class="g-gloss-def">Project που η πρόοδός του ξεπερνά κατά 30%+ αυτό που έχει χρεωθεί. Κίνδυνος απώλειας εσόδων.</div></div>
+        <div class="g-gloss-row"><div class="g-gloss-term">Notification</div><div class="g-gloss-def">Αυτόματη ειδοποίηση για κρίσιμο event (deadline, blocked task, stale project κλπ). Εμφανίζεται ως toast και στο bell panel.</div></div>
+      </div>
+    </div>
+
+  </div>
+  </div>
+
+</main>
+</div>
+
+<!-- ════ MODALS ════ -->
+
+<!-- COMPANY -->
+<div id="modal-company" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal('company')">
+<div class="modal">
+  <div class="modal-head"><div class="modal-title">Add Company</div><div class="modal-close" onclick="closeModal('company')">✕</div></div>
+  <div class="modal-body">
+    <div class="field"><label>Company Name</label><input id="co-name-input" placeholder="π.χ. Polaris Financial Services"></div>
+    <div class="field-row">
+      <div class="field"><label>Short Code (2-3)</label><input id="co-code-input" placeholder="PF" maxlength="3"></div>
+      <div class="field"><label>Color</label>
+        <select id="co-color-input">
+          <option value="var(--accent)">Blue</option>
+          <option value="var(--finance)">Green</option>
+          <option value="var(--legal)">Amber</option>
+          <option value="var(--dev)">Purple</option>
+          <option value="var(--marketing)">Pink</option>
+          <option value="var(--text-mid)">Gray</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Description</label><input id="co-desc-input" placeholder="π.χ. TPA maritime healthcare"></div>
+  </div>
+  <div class="modal-footer">
+    <div class="btn-secondary" onclick="closeModal('company')">Cancel</div>
+    <div class="btn-primary" onclick="saveCompany()">Save Company</div>
+  </div>
+</div>
+</div>
+
+<!-- USER -->
+<div id="modal-user" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal('user')">
+<div class="modal">
+  <div class="modal-head"><div class="modal-title">Add User</div><div class="modal-close" onclick="closeModal('user')">✕</div></div>
+  <div class="modal-body">
+    <div class="field-row">
+      <div class="field"><label>Full Name</label><input id="u-name" placeholder="π.χ. Makram Yousef"></div>
+      <div class="field"><label>Role / Title</label><input id="u-role" placeholder="π.χ. COO"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Company</label><select id="u-co"><option value="">— Επίλεξε —</option></select></div>
+      <div class="field"><label>Department</label>
+        <select id="u-dept">
+          <option value="finance">Finance</option>
+          <option value="legal">Legal</option>
+          <option value="dev">Developing</option>
+          <option value="marketing">Marketing</option>
+          <option value="management">Management</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="btn-secondary" onclick="closeModal('user')">Cancel</div>
+    <div class="btn-primary" onclick="saveUser()">Save User</div>
+  </div>
+</div>
+</div>
+
+<!-- PROJECT -->
+<div id="modal-project" class="modal-overlay" style="display:none;" onclick="if(event.target===this)closeModal('project')">
+<div class="modal" style="width:660px;">
+  <div class="modal-head"><div class="modal-title" id="proj-modal-title">New Project</div><div class="modal-close" onclick="closeModal('project')">✕</div></div>
+  <div class="modal-body">
+    <div class="form-section-title">Project Info</div>
+    <div class="field"><label>Project Title</label><input id="p-title" placeholder="π.χ. IMO CII Compliance 2026"></div>
+    <div class="field-row">
+      <div class="field"><label>Company</label><select id="p-co"><option value="">— Επίλεξε —</option></select></div>
+      <div class="field"><label>Category</label>
+        <select id="p-cat">
+          <option value="finance">$ Finance</option>
+          <option value="legal">⚖ Legal</option>
+          <option value="dev">⌨ Developing</option>
+          <option value="marketing">◈ Marketing</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Budget / Contract (€)</label><input id="p-budget" type="number" placeholder="20000"></div>
+      <div class="field"><label>Deadline</label><input id="p-deadline" type="date"></div>
+    </div>
+    <div class="field"><label>Contract Description</label><textarea id="p-contract" placeholder="Σύντομη περιγραφή σύμβασης..."></textarea></div>
+
+    <div class="form-section-title">Υπογεγραμμένη Σύμβαση</div>
+    <div class="contract-upload-area" id="contract-upload-area" onclick="document.getElementById('p-contract-file').click()">
+      <div class="cup-icon">📄</div>
+      <div class="cup-label">Κλικ ή σύρε το αρχείο εδώ</div>
+      <div class="cup-sub">PDF, JPG, PNG έως 10MB</div>
+      <input type="file" id="p-contract-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="handleContractUpload(this)">
+    </div>
+    <div id="contract-file-preview" style="display:none;"></div>
+    <div id="specs-builder"></div>
+    <button class="add-row-btn" onclick="addSpec()">+ Add Specification</button>
+
+    <div class="form-section-title" style="margin-top:14px;">Modules & Tasks</div>
+    <div id="modules-builder"></div>
+    <button class="add-row-btn" onclick="addModule()">+ Add Module / Stage</button>
+  </div>
+  <div class="modal-footer">
+    <div class="btn-secondary" onclick="closeModal('project')">Cancel</div>
+    <div class="btn-primary" onclick="saveProject()">Save Project</div>
+  </div>
+</div>
+</div>
+
+<script>
+// ════ STATE ════
+const uid=()=>'x'+Math.random().toString(36).slice(2,9);
+const catColor={finance:'var(--finance)',legal:'var(--legal)',dev:'var(--dev)',marketing:'var(--marketing)'};
+const catLabel={finance:'Finance',legal:'Legal',dev:'Developing',marketing:'Marketing'};
+const catIcon={finance:'$',legal:'⚖',dev:'⌨',marketing:'◈'};
+
+let S={
+  companies:[
+    {id:'c1',name:'Polaris Financial',code:'PF',color:'var(--accent)',desc:'TPA maritime healthcare'},
+    {id:'c2',name:'Crossworld Marine',code:'CW',color:'var(--finance)',desc:'Crew management'},
+    {id:'c3',name:'WiMAS',code:'WM',color:'var(--legal)',desc:'Maritime training'},
+    {id:'c4',name:'Varship',code:'VS',color:'var(--dev)',desc:'Ship management'},
+    {id:'c5',name:'Oceansoft',code:'OS',color:'var(--text-mid)',desc:'IT solutions'},
+  ],
+  users:[
+    {id:'u1',name:'Απόστολος Β.',role:'CEO',coId:'c1',dept:'management'},
+    {id:'u2',name:'Makram Y.',role:'COO',coId:'c2',dept:'management'},
+    {id:'u3',name:'Toni A.',role:'CFO',coId:'c1',dept:'finance'},
+  ],
+  projects:[
+    {id:'p1',title:'ATLAS Financial System',coId:'c1',cat:'finance',
+     budget:20000,paid:14000,invoiced:18000,deadline:'2026-06-30',updated:Date.now()-2*3600000,
+     contract:'Ανάπτυξη χρηματοοικονομικού συστήματος διαχείρισης για 2 ρεύματα (Α & Β).',
+     specs:[{t:'Migration ιστορικών δεδομένων',done:true},{t:'Dashboard εισροών/εκροών',done:true},{t:'Budget tracking',done:true},{t:'Debt module',done:false}],
+     modules:[
+       {name:'Data Migration',color:'finance',tasks:[
+         {name:'Export Excel',done:true,pct:100,who:'Polaris Finance',startW:0,dW:1},
+         {name:'Import & validation',done:true,pct:100,who:'Oceansoft Dev',startW:1,dW:1},
+       ]},
+       {name:'Dashboard Module',color:'finance',tasks:[
+         {name:'Inflow/Outflow charts',done:true,pct:100,who:'Oceansoft Dev',startW:2,dW:2},
+         {name:'YTD cumulative logic',done:false,pct:70,who:'Oceansoft Dev',startW:4,dW:2},
+       ]},
+       {name:'Debt Module',color:'dev',tasks:[
+         {name:'Schema design',done:false,pct:0,who:'Polaris Finance',startW:7,dW:2,note:'Pending clarification'},
+         {name:'Payment schedule UI',done:false,pct:0,who:'Oceansoft Dev',startW:9,dW:2},
+       ]},
+     ],
+     notes:[{date:'05 Απρ 2026',text:'Debt module χρειάζεται διευκρίνιση για οντότητες Α & Β.'}]},
+    {id:'p2',title:'IMO CII Compliance',coId:'c2',cat:'legal',
+     budget:35000,paid:10000,invoiced:15000,deadline:'2026-04-14',updated:Date.now()-86400000,
+     contract:'Πλήρης συμμόρφωση IMO CII 2024 για στόλο 12 πλοίων.',
+     specs:[{t:'CII rating assessment',done:true},{t:'Carbon reduction plan',done:true},{t:'Flag State submission',done:false}],
+     modules:[
+       {name:'Assessment',color:'finance',tasks:[
+         {name:'Fleet CII ratings',done:true,pct:100,who:'Crossworld Legal',startW:0,dW:2},
+         {name:'Gap analysis',done:true,pct:100,who:'Crossworld Legal',startW:1,dW:1},
+       ]},
+       {name:'Flag State Submission',color:'legal',tasks:[
+         {name:'Prepare package',done:false,pct:30,who:'Crossworld Legal',startW:3,dW:2,note:'BLOCKED — αναμένει OWGP'},
+         {name:'Submit to registry',done:false,pct:0,who:'Crossworld Legal',startW:5,dW:1},
+       ]},
+     ],
+     notes:[{date:'07 Απρ 2026',text:'ΚΡΙΣΙΜΟ: deadline 14 Απρ. Να τηλεφωνήσω Makram.'}]},
+    {id:'p3',title:'HireBase MVP',coId:'c5',cat:'dev',
+     budget:28000,paid:14000,invoiced:14000,deadline:'2026-04-30',updated:Date.now()-5*3600000,
+     contract:'MVP ψηφιακής πλατφόρμας πρόσληψης Filipino ταλέντων.',
+     specs:[{t:'Landing page & brand',done:true},{t:'Employer registration',done:true},{t:'Payment gateway',done:false}],
+     modules:[
+       {name:'Frontend / UI',color:'dev',tasks:[
+         {name:'Landing page',done:true,pct:100,who:'Oceansoft Dev',startW:0,dW:2},
+         {name:'Employer dashboard',done:true,pct:100,who:'Oceansoft Dev',startW:2,dW:2},
+         {name:'Candidate listing',done:false,pct:70,who:'Oceansoft Dev',startW:4,dW:1},
+       ]},
+       {name:'Revenue & Payments',color:'marketing',tasks:[
+         {name:'Pricing logic',done:false,pct:20,who:'Oceansoft Dev',startW:5,dW:1},
+         {name:'Payment gateway',done:false,pct:0,who:'Oceansoft Dev',startW:6,dW:2},
+       ]},
+     ],
+     notes:[]},
+    {id:'p4',title:'ATLANTIS ERP',coId:'c2',cat:'dev',
+     budget:45000,paid:40000,invoiced:42000,deadline:'2026-04-20',updated:Date.now()-3600000,
+     contract:'ERP διαχείρισης πλοιάρχων & πληρωμάτων για Crossworld Marine.',
+     specs:[{t:'Dashboard & KPIs',done:true},{t:'Crew Roster',done:true},{t:'Sign-Off module',done:true},{t:'Payroll module',done:false}],
+     modules:[
+       {name:'Core Modules',color:'dev',tasks:[
+         {name:'Dashboard',done:true,pct:100,who:'Oceansoft Dev',startW:0,dW:2},
+         {name:'Roster management',done:true,pct:100,who:'Oceansoft Dev',startW:1,dW:2},
+       ]},
+       {name:'Financial Modules',color:'legal',tasks:[
+         {name:'Payroll calculator',done:false,pct:40,who:'Oceansoft Dev',startW:4,dW:2},
+         {name:'Expense tracking',done:false,pct:20,who:'Crossworld Finance',startW:5,dW:2},
+       ]},
+     ],
+     notes:[]},
+  ],
+  currentProjectId:null,
+  editingId:null,
+};
+
+// ════ HELPERS ════
+const getPct=p=>{let tot=0,done=0;p.modules.forEach(m=>m.tasks.forEach(t=>{tot++;done+=t.pct/100;}));return tot?Math.round(done/tot*100):0;};
+const getStatus=p=>{
+  const pct=getPct(p),dl=new Date(p.deadline),now=new Date();
+  const days=Math.round((dl-now)/86400000);
+  const hasBlock=p.modules.some(m=>m.tasks.some(t=>t.note&&t.note.includes('BLOCK')));
+  const stale=(Date.now()-p.updated)/86400000>5;
+  if(hasBlock)return'risk';if(stale)return'stale';
+  if(days<7&&pct<80)return'risk';if(days<14&&pct<50)return'delay';return'on';
+};
+const fmtD=iso=>{if(!iso)return'—';const d=new Date(iso),m=['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'];return d.getDate()+' '+m[d.getMonth()]+' '+d.getFullYear();};
+const fmtAgo=ts=>{const s=(Date.now()-ts)/1000;if(s<3600)return Math.round(s/60)+'m';if(s<86400)return Math.round(s/3600)+'h';return Math.round(s/86400)+'d';};
+const dLeft=iso=>Math.round((new Date(iso)-new Date())/86400000);
+const getCo=id=>S.companies.find(c=>c.id===id);
+const statusIcon=st=>({
+  on:'<span class="sdot g"></span><span style="font-size:13px;font-weight:700;">On Track</span>',
+  risk:'<span class="sdot r"></span><span style="font-size:13px;font-weight:700;color:var(--red);">At Risk</span>',
+  delay:'<span class="sdot y"></span><span style="font-size:13px;font-weight:700;color:var(--yellow);">Delayed</span>',
+  stale:'<span class="sdot r"></span><span style="font-size:13px;font-weight:700;color:var(--red);">Stale</span>',
+}[st]||'');
+
+// ════ SIDEBAR COUNTS ════
+function updateCounts(){
+  document.getElementById('nc-all').textContent=S.projects.length;
+  ['finance','legal','dev','marketing'].forEach(c=>{
+    const el=document.getElementById('nc-'+c.slice(0,3));
+    if(el)el.textContent=S.projects.filter(p=>p.cat===c).length;
+  });
+  document.getElementById('nc-mkt').textContent=S.projects.filter(p=>p.cat==='marketing').length;
+  // co nav
+  const coNav=document.getElementById('co-nav-items');
+  const icons={c1:'★',c2:'⚓',c3:'◉',c4:'▲',c5:'·'};
+  coNav.innerHTML=S.companies.map(co=>`
+    <div class="nav-item" onclick="showCoView('${co.id}',this)">
+      <span class="nav-ico" style="color:${co.color};">${icons[co.id]||'·'}</span>${co.name}
+      <span class="nav-count">${S.projects.filter(p=>p.coId===co.id).length}</span>
+    </div>`).join('');
+}
+
+// ════ OVERVIEW ════
+function renderOverview(){
+  // stale
+  const stale=S.projects.filter(p=>getStatus(p)==='stale'||getStatus(p)==='risk');
+  const sb=document.getElementById('stale-banner');
+  if(stale.length){
+    sb.style.display='flex';
+    document.getElementById('stale-txt').innerHTML=`<strong>${stale.length} projects</strong> χρειάζονται προσοχή — ${stale.map(p=>p.title).join(', ')}`;
+  } else sb.style.display='none';
+
+  // KPI
+  const cats=['finance','legal','dev','marketing'];
+  const all=S.projects;
+  const overall=all.length?Math.round(all.map(getPct).reduce((a,b)=>a+b,0)/all.length):0;
+  const blocked=all.filter(p=>getStatus(p)==='risk').length;
+  document.getElementById('kpi-strip').innerHTML=`
+    <div class="kpi total"><div class="kpi-lbl">Overall</div><div class="kpi-val">${overall}%</div><div class="kpi-sub">${all.length} projects</div></div>
+    ${cats.map(c=>{const ps=all.filter(p=>p.cat===c);const pct=ps.length?Math.round(ps.map(getPct).reduce((a,b)=>a+b,0)/ps.length):0;return`<div class="kpi ${c}"><div class="kpi-lbl">${catLabel[c]}</div><div class="kpi-val">${pct}%</div><div class="kpi-sub">${ps.length} projects</div></div>`;}).join('')}
+    <div class="kpi alert"><div class="kpi-lbl">At Risk</div><div class="kpi-val">${blocked}</div><div class="kpi-sub">need action</div></div>`;
+
+  // Companies
+  document.getElementById('co-badge').textContent=S.companies.length+' entities';
+  document.getElementById('co-list').innerHTML=S.companies.map(co=>{
+    const ps=S.projects.filter(p=>p.coId===co.id);
+    const pct=ps.length?Math.round(ps.map(getPct).reduce((a,b)=>a+b,0)/ps.length):0;
+    return`<div class="co-row" onclick="showCoView('${co.id}',null)">
+      <div class="co-av" style="background:rgba(0,0,0,0.05);color:${co.color};">${co.code}</div>
+      <div class="co-info"><div class="co-name">${co.name}</div><div class="co-meta">${ps.length} projects</div></div>
+      <div class="co-barw"><div class="co-bar"><div style="width:${pct}%;height:100%;background:${co.color};border-radius:2px;"></div></div></div>
+      <div class="co-pct" style="color:${co.color};">${pct}%</div>
+    </div>`;
+  }).join('')||'<div class="empty-state"><div class="empty-ico">🏢</div><div>Δεν υπάρχουν εταιρείες.</div></div>';
+
+  // Cat breakdown
+  document.getElementById('cat-breakdown').innerHTML=cats.map(c=>{
+    const ps=S.projects.filter(p=>p.cat===c);
+    const pct=ps.length?Math.round(ps.map(getPct).reduce((a,b)=>a+b,0)/ps.length):0;
+    const tasks=ps.reduce((a,p)=>a+p.modules.reduce((b,m)=>b+m.tasks.length,0),0);
+    const done=ps.reduce((a,p)=>a+p.modules.reduce((b,m)=>b+m.tasks.filter(t=>t.done).length,0),0);
+    return`<div class="cat-blk">
+      <div class="cat-blk-lbl ${c}">${catIcon[c]} ${catLabel[c]}</div>
+      <div class="cat-blk-pct ${c}">${pct}%</div>
+      <div class="cat-blk-sub">${done}/${tasks} tasks</div>
+      <div class="cat-big-bar"><div class="cat-big-fill" style="width:${pct}%;background:${catColor[c]};"></div></div>
+    </div>`;
+  }).join('');
+
+  // Deadlines
+  const sorted=[...S.projects].sort((a,b)=>new Date(a.deadline)-new Date(b.deadline)).slice(0,5);
+  let urg=0;
+  document.getElementById('deadlines-list').innerHTML=sorted.map(p=>{
+    const dl=dLeft(p.deadline),co=getCo(p.coId);
+    if(dl<7)urg++;
+    const cls=dl<7?'u':dl<14?'w':'ok';
+    return`<div class="dl-row" onclick="openDetail('${p.id}')">
+      <div class="dl-date">${fmtD(p.deadline)}</div>
+      <div><div class="dl-label">${p.title}</div><div class="dl-co">${co?.name||'—'}</div></div>
+      <div class="dl-days ${cls}">${dl}d</div>
+    </div>`;
+  }).join('')||'<div style="font-size:11px;color:var(--text-dim);padding:4px 0;">Δεν υπάρχουν.</div>';
+  document.getElementById('urgent-badge').textContent=urg+' urgent';
+
+  // Activity
+  document.getElementById('activity-list').innerHTML=[...S.projects].sort((a,b)=>b.updated-a.updated).slice(0,5).map(p=>{
+    const co=getCo(p.coId);
+    return`<div class="act-item"><div class="act-dot" style="background:${catColor[p.cat]};"></div>
+      <div class="act-txt"><strong>${co?.name||'—'}</strong> — ${p.title} <span style="color:${catColor[p.cat]};font-weight:700;">${getPct(p)}%</span></div>
+      <div class="act-time">${fmtAgo(p.updated)}</div>
+    </div>`;
+  }).join('')||'<div class="empty-state">Καμία δραστηριότητα.</div>';
+
+  renderDashTimeline();
+}
+
+// ════ TIMELINE on DASHBOARD ════
+function renderDashTimeline(){
+  const catF=document.getElementById('tl-filter-cat').value;
+  let projs=S.projects;
+  if(catF)projs=projs.filter(p=>p.cat===catF);
+  document.getElementById('tl-proj-count').textContent=projs.length+' projects';
+  const wrap=document.getElementById('dash-timeline');
+  if(!projs.length){wrap.innerHTML='<div class="empty-state"><div class="empty-ico">◌</div><div>Δεν υπάρχουν projects.</div></div>';return;}
+
+  const WEEKS=14;
+  const now=new Date();
+  const baseDate=new Date(now.getTime()-4*7*86400000);// 4 weeks before today
+  const curW=4;// today is at week 4
+
+  const weekDates=Array.from({length:WEEKS},(_,i)=>{
+    const d=new Date(baseDate.getTime()+i*7*86400000);
+    return{num:i+1,day:d.getDate(),mon:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]};
+  });
+
+  const wkHeader=weekDates.map((w,i)=>`<div class="tl-week ${i===curW?'cur':''}"><div class="tl-week-num">W${w.num}</div><div class="tl-week-date">${w.day} ${w.mon}</div></div>`).join('');
+
+  const rowsHTML=projs.map(p=>{
+    const co=getCo(p.coId);
+    const pct=getPct(p);
+    const st=getStatus(p);
+    const projTasksHTML=p.modules.map((m,mi)=>{
+      const mc=catColor[m.color]||catColor[p.cat];
+      const modTasksHTML=m.tasks.map(t=>{
+        const cells=Array.from({length:WEEKS},(_,ci)=>{
+          let barHTML='';
+          if(ci===t.startW){
+            const widthSpans=t.dW;
+            barHTML=`<div class="tl-bar ${t.note&&t.note.includes('BLOCK')?'blocked':m.color||p.cat} ${t.done?'done':''}"
+              style="left:3px;width:calc(${widthSpans}*100% - 6px);">${t.name}</div>`;
+          }
+          return`<div class="tl-cell ${ci===curW?'cur':''}">${barHTML}</div>`;
+        }).join('');
+        return`<div class="tl-task-row">
+          <div class="tl-task-label">${t.name}${t.note?`<span style="font-size:9px;color:var(--red);margin-left:4px;">⚠</span>`:''}</div>
+          <div class="tl-cells">${cells}</div>
+        </div>`;
+      }).join('');
+      const modPct=m.tasks.length?Math.round(m.tasks.reduce((a,t)=>a+t.pct,0)/m.tasks.length):0;
+      return`
+        <div class="tl-mod-row">
+          <div class="tl-mod-label">
+            <div class="tl-mod-dot" style="background:${mc};"></div>${m.name}
+            <span style="font-size:9px;color:${mc};margin-left:6px;font-weight:700;">${modPct}%</span>
+          </div>
+          <div class="tl-cells">${Array.from({length:WEEKS},(_,ci)=>`<div class="tl-cell ${ci===curW?'cur':''}" style="background:rgba(0,0,0,0.01);"></div>`).join('')}</div>
+        </div>
+        ${modTasksHTML}`;
+    }).join('');
+    return`
+      <div class="tl-proj-row">
+        <div class="tl-proj-label" onclick="openDetail('${p.id}')">
+          <span class="cat-pill ${p.cat}">${catIcon[p.cat]}</span>
+          ${p.title}
+          <span style="font-size:9px;color:var(--text-dim);margin-left:4px;">${co?.name||''}</span>
+        </div>
+        <div class="tl-cells">${Array.from({length:WEEKS},(_,ci)=>`<div class="tl-cell ${ci===curW?'cur':''}" style="background:rgba(0,0,0,0.015);"></div>`).join('')}</div>
+      </div>
+      ${projTasksHTML}`;
+  }).join('');
+
+  wrap.innerHTML=`
+    <div class="tl-head" style="display:flex;">
+      <div class="tl-label-col">MODULE / TASK</div>
+      ${wkHeader}
+    </div>
+    ${rowsHTML}`;
+}
+
+// ════ PROJECT TABLE ════
+function renderProjTable(cat,coId){
+  if(cat){document.getElementById('flt-cat').value=cat;}
+  if(coId){
+    const coSel=document.getElementById('flt-co');
+    coSel.innerHTML='<option value="">Όλες εταιρείες</option>'+S.companies.map(c=>`<option value="${c.id}" ${c.id===coId?'selected':''}>${c.name}</option>`).join('');
+  } else {
+    const coSel=document.getElementById('flt-co');
+    const prev=coSel.value;
+    coSel.innerHTML='<option value="">Όλες εταιρείες</option>'+S.companies.map(c=>`<option value="${c.id}" ${c.id===prev?'selected':''}>${c.name}</option>`).join('');
+  }
+  const catF=document.getElementById('flt-cat').value;
+  const coF=document.getElementById('flt-co').value;
+  let list=S.projects;
+  if(catF)list=list.filter(p=>p.cat===catF);
+  if(coF)list=list.filter(p=>p.coId===coF);
+  document.getElementById('proj-count-badge').textContent=list.length+' projects';
+  const tbody=document.getElementById('proj-tbody');
+  if(!list.length){tbody.innerHTML='';document.getElementById('proj-empty').style.display='block';return;}
+  document.getElementById('proj-empty').style.display='none';
+  tbody.innerHTML=list.map(p=>{
+    const pct=getPct(p),st=getStatus(p),co=getCo(p.coId);
+    return`<tr class="proj-row" onclick="openDetail('${p.id}')">
+      <td><div class="pname">${p.title}</div><div class="pco">${co?.name||'—'}</div></td>
+      <td><span class="cat-pill ${p.cat}">${catIcon[p.cat]} ${catLabel[p.cat]}</span></td>
+      <td>${statusIcon(st)}</td>
+      <td><div class="pct-mono" style="color:${catColor[p.cat]};">${pct}%</div><div class="mbar"><div class="mbar-fill" style="width:${pct}%;background:${catColor[p.cat]};"></div></div></td>
+      <td style="font-size:14px;font-weight:700;color:var(--text-mid);">${p.budget?'€'+(p.budget/1000).toFixed(0)+'k':'—'}</td>
+      <td style="font-size:14px;font-weight:700;color:var(--text-mid);">${p.modules.reduce((a,m)=>a+m.tasks.filter(t=>t.done).length,0)}/${p.modules.reduce((a,m)=>a+m.tasks.length,0)}</td>
+      <td style="font-size:13px;font-weight:600;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;">${fmtD(p.deadline)}</td>
+      <td style="font-size:13px;font-weight:600;color:${(Date.now()-p.updated)/86400000>4?'var(--red)':'var(--text-dim)'};">${fmtAgo(p.updated)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════ DETAIL ════
+function openDetail(id){
+  const p=S.projects.find(x=>x.id===id);
+  if(!p)return;
+  S.currentProjectId=id;
+  const co=getCo(p.coId);
+  const pct=getPct(p);
+  const c=catColor[p.cat];
+  const paidPct=p.budget?Math.round((p.paid||0)/p.budget*100):0;
+  const invPct=p.budget?Math.round((p.invoiced||0)/p.budget*100):0;
+
+  const modsHTML=p.modules.map((m,mi)=>{
+    const mc=catColor[m.color]||c;
+    const modPct=m.tasks.length?Math.round(m.tasks.reduce((a,t)=>a+t.pct,0)/m.tasks.length):0;
+    const tasks=m.tasks.map((t,ti)=>{
+      const commentId=`cmt-${id}-${mi}-${ti}`;
+      const hasComment=t.comment&&t.comment.trim();
+      return`
+      <div class="task-item" style="flex-wrap:wrap;">
+        <div class="task-check ${t.done?'done':t.note&&t.note.includes('BLOCK')?'block':''}">${t.done?'✓':''}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="task-name ${t.done?'done':''}">${t.name}</div>
+          ${t.note?`<div class="task-note">⚠ ${t.note}</div>`:''}
+          ${hasComment?`<div class="task-comment-preview">💬 ${t.comment}</div>`:''}
+        </div>
+        <span class="task-assignee">${t.who||'—'}</span>
+        <div class="task-pct-wrap">
+          <div class="task-bar"><div class="task-bar-fill" style="width:${t.pct}%;background:${t.done?'var(--green)':mc};"></div></div>
+          <div class="task-pct" style="color:${t.done?'var(--green)':mc};">${t.pct}%</div>
+        </div>
+        <div class="task-comment-btn ${hasComment?'has-comment':''}" onclick="toggleComment('${commentId}')" title="Σχόλιο">💬</div>
+        <div class="task-comment-box" id="${commentId}" style="display:none;">
+          <textarea class="task-comment-input" placeholder="Πρόσθεσε σχόλιο για αυτή την εργασία..." onblur="saveTaskComment('${id}',${mi},${ti},this.value)">${t.comment||''}</textarea>
+          <div style="display:flex;justify-content:flex-end;gap:6px;margin-top:6px;">
+            <div class="btn-comment-save" onclick="saveTaskComment('${id}',${mi},${ti},this.closest('.task-comment-box').querySelector('textarea').value);toggleComment('${commentId}')">Αποθήκευση</div>
+            <div class="btn-comment-cancel" onclick="toggleComment('${commentId}')">Κλείσιμο</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return`<div class="module-group">
+      <div class="mg-header" onclick="toggleMod('mgb${id}${mi}','mge${id}${mi}')">
+        <span class="mg-expand" id="mge${id}${mi}">▶</span>
+        <span class="mg-name">${m.name}</span>
+        <span class="mg-tasks-count">${m.tasks.filter(t=>t.done).length}/${m.tasks.length}</span>
+        <div class="mg-bar-wrap"><div class="mg-bar"><div class="mg-bar-fill" style="width:${modPct}%;background:${mc};"></div></div></div>
+        <span class="mg-pct" style="color:${mc};min-width:34px;text-align:right;">${modPct}%</span>
+      </div>
+      <div class="task-list" id="mgb${id}${mi}" style="display:none;">${tasks}</div>
+    </div>`;
+  }).join('');
+
+  const specsHTML=(p.specs||[]).map((s,i)=>`
+    <li class="spec-item">
+      <span class="spec-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="spec-text">${s.t}</span>
+      <span class="spec-check">${s.done?'<span style="color:var(--green)">✓</span>':'<span style="color:var(--border-bright)">○</span>'}</span>
+    </li>`).join('');
+
+  const notesHTML=(p.notes||[]).map(n=>`
+    <div class="ceo-note"><div class="ceo-note-date">${n.date} · CEO Note</div>${n.text}</div>`).join('');
+
+  document.getElementById('detail-content').innerHTML=`
+    <div class="breadcrumb">
+      <span onclick="showView('overview',null)">Dashboard</span>
+      <span class="bc-sep">›</span>
+      <span onclick="showView('projects',null)">Projects</span>
+      <span class="bc-sep">›</span>
+      <span style="color:${c};">${p.title}</span>
+    </div>
+    <div class="contract-header ${p.cat}">
+      <div class="ch-top">
+        <div>
+          <div class="ch-title">${p.title}</div>
+          <div class="ch-meta">
+            <span>${co?.name||'—'}</span><span>Deadline: ${fmtD(p.deadline)}</span>${p.budget?`<span>Budget: €${p.budget.toLocaleString()}</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start;">
+          <span class="ch-badge ${p.cat}">${catLabel[p.cat].toUpperCase()}</span>
+          <div class="btn-ico" onclick="openEditProject('${p.id}')" title="Edit project">✎</div>
+        </div>
+      </div>
+      ${p.contract?`<div style="font-size:11px;color:var(--text-mid);margin-bottom:14px;line-height:1.7;">${p.contract}</div>`:''}
+      <div class="contract-stats">
+        <div class="cs-item"><div class="cs-lbl">Overall</div><div class="cs-val" style="color:${c};">${pct}%</div><div class="cs-sub">completion</div></div>
+        ${p.budget?`<div class="cs-item"><div class="cs-lbl">Budget</div><div class="cs-val">€${p.budget.toLocaleString()}</div><div class="cs-sub">contract</div></div>`:''}
+        <div class="cs-item"><div class="cs-lbl">Tasks</div><div class="cs-val">${p.modules.reduce((a,m)=>a+m.tasks.filter(t=>t.done).length,0)}/${p.modules.reduce((a,m)=>a+m.tasks.length,0)}</div><div class="cs-sub">completed</div></div>
+        <div class="cs-item"><div class="cs-lbl">Status</div><div class="cs-val" style="font-size:11px;">${statusIcon(getStatus(p))}</div></div>
+        <div class="cs-item"><div class="cs-lbl">Updated</div><div class="cs-val" style="font-size:12px;${(Date.now()-p.updated)/86400000>4?'color:var(--red)':''}">${fmtAgo(p.updated)}</div></div>
+      </div>
+    </div>
+    <div class="overall-progress">
+      <div class="op-top"><div class="op-label">Overall Progress</div><div class="op-pct" style="color:${c};">${pct}%</div></div>
+      <div class="op-bar"><div class="op-fill" style="width:${pct}%;background:${c};"></div></div>
+    </div>
+    <div class="g2" style="margin-bottom:14px;">
+      <div>
+        <div style="font-family:'Nunito Sans',sans-serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;">Modules & Tasks</div>
+        ${modsHTML||'<div class="empty-state"><div class="empty-ico">◌</div><div>Δεν υπάρχουν modules.</div></div>'}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:13px;">
+        ${renderContractSummaryCard(p)}
+        ${p.specs?.length?`<div class="panel"><div class="ph"><div class="ph-title">Specifications</div><div class="ph-badge badge green">${p.specs.filter(s=>s.done).length}/${p.specs.length}</div></div><div class="pb"><ul class="spec-list">${specsHTML}</ul></div></div>`:''}
+        ${renderContractFilePanel(p)}
+        ${p.budget?`<div class="panel"><div class="ph"><div class="ph-title">Financial Overview</div></div><div class="pb">
+          <div class="payment-bar">
+            <div class="pay-paid" style="width:${paidPct}%;"></div>
+            <div class="pay-pending" style="width:${Math.max(0,invPct-paidPct)}%;"></div>
+            <div class="pay-remaining" style="flex:1;"></div>
+          </div>
+          <div class="pay-legend">
+            <div class="pay-leg-item"><div class="pay-leg-dot" style="background:var(--green);"></div>Paid €${(p.paid||0).toLocaleString()}</div>
+            <div class="pay-leg-item"><div class="pay-leg-dot" style="background:var(--yellow);"></div>Invoiced €${((p.invoiced||0)-(p.paid||0)).toLocaleString()}</div>
+            <div class="pay-leg-item"><div class="pay-leg-dot" style="background:var(--surface3);border:1px solid var(--border-bright);"></div>Remaining €${(p.budget-(p.invoiced||0)).toLocaleString()}</div>
+          </div>
+          <div class="fin-row"><div class="fin-key">Contract Value</div><div class="fin-val accent">€${p.budget.toLocaleString()}</div></div>
+          <div class="fin-row"><div class="fin-key">Collected</div><div class="fin-val green">€${(p.paid||0).toLocaleString()}</div></div>
+          <div class="fin-row"><div class="fin-key">Uninvoiced</div><div class="fin-val" style="color:var(--text-mid);">€${(p.budget-(p.invoiced||0)).toLocaleString()}</div></div>
+          <div class="fin-row"><div class="fin-key">Progress vs Billing</div><div class="fin-val ${pct>paidPct?'red':'green'}">${pct>paidPct?'⚠ Under-billed':'✓ Aligned'}</div></div>
+        </div></div>`:''}
+        ${notesHTML?`<div class="panel"><div class="ph"><div class="ph-title">CEO Notes</div><div class="ph-badge badge blue">Private</div></div><div class="pb">${notesHTML}</div></div>`:''}
+      </div>
+    </div>`;
+  showView('detail',null);
+  document.getElementById('page-title').textContent=p.title;
+  document.getElementById('page-sub').textContent=getCo(p.coId)?.name+' · '+catLabel[p.cat];
+}
+
+function toggleComment(id){
+  const box=document.getElementById(id);
+  if(!box)return;
+  const open=box.style.display==='none';
+  // close all other open comment boxes first
+  document.querySelectorAll('.task-comment-box').forEach(b=>{if(b.id!==id)b.style.display='none';});
+  box.style.display=open?'block':'none';
+  if(open){setTimeout(()=>box.querySelector('textarea').focus(),50);}
+}
+
+function saveTaskComment(projId,mi,ti,value){
+  const p=S.projects.find(x=>x.id===projId);
+  if(!p||!p.modules[mi]||!p.modules[mi].tasks[ti])return;
+  p.modules[mi].tasks[ti].comment=value.trim();
+  p.updated=Date.now();
+  openDetail(projId);
+}
+
+function toggleMod(bodyId,expId){
+  const b=document.getElementById(bodyId),e=document.getElementById(expId);
+  const open=b.style.display==='none';
+  b.style.display=open?'block':'none';
+  e.classList.toggle('open',open);
+}
+
+// ════ MANAGE ════
+function renderManage(){
+  document.getElementById('manage-companies').innerHTML=S.companies.map(co=>`
+    <div class="ent-row">
+      <div class="ent-av" style="background:rgba(0,0,0,0.05);color:${co.color};">${co.code}</div>
+      <div class="ent-info"><div class="ent-name">${co.name}</div><div class="ent-meta">${co.desc||''}</div></div>
+      <div class="ent-acts"><div class="btn-ico del" onclick="delCompany('${co.id}')">✕</div></div>
+    </div>`).join('')||'<div class="empty-state"><div class="empty-ico">🏢</div><div>Καμία εταιρεία.</div></div>';
+  document.getElementById('manage-users').innerHTML=S.users.map(u=>{
+    const co=getCo(u.coId);
+    const initials=u.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    return`<div class="ent-row">
+      <div class="ent-av" style="background:var(--accent-dim);color:var(--accent);">${initials}</div>
+      <div class="ent-info"><div class="ent-name">${u.name}</div><div class="ent-meta">${u.role} · ${co?.name||'—'} · ${u.dept}</div></div>
+      <div class="ent-acts"><div class="btn-ico del" onclick="delUser('${u.id}')">✕</div></div>
+    </div>`;
+  }).join('')||'<div class="empty-state"><div class="empty-ico">👤</div><div>Κανένας χρήστης.</div></div>';
+}
+
+// ════ COMPANY/USER CRUD ════
+function openModal(type){
+  if(type==='company'){document.getElementById('co-name-input').value='';document.getElementById('co-code-input').value='';document.getElementById('co-desc-input').value='';}
+  if(type==='user'){
+    document.getElementById('u-name').value='';document.getElementById('u-role').value='';
+    document.getElementById('u-co').innerHTML='<option value="">— Επίλεξε —</option>'+S.companies.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  }
+  if(type==='project'&&type!=='project_edit')openNewProjectModal();
+  else if(type!=='project')document.getElementById('modal-'+type).style.display='flex';
+}
+function closeModal(t){document.getElementById('modal-'+t).style.display='none';}
+function saveCompany(){
+  const name=document.getElementById('co-name-input').value.trim();
+  const code=document.getElementById('co-code-input').value.trim().toUpperCase();
+  if(!name||!code){alert('Συμπλήρωσε όνομα & code.');return;}
+  S.companies.push({id:uid(),name,code,color:document.getElementById('co-color-input').value,desc:document.getElementById('co-desc-input').value});
+  closeModal('company');renderAll();
+}
+function delCompany(id){if(!confirm('Διαγραφή εταιρείας;'))return;S.companies=S.companies.filter(c=>c.id!==id);renderAll();}
+function saveUser(){
+  const name=document.getElementById('u-name').value.trim();
+  if(!name){alert('Συμπλήρωσε όνομα.');return;}
+  S.users.push({id:uid(),name,role:document.getElementById('u-role').value,coId:document.getElementById('u-co').value,dept:document.getElementById('u-dept').value});
+  closeModal('user');renderManage();
+}
+function delUser(id){S.users=S.users.filter(u=>u.id!==id);renderManage();}
+
+// ════ PROJECT CRUD ════
+let bSpecs=[],bModules=[],editingId=null;
+function openNewProjectModal(){
+  editingId=null;bSpecs=[];bModules=[];
+  pendingContractFile=null;
+  document.getElementById('proj-modal-title').textContent='New Project';
+  document.getElementById('p-title').value='';document.getElementById('p-budget').value='';
+  document.getElementById('p-contract').value='';document.getElementById('p-deadline').value='';
+  const ps=document.getElementById('p-co');
+  ps.innerHTML='<option value="">— Επίλεξε —</option>'+S.companies.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  document.getElementById('specs-builder').innerHTML='';
+  document.getElementById('modules-builder').innerHTML='';
+  document.getElementById('contract-file-preview').style.display='none';
+  document.getElementById('contract-file-preview').innerHTML='';
+  document.getElementById('p-contract-file').value='';
+  document.getElementById('modal-project').style.display='flex';
+}
+function openEditProject(id){
+  const p=S.projects.find(x=>x.id===id);if(!p)return;
+  editingId=id;bSpecs=JSON.parse(JSON.stringify(p.specs||[]));bModules=JSON.parse(JSON.stringify(p.modules||[]));
+  pendingContractFile=null;
+  document.getElementById('proj-modal-title').textContent='Edit Project';
+  const ps=document.getElementById('p-co');
+  ps.innerHTML='<option value="">— Επίλεξε —</option>'+S.companies.map(c=>`<option value="${c.id}" ${c.id===p.coId?'selected':''}>${c.name}</option>`).join('');
+  document.getElementById('p-title').value=p.title;
+  document.getElementById('p-budget').value=p.budget||'';
+  document.getElementById('p-contract').value=p.contract||'';
+  document.getElementById('p-deadline').value=p.deadline||'';
+  document.getElementById('p-cat').value=p.cat;
+  // Show existing contract file if any
+  const prev=document.getElementById('contract-file-preview');
+  if(p.contractFile){
+    showContractPreview(p.contractFile,'contract-file-preview',true);
+  } else {
+    prev.style.display='none';prev.innerHTML='';
+  }
+  renderSpecsBuilder();renderModulesBuilder();
+  document.getElementById('modal-project').style.display='flex';
+}
+function addSpec(){bSpecs.push({t:'',done:false});renderSpecsBuilder();}
+function renderSpecsBuilder(){
+  document.getElementById('specs-builder').innerHTML=bSpecs.map((s,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <input type="checkbox" ${s.done?'checked':''} onchange="bSpecs[${i}].done=this.checked" style="width:auto;cursor:pointer;accent-color:var(--accent);">
+      <input style="flex:1;" value="${s.t||''}" placeholder="Specification..." oninput="bSpecs[${i}].t=this.value" class="field input">
+      <div class="btn-ico del" onclick="bSpecs.splice(${i},1);renderSpecsBuilder()">✕</div>
+    </div>`).join('');
+}
+function addModule(){bModules.push({name:'New Module',color:document.getElementById('p-cat')?.value||'dev',tasks:[]});renderModulesBuilder();}
+function renderModulesBuilder(){
+  document.getElementById('modules-builder').innerHTML=bModules.map((m,mi)=>`
+    <div class="module-builder open">
+      <div class="mb-builder-head" onclick="this.parentElement.classList.toggle('open')">
+        <span class="mb-expand-ico">▶</span>
+        <input style="flex:1;font-size:12px;font-weight:600;border:none;background:transparent;color:var(--text);font-family:'Nunito',sans-serif;" value="${m.name}" oninput="bModules[${mi}].name=this.value" onclick="event.stopPropagation()">
+        <select oninput="bModules[${mi}].color=this.value" onclick="event.stopPropagation()" style="font-size:10px;padding:3px 7px;background:var(--surface2);border:1px solid var(--border-bright);border-radius:4px;color:var(--text-mid);">
+          <option value="finance" ${m.color==='finance'?'selected':''}>Finance</option>
+          <option value="legal" ${m.color==='legal'?'selected':''}>Legal</option>
+          <option value="dev" ${m.color==='dev'?'selected':''}>Dev</option>
+          <option value="marketing" ${m.color==='marketing'?'selected':''}>Marketing</option>
+        </select>
+        <div class="btn-ico del" onclick="event.stopPropagation();bModules.splice(${mi},1);renderModulesBuilder()">✕</div>
+      </div>
+      <div class="mb-builder-body">
+        <div style="display:flex;gap:7px;padding-bottom:5px;border-bottom:1px solid var(--border);margin-bottom:3px;">
+          <div style="flex:2;font-size:8px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;">Task Name</div>
+          <div style="flex:1;font-size:8px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;">Assignee</div>
+          <div style="width:86px;font-size:8px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;">Deadline</div>
+          <div style="width:52px;font-size:8px;color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;">%</div>
+          <div style="width:24px;"></div>
+        </div>
+        ${m.tasks.map((t,ti)=>`
+          <div class="tb-row">
+            <input class="tb-nm" placeholder="Task name..." value="${t.name||''}" oninput="bModules[${mi}].tasks[${ti}].name=this.value">
+            <input class="tb-who" placeholder="Assignee..." value="${t.who||''}" oninput="bModules[${mi}].tasks[${ti}].who=this.value">
+            <input class="tb-date" type="date" value="${t.deadline||''}" onchange="bModules[${mi}].tasks[${ti}].deadline=this.value">
+            <input class="tb-pct" type="number" min="0" max="100" placeholder="%" value="${t.pct||0}" oninput="bModules[${mi}].tasks[${ti}].pct=parseInt(this.value)||0;bModules[${mi}].tasks[${ti}].done=parseInt(this.value)===100">
+            <div class="btn-ico del" onclick="bModules[${mi}].tasks.splice(${ti},1);renderModulesBuilder()">✕</div>
+          </div>`).join('')}
+        <button class="add-row-btn" onclick="bModules[${mi}].tasks.push({name:'',who:'',pct:0,done:false,startW:${mi+1},dW:2});renderModulesBuilder()">+ Add Task</button>
+      </div>
+    </div>`).join('');
+}
+function saveProject(){
+  const title=document.getElementById('p-title').value.trim();
+  if(!title){alert('Συμπλήρωσε τίτλο.');return;}
+  const now = new Date();
+  const proj={
+    id:editingId||uid(),title,
+    coId:document.getElementById('p-co').value,
+    cat:document.getElementById('p-cat').value,
+    budget:parseInt(document.getElementById('p-budget').value)||0,
+    paid:0,invoiced:0,
+    deadline:document.getElementById('p-deadline').value,
+    updated:Date.now(),
+    contract:document.getElementById('p-contract').value,
+    specs:JSON.parse(JSON.stringify(bSpecs)),
+    modules:JSON.parse(JSON.stringify(bModules)),
+    notes:[],
+    contractFile: pendingContractFile ? {
+      ...pendingContractFile,
+      uploadedAt: now.toLocaleDateString('el-GR')+' '+now.toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'})
+    } : null,
+  };
+  if(editingId){
+    const idx=S.projects.findIndex(p=>p.id===editingId);
+    if(idx>=0){
+      proj.paid=S.projects[idx].paid;
+      proj.invoiced=S.projects[idx].invoiced;
+      proj.notes=S.projects[idx].notes;
+      // Keep existing contract file if no new one uploaded
+      if(!pendingContractFile) proj.contractFile=S.projects[idx].contractFile||null;
+      S.projects[idx]=proj;
+    }
+  } else S.projects.push(proj);
+  pendingContractFile=null;
+  closeModal('project');renderAll();openDetail(proj.id);
+}
+
+// ════ NAV ════
+function showView(id,navEl){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if(navEl){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));navEl.classList.add('active');}
+  if(id==='overview'){renderOverview();document.getElementById('page-title').textContent='Group Dashboard';document.getElementById('page-sub').textContent='All companies · All categories · CEO view';}
+  if(id==='projects'){renderProjTable();document.getElementById('page-title').textContent='All Projects';document.getElementById('page-sub').textContent=S.projects.length+' projects';}
+  if(id==='manage'){renderManage();document.getElementById('page-title').textContent='Manage';document.getElementById('page-sub').textContent='Companies, Users';}
+  if(id==='guide'){document.getElementById('page-title').textContent='Guide';document.getElementById('page-sub').textContent='Οδηγός χρήσης Next2View';}
+}
+function showCatView(cat,navEl){
+  renderProjTable(cat,null);
+  showView('projects',navEl);
+  document.getElementById('page-title').textContent=catLabel[cat]+' Projects';
+}
+function showCoView(coId,navEl){
+  renderProjTable(null,coId);
+  showView('projects',navEl);
+  document.getElementById('page-title').textContent=getCo(coId)?.name+' Projects';
+}
+
+// topbar chips for detail
+function setTopbarChips(){
+  document.getElementById('topbar-chips').innerHTML=`
+    <div class="chip active" onclick="this.closest('.main').querySelectorAll('.view').forEach(v=>{v.classList.remove('active')});document.getElementById('view-overview').classList.add('active');renderOverview();">Dashboard</div>
+    <div class="chip" onclick="showView('manage',null)">Manage</div>
+    <div class="chip" onclick="openNewProjectModal()">+ Project</div>`;
+}
+
+
+function switchGuideTab(tabId, el) {
+  document.querySelectorAll('.guide-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.guide-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  el.classList.add('active');
+}
+
+function renderAll(){
+  updateCounts();renderOverview();renderProjTable();renderManage();setTopbarChips();
+}
+
+
+renderAll();
+
+
+
+// ════ API KEY MANAGEMENT ════
+function getApiKey() {
+  return localStorage.getItem('n2v_api_key') || '';
+}
+
+function injectApiKey(headers) {
+  const key = getApiKey();
+  if (key) headers['x-api-key'] = key;
+  return headers;
+}
+
+function openApiKeySetup() {
+  document.getElementById('api-key-modal').style.display = 'flex';
+  document.getElementById('api-key-input').value = getApiKey();
+}
+
+function saveApiKey() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key) { alert('Βάλε ένα valid API key.'); return; }
+  if (!key.startsWith('sk-ant-')) { 
+    if (!confirm('Το key δεν αρχίζει με sk-ant-. Είσαι σίγουρος;')) return;
+  }
+  localStorage.setItem('n2v_api_key', key);
+  document.getElementById('api-key-modal').style.display = 'none';
+  document.getElementById('api-key-status').textContent = '✓ API Key';
+  document.getElementById('api-key-status').style.color = 'var(--green)';
+}
+
+function checkApiKeyOnLoad() {
+  const key = getApiKey();
+  const statusEl = document.getElementById('api-key-status');
+  if (key) {
+    statusEl.textContent = '✓ API Key';
+    statusEl.style.color = 'var(--green)';
+  } else {
+    statusEl.textContent = '⚠ API Key';
+    statusEl.style.color = 'var(--yellow)';
+    // Auto-open setup on first visit
+    setTimeout(() => openApiKeySetup(), 600);
+  }
+}
+
+
+// ════ CONTRACT SUMMARY EXTRACTION ════
+async function extractContractSummary(projId) {
+  const p = S.projects.find(x=>x.id===projId);
+  if (!p || !p.contractFile) return;
+
+  // Show loading state in card
+  const cardEl = document.getElementById('cscard-' + projId);
+  if (cardEl) {
+    cardEl.querySelector('.cscard-body-wrap').innerHTML = `
+      <div class="cscard-loading">
+        <div class="ai-spinner" style="width:24px;height:24px;border-width:2px;"></div>
+        <span>Εξαγωγή στοιχείων σύμβασης...</span>
+      </div>`;
+  }
+
+  try {
+    const cf = p.contractFile;
+    const isPDF = cf.type === 'application/pdf' || cf.name.endsWith('.pdf');
+    const isImg = cf.type && cf.type.startsWith('image/');
+    const base64Data = cf.dataUrl.split(',')[1];
+    const mediaType = isPDF ? 'application/pdf' : (cf.type || 'image/jpeg');
+
+    let contentBlocks = [];
+    if (isPDF) {
+      contentBlocks.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data:base64Data }});
+    } else if (isImg) {
+      contentBlocks.push({ type:'image', source:{ type:'base64', media_type:mediaType, data:base64Data }});
+    }
+
+    contentBlocks.push({ type:'text', text:`Διάβασε αυτή τη σύμβαση και εξήγαγε ΜΟΝΟ τα παρακάτω στοιχεία σε JSON format. Μη βάλεις τίποτε άλλο εκτός από το JSON object.
+
+{
+  "parties": ["Μέρος 1", "Μέρος 2"],
+  "subject": "Αντικείμενο σύμβασης σε 1-2 προτάσεις",
+  "value": "Αξία σύμβασης (αριθμός ή κείμενο)",
+  "currency": "Νόμισμα (EUR/USD/κλπ)",
+  "start_date": "Ημερομηνία έναρξης",
+  "end_date": "Ημερομηνία λήξης/παράδοσης",
+  "payment_terms": "Όροι πληρωμής (σύντομα)",
+  "key_obligations": ["Υποχρέωση 1", "Υποχρέωση 2", "Υποχρέωση 3"],
+  "penalties": "Ρήτρες/ποινές αν υπάρχουν ή 'Δεν αναφέρονται'",
+  "governing_law": "Εφαρμοστέο δίκαιο/δικαιοδοσία",
+  "signed": true/false,
+  "special_terms": "Ιδιαίτεροι όροι αν υπάρχουν ή null"
+}
+
+Αν κάτι δεν βρίσκεται στο έγγραφο, βάλε null. Απάντα ΜΟΝΟ με το JSON.`
+    });
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: injectApiKey({ 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }),
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:800, messages:[{ role:'user', content:contentBlocks }] })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const summary = JSON.parse(clean);
+
+    // Store in project
+    p.contractSummary = summary;
+
+    // Re-render detail to show populated card
+    openDetail(projId);
+
+  } catch(err) {
+    const cardEl = document.getElementById('cscard-' + projId);
+    if (cardEl) {
+      cardEl.querySelector('.cscard-body-wrap').innerHTML = `
+        <div style="padding:16px 20px;color:var(--red);font-size:12px;">⚠ ${err.message}</div>`;
+    }
+    console.error(err);
+  }
+}
+
+function renderContractSummaryCard(p) {
+  const catColors = {finance:'var(--finance)',legal:'var(--legal)',dev:'var(--dev)',marketing:'var(--marketing)'};
+  const c = catColors[p.cat] || 'var(--accent)';
+
+  if (!p.contractFile) return '';
+
+  if (!p.contractSummary) {
+    return `<div class="contract-summary-card" id="cscard-${p.id}">
+      <div style="height:3px;background:${c};"></div>
+      <div class="cscard-header">
+        <div class="cscard-title">📋 Στοιχεία Σύμβασης</div>
+      </div>
+      <div class="cscard-body-wrap">
+        <div style="padding:24px 20px;text-align:center;">
+          <div style="font-size:24px;margin-bottom:10px;opacity:0.4;">📄</div>
+          <div style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">Η σύμβαση έχει ανέβει. Πάτα για αυτόματη εξαγωγή στοιχείων.</div>
+          <div class="cscard-regenerate" onclick="extractContractSummary('${p.id}')">✦ Εξαγωγή Στοιχείων</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const s = p.contractSummary;
+
+  const partiesHTML = (s.parties||[]).map(party =>
+    `<span class="cscard-party">👤 ${party}</span>`
+  ).join('');
+
+  const obligationsHTML = (s.key_obligations||[]).map((o,i) =>
+    `<div class="cscard-obligation">
+      <span class="cscard-obligation-num" style="color:${c};">${i+1}.</span>
+      <span>${o}</span>
+    </div>`
+  ).join('');
+
+  const hasPenalties = s.penalties && s.penalties !== 'Δεν αναφέρονται' && s.penalties !== 'null' && s.penalties !== null;
+
+  return `<div class="contract-summary-card" id="cscard-${p.id}">
+    <div style="height:3px;background:${c};"></div>
+    <div class="cscard-header">
+      <div class="cscard-title">
+        📋 Στοιχεία Σύμβασης
+        ${s.signed
+          ? '<span class="cscard-badge">✓ Υπογεγραμμένη</span>'
+          : '<span class="cscard-badge unsigned">⚠ Μη υπογεγραμμένη</span>'}
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;" class="no-print">
+        <div class="cscard-export-btn" onclick="exportContractSummary('${p.id}')">🖨 Export / Print</div>
+        <div class="cscard-regenerate" onclick="extractContractSummary('${p.id}')">↺ Ανανέωση</div>
+      </div>
+    </div>
+    <div class="cscard-body-wrap">
+      <div class="cscard-body">
+
+        <div class="cscard-field full">
+          <div class="cscard-field-label">Αντικείμενο Σύμβασης</div>
+          <div class="cscard-field-value">${s.subject||'—'}</div>
+        </div>
+
+        <div class="cscard-field full">
+          <div class="cscard-field-label">Συμβαλλόμενα Μέρη</div>
+          <div class="cscard-parties" style="margin-top:4px;">${partiesHTML||'—'}</div>
+        </div>
+
+        <div class="cscard-field">
+          <div class="cscard-field-label">Αξία Σύμβασης</div>
+          <div class="cscard-field-value big" style="color:${c};">${s.value ? s.value + (s.currency?' '+s.currency:'') : '—'}</div>
+        </div>
+
+        <div class="cscard-field">
+          <div class="cscard-field-label">Όροι Πληρωμής</div>
+          <div class="cscard-field-value">${s.payment_terms||'—'}</div>
+        </div>
+
+        <div class="cscard-field">
+          <div class="cscard-field-label">📅 Ημερομηνία Έναρξης</div>
+          <div class="cscard-field-value accent">${s.start_date||'—'}</div>
+        </div>
+
+        <div class="cscard-field">
+          <div class="cscard-field-label">🏁 Ημερομηνία Λήξης</div>
+          <div class="cscard-field-value red">${s.end_date||'—'}</div>
+        </div>
+
+        ${obligationsHTML ? `<div class="cscard-field full">
+          <div class="cscard-field-label">Κύριες Υποχρεώσεις</div>
+          <div style="margin-top:4px;">${obligationsHTML}</div>
+        </div>` : ''}
+
+        ${hasPenalties ? `<div class="cscard-penalty-box">
+          <div class="cscard-penalty-label">⚠ Ρήτρες / Ποινές</div>
+          <div class="cscard-penalty-val">${s.penalties}</div>
+        </div>` : ''}
+
+        <div class="cscard-field">
+          <div class="cscard-field-label">⚖️ Εφαρμοστέο Δίκαιο</div>
+          <div class="cscard-field-value">${s.governing_law||'—'}</div>
+        </div>
+
+        ${s.special_terms && s.special_terms !== 'null' ? `<div class="cscard-field">
+          <div class="cscard-field-label">✨ Ιδιαίτεροι Όροι</div>
+          <div class="cscard-field-value">${s.special_terms}</div>
+        </div>` : ''}
+
+      </div>
+    </div>
+  </div>`;
+}
+
+// ════ EXPORT CONTRACT SUMMARY ════
+function exportContractSummary(projId) {
+  const p = S.projects.find(x=>x.id===projId);
+  if (!p || !p.contractSummary) return;
+  const s = p.contractSummary;
+  const co = getCo(p.coId);
+  const catColors = {finance:'#059669',legal:'#d97706',dev:'#7c3aed',marketing:'#db2777'};
+  const c = catColors[p.cat] || '#3b82f6';
+  const now = new Date().toLocaleDateString('el-GR');
+
+  const partiesHTML = (s.parties||[]).map(party =>
+    `<span style="display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 12px;border-radius:12px;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;margin-right:6px;">👤 ${party}</span>`
+  ).join('');
+
+  const obligationsHTML = (s.key_obligations||[]).map((o,i) =>
+    `<tr><td style="color:${c};font-weight:700;padding:6px 8px 6px 0;vertical-align:top;">${i+1}.</td><td style="padding:6px 0;font-size:13px;color:#374151;border-bottom:1px solid #e5e7eb;">${o}</td></tr>`
+  ).join('');
+
+  const hasPenalties = s.penalties && s.penalties !== 'Δεν αναφέρονται' && s.penalties !== 'null' && s.penalties !== null;
+
+  const printHTML = `<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<title>Σύμβαση — ${p.title}</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Nunito',sans-serif; background:#f8fafc; color:#1a202c; padding:32px; }
+  @media print {
+    body { background:#fff; padding:20px; }
+    .no-print { display:none; }
+    @page { margin: 1.5cm; }
+  }
+  .card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; max-width:800px; margin:0 auto; box-shadow:0 2px 8px rgba(0,0,0,0.06); }
+  .top-bar { height:4px; background:${c}; }
+  .card-header { padding:18px 24px; background:#f8fafc; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; }
+  .header-left { display:flex; align-items:center; gap:10px; }
+  .header-title { font-size:16px; font-weight:800; color:#1a202c; }
+  .badge { font-size:10px; font-weight:700; padding:3px 10px; border-radius:8px; background:#dcfce7; color:#15803d; }
+  .badge.unsigned { background:#fef9c3; color:#854d0e; }
+  .header-meta { font-size:11px; color:#94a3b8; }
+  .logo-area { font-size:20px; font-weight:800; color:#1a202c; letter-spacing:-0.5px; }
+  .logo-area span { color:#3b82f6; }
+  .grid { padding:20px 24px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .field { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px 14px; }
+  .field.full { grid-column:1/-1; }
+  .field-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#94a3b8; margin-bottom:6px; }
+  .field-value { font-size:13px; font-weight:600; color:#1a202c; line-height:1.5; }
+  .field-value.big { font-size:22px; font-weight:900; color:${c}; }
+  .field-value.red { color:#dc2626; }
+  .field-value.blue { color:#2563eb; }
+  .penalty-box { background:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:12px 14px; grid-column:1/-1; }
+  .penalty-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#dc2626; margin-bottom:6px; }
+  .penalty-val { font-size:13px; font-weight:600; color:#dc2626; }
+  table { width:100%; border-collapse:collapse; }
+  .footer { padding:14px 24px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; font-size:10px; color:#94a3b8; }
+  .print-btn { background:${c}; color:#fff; border:none; padding:10px 20px; border-radius:8px; font-family:'Nunito',sans-serif; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; margin:0 auto 20px; }
+  .print-btn:hover { opacity:0.9; }
+</style>
+</head>
+<body>
+<div style="max-width:800px;margin:0 auto;">
+  <button class="print-btn no-print" onclick="window.print()">🖨 Εκτύπωση / Αποθήκευση ως PDF</button>
+  <div class="card">
+    <div class="top-bar"></div>
+    <div class="card-header">
+      <div class="header-left">
+        <div class="logo-area">Next<span>2</span>View</div>
+        <div style="width:1px;height:28px;background:#e2e8f0;margin:0 4px;"></div>
+        <div>
+          <div class="header-title">📋 Στοιχεία Σύμβασης</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:1px;">${p.title} · ${co?.name||'—'}</div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        ${s.signed
+          ? '<span class="badge">✓ Υπογεγραμμένη</span>'
+          : '<span class="badge unsigned">⚠ Μη υπογεγραμμένη</span>'}
+        <div class="header-meta" style="margin-top:6px;">Εξαγωγή: ${now}</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="field full">
+        <div class="field-label">Αντικείμενο Σύμβασης</div>
+        <div class="field-value">${s.subject||'—'}</div>
+      </div>
+
+      <div class="field full">
+        <div class="field-label">Συμβαλλόμενα Μέρη</div>
+        <div style="margin-top:4px;">${partiesHTML||'—'}</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Αξία Σύμβασης</div>
+        <div class="field-value big">${s.value ? s.value + (s.currency?' '+s.currency:'') : '—'}</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Όροι Πληρωμής</div>
+        <div class="field-value">${s.payment_terms||'—'}</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">📅 Ημερομηνία Έναρξης</div>
+        <div class="field-value blue">${s.start_date||'—'}</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">🏁 Ημερομηνία Λήξης</div>
+        <div class="field-value red">${s.end_date||'—'}</div>
+      </div>
+
+      ${obligationsHTML ? `<div class="field full">
+        <div class="field-label">Κύριες Υποχρεώσεις</div>
+        <table style="margin-top:6px;"><tbody>${obligationsHTML}</tbody></table>
+      </div>` : ''}
+
+      ${hasPenalties ? `<div class="penalty-box">
+        <div class="penalty-label">⚠ Ρήτρες / Ποινές</div>
+        <div class="penalty-val">${s.penalties}</div>
+      </div>` : ''}
+
+      <div class="field">
+        <div class="field-label">⚖️ Εφαρμοστέο Δίκαιο</div>
+        <div class="field-value">${s.governing_law||'—'}</div>
+      </div>
+
+      ${s.special_terms && s.special_terms !== 'null' ? `<div class="field">
+        <div class="field-label">✨ Ιδιαίτεροι Όροι</div>
+        <div class="field-value">${s.special_terms}</div>
+      </div>` : ''}
+    </div>
+
+    <div class="footer">
+      <span>Next2View Command Center — Next2me Group</span>
+      <span>${p.title} · ${catLabel[p.cat]}</span>
+      <span>Εκτύπωση: ${now}</span>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION DROPDOWN -->
+<div class="notif-dropdown" id="notif-dropdown">
+  <div class="notif-header">
+    <div class="notif-header-title">🔔 Notifications</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="notif-clear" onclick="clearAllNotifs()">Clear all</div>
+      <div style="font-size:13px;color:var(--text-dim);cursor:pointer;" onclick="closeNotifDropdown()">✕</div>
+    </div>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="notif-empty"><div class="notif-empty-ico">🔔</div><div>Δεν υπάρχουν notifications.</div></div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+</body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(printHTML);
+  win.document.close();
+  // Auto-trigger print dialog after fonts load
+  win.onload = () => setTimeout(() => win.print(), 500);
+}
+
+// ════ CONTRACT AI ANALYSIS ════
+async function openContractAI(projId) {
+  const p = S.projects.find(x=>x.id===projId);
+  if (!p || !p.contractFile) return;
+
+  const modal = document.getElementById('contract-ai-modal');
+  modal.style.display = 'flex';
+  document.getElementById('cai-proj-title').textContent = p.title + ' — Ανάλυση Σύμβασης';
+  document.getElementById('cai-generated-at').textContent = 'Generating...';
+  document.getElementById('cai-loading').style.display = 'flex';
+  document.getElementById('cai-content').style.display = 'none';
+  document.getElementById('cai-verdict').style.display = 'none';
+  document.getElementById('cai-error').style.display = 'none';
+
+  // Set up refresh button
+  document.getElementById('cai-refresh-btn').onclick = () => openContractAI(projId);
+
+  try {
+    const co = getCo(p.coId);
+    const pct = getPct(p);
+    const dl = dLeft(p.deadline);
+    const now = new Date();
+    const tasksDone = p.modules.reduce((a,m)=>a+m.tasks.filter(t=>t.done).length,0);
+    const tasksTotal = p.modules.reduce((a,m)=>a+m.tasks.length,0);
+    const paidPct = p.budget ? Math.round((p.paid||0)/p.budget*100) : 0;
+    const staleDay = Math.round((Date.now()-p.updated)/86400000);
+    const blockedTasks = p.modules.flatMap(m=>m.tasks.filter(t=>t.note&&t.note.toLowerCase().includes('block'))).map(t=>t.name);
+    const modulesDetail = p.modules.map(m=>{
+      const mp = m.tasks.length ? Math.round(m.tasks.reduce((a,t)=>a+t.pct,0)/m.tasks.length) : 0;
+      const tasks = m.tasks.map(t=>`    - ${t.name}: ${t.pct}% ${t.done?'[ΟΛΟΚΛΗΡΩΘΗΚΕ]':''} ${t.note?'['+t.note+']':''}${t.comment?' Σχόλιο: "'+t.comment+'"':''}`).join('\n');
+      return `  Module: ${m.name} (${mp}%)\n${tasks}`;
+    }).join('\n');
+    const comments = p.modules.flatMap(m=>m.tasks.filter(t=>t.comment).map(t=>t.task+': "'+t.comment+'"')).join('; ');
+
+    const projectContext = `
+ΗΜΕΡΟΜΗΝΙΑ ΑΝΑΛΥΣΗΣ: ${now.toLocaleDateString('el-GR')}
+PROJECT: ${p.title}
+ΕΤΑΙΡΕΙΑ: ${co?.name||'—'} | ΚΑΤΗΓΟΡΙΑ: ${catLabel[p.cat]}
+DEADLINE: ${p.deadline} (σε ${dl} ημέρες)
+ΣΥΝΟΛΙΚΗ ΠΡΟΟΔΟΣ: ${pct}%
+TASKS: ${tasksDone}/${tasksTotal} ολοκληρώθηκαν
+BUDGET: €${(p.budget||0).toLocaleString()} | Εισπράχθηκε: €${(p.paid||0).toLocaleString()} (${paidPct}%)
+ΤΕΛΕΥΤΑΙΑ ΕΝΗΜΕΡΩΣΗ: ${staleDay} ημέρες πριν
+BLOCKED: ${blockedTasks.length ? blockedTasks.join(', ') : 'Κανένα'}
+ΣΧΟΛΙΑ ΕΡΓΑΣΙΩΝ: ${comments||'Κανένα'}
+
+ΑΝΑΛΥΣΗ ΑΝΑ MODULE:
+${modulesDetail}
+
+ΠΕΡΙΓΡΑΦΗ PROJECT (από το σύστημα): ${p.contract||'—'}`;
+
+    // Build message with document
+    const cf = p.contractFile;
+    const isPDF = cf.type === 'application/pdf' || cf.name.endsWith('.pdf');
+    const isImg = cf.type && cf.type.startsWith('image/');
+
+    // Extract base64 data (remove data URL prefix)
+    const base64Data = cf.dataUrl.split(',')[1];
+    const mediaType = isPDF ? 'application/pdf' : (cf.type || 'image/jpeg');
+
+    let contentBlocks = [];
+
+    // Add the contract document
+    if (isPDF) {
+      contentBlocks.push({
+        type: 'document',
+        source: { type: 'base64', media_type: 'application/pdf', data: base64Data }
+      });
+    } else if (isImg) {
+      contentBlocks.push({
+        type: 'image',
+        source: { type: 'base64', media_type: mediaType, data: base64Data }
+      });
+    }
+
+    // Add the text prompt
+    contentBlocks.push({
+      type: 'text',
+      text: `Είσαι σύμβουλος project management και νομικής συμμόρφωσης. Διάβασε την παραπάνω σύμβαση/συμφωνία και σύγκρινέ την με τα παρακάτω δεδομένα πραγματικής προόδου του project.
+
+ΔΕΔΟΜΕΝΑ PROJECT:
+${projectContext}
+
+Απάντησε ΑΠΟΚΛΕΙΣΤΙΚΑ στα ΕΛΛΗΝΙΚΑ με την παρακάτω δομή:
+
+## ⚖️ ΣΥΓΚΡΙΣΗ ΣΥΜΒΑΣΗΣ vs ΠΡΑΓΜΑΤΙΚΟΤΗΤΑΣ
+
+Τι έχει συμφωνηθεί στη σύμβαση (deliverables, χρονοδιάγραμμα, υποχρεώσεις) vs τι συμβαίνει πραγματικά.
+
+## 🟢 / 🟡 / 🔴 ΕΤΥΜΗΓΟΡΙΑ: [ΕΝΤΟΣ / ΣΕ ΚΙΝΔΥΝΟ / ΕΚΤΟΣ ΣΥΜΒΑΣΗΣ]
+
+Μία σαφής κρίση: είμαστε σε συμμόρφωση με τη σύμβαση ή όχι; Γιατί;
+
+## ⏱ ΠΡΟΒΛΕΨΗ ΟΛΟΚΛΗΡΩΣΗΣ
+
+Με βάση τον τρέχοντα ρυθμό προόδου (${pct}% σε ${dl} ημέρες πριν το deadline):
+- Εκτιμώμενη ημερομηνία ολοκλήρωσης αν συνεχιστεί ο ρυθμός
+- Πιθανότητα να τηρηθεί το deadline (%)
+- Τι πρέπει να αλλάξει για να μπει εντός χρονοδιαγράμματος
+
+## ⚠️ ΚΙΝΔΥΝΟΙ ΣΥΜΒΑΤΙΚΗΣ ΑΘΕΤΗΣΗΣ
+
+Ποια σημεία της σύμβασης κινδυνεύουν να μη τηρηθούν; Ποιες ρήτρες ή υποχρεώσεις είναι σε κίνδυνο;
+
+## 💰 ΟΙΚΟΝΟΜΙΚΗ ΣΥΜΒΑΤΟΤΗΤΑ
+
+Πληρωμές vs πρόοδος: είμαστε σε ισορροπία ή υπάρχει ρίσκο;
+
+## 📋 ΠΡΟΤΕΙΝΟΜΕΝΕΣ ΕΝΕΡΓΕΙΕΣ (3-5)
+
+Συγκεκριμένες ενέργειες για να επανέλθουμε ή να παραμείνουμε εντός σύμβασης.
+
+Γράψε άμεσα, χωρίς padding. Αν κάτι δεν είναι σαφές στη σύμβαση, το σημειώνεις.`
+    });
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: injectApiKey({ 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }),
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1800,
+        messages: [{ role: 'user', content: contentBlocks }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = data.content?.[0]?.text || '';
+    if (!text) throw new Error('Δεν επιστράφηκε κείμενο');
+
+    // Extract verdict for banner
+    const verdictMatch = text.match(/ΕΤΥΜΗΓΟΡΙΑ[:\s]*\[?([^\]\n]+)\]?/i);
+    const verdict = verdictMatch ? verdictMatch[1].trim() : '';
+    const isOk = verdict.includes('ΕΝΤΟΣ');
+    const isRisk = verdict.includes('ΚΙΝΔΥΝΟ');
+    const isBad = verdict.includes('ΕΚΤΟΣ');
+
+    const verdictEl = document.getElementById('cai-verdict');
+    verdictEl.style.display = 'flex';
+    verdictEl.style.cssText = `display:flex;align-items:center;gap:14px;padding:16px 28px;
+      background:${isOk?'rgba(5,150,105,0.1)':isRisk?'rgba(217,119,6,0.1)':'rgba(220,38,38,0.1)'};
+      border-bottom:1px solid ${isOk?'rgba(5,150,105,0.25)':isRisk?'rgba(217,119,6,0.25)':'rgba(220,38,38,0.25)'};`;
+    verdictEl.innerHTML = `
+      <span style="font-size:28px;">${isOk?'🟢':isRisk?'🟡':'🔴'}</span>
+      <div>
+        <div style="font-size:16px;font-weight:900;color:${isOk?'var(--green)':isRisk?'var(--yellow)':'var(--red)'};font-family:'Nunito',sans-serif;">
+          ${isOk?'ΕΝΤΟΣ ΣΥΜΒΑΣΗΣ':isRisk?'ΣΕ ΚΙΝΔΥΝΟ':'ΕΚΤΟΣ ΣΥΜΒΑΣΗΣ'}
+        </div>
+        <div style="font-size:11px;color:var(--text-dim);font-family:'Nunito Sans',sans-serif;margin-top:2px;">
+          Project: ${p.title} · Deadline σε ${dl} ημέρες · Πρόοδος ${pct}%
+        </div>
+      </div>`;
+
+    document.getElementById('cai-loading').style.display = 'none';
+    const contentEl = document.getElementById('cai-content');
+    contentEl.style.display = 'block';
+    contentEl.innerHTML = renderAIMarkdown(text);
+    document.getElementById('cai-generated-at').textContent = 'Αναλύθηκε: ' + new Date().toLocaleString('el-GR');
+
+  } catch(err) {
+    document.getElementById('cai-loading').style.display = 'none';
+    const errEl = document.getElementById('cai-error');
+    errEl.style.display = 'block';
+    errEl.textContent = '⚠ Σφάλμα: ' + err.message;
+    console.error(err);
+  }
+}
+
+// ════ AI REPORT ════
+function buildAIPrompt() {
+  const all = S.projects;
+  const cats = ['finance','legal','dev','marketing'];
+  const overall = all.length ? Math.round(all.map(getPct).reduce((a,b)=>a+b,0)/all.length) : 0;
+  const now = new Date();
+
+  const projDetails = all.map(p => {
+    const co = getCo(p.coId);
+    const pct = getPct(p);
+    const st = getStatus(p);
+    const dl = dLeft(p.deadline);
+    const tasksDone = p.modules.reduce((a,m)=>a+m.tasks.filter(t=>t.done).length,0);
+    const tasksTotal = p.modules.reduce((a,m)=>a+m.tasks.length,0);
+    const blockedTasks = p.modules.flatMap(m=>m.tasks.filter(t=>t.note&&t.note.includes('BLOCK'))).map(t=>t.name);
+    const paidPct = p.budget ? Math.round((p.paid||0)/p.budget*100) : null;
+    const staleDay = Math.round((Date.now()-p.updated)/86400000);
+    const comments = p.modules.flatMap(m=>m.tasks.filter(t=>t.comment).map(t=>({task:t.name,comment:t.comment})));
+
+    return `
+PROJECT: ${p.title}
+  Εταιρεία: ${co?.name||'—'} | Κατηγορία: ${catLabel[p.cat]}
+  Πρόοδος: ${pct}% | Status: ${st} | Tasks: ${tasksDone}/${tasksTotal}
+  Deadline: ${fmtD(p.deadline)} (σε ${dl} ημέρες)
+  Budget: €${p.budget?.toLocaleString()||'—'} | Εισπράχθηκε: €${(p.paid||0).toLocaleString()} (${paidPct||0}%)
+  Τελευταία ενημέρωση: ${staleDay} ημέρες πριν
+  ${blockedTasks.length ? 'BLOCKED tasks: '+blockedTasks.join(', ') : ''}
+  Modules: ${p.modules.map(m=>{
+    const mp=m.tasks.length?Math.round(m.tasks.reduce((a,t)=>a+t.pct,0)/m.tasks.length):0;
+    return m.name+' ('+mp+'%)';
+  }).join(', ')}
+  ${comments.length ? 'Σχόλια: '+comments.map(c=>c.task+': "'+c.comment+'"').join(' | ') : ''}
+  Σύμβαση: ${p.contract||'—'}`;
+  }).join('\n---');
+
+  const coSummary = S.companies.map(co=>{
+    const ps = all.filter(p=>p.coId===co.id);
+    const pct = ps.length ? Math.round(ps.map(getPct).reduce((a,b)=>a+b,0)/ps.length) : 0;
+    return `${co.name}: ${ps.length} projects, ${pct}% avg completion`;
+  }).join('\n');
+
+  return `Είσαι σύμβουλος διαχείρισης projects που αναλύεις το portfolio ενός CEO (Απόστολος Βίζου, Chios Maritime Group).
+
+ΗΜΕΡΟΜΗΝΙΑ ΑΝΑΛΥΣΗΣ: ${now.toLocaleDateString('el-GR')}
+ΣΥΝΟΛΙΚΗ ΠΡΟΟΔΟΣ: ${overall}% (${all.length} active projects)
+
+ΕΤΑΙΡΕΙΕΣ:
+${coSummary}
+
+PROJECTS:
+${projDetails}
+
+Δώσε μία ΠΛΗΡΗ CEO ΑΝΑΦΟΡΑ στα ελληνικά με τα εξής sections:
+
+## 🔵 ΓΕΝΙΚΗ ΕΙΚΟΝΑ
+- Συνολική υγεία portfolio (1-2 προτάσεις, direct)
+- Ποια εταιρεία/κατηγορία αποδίδει καλύτερα και ποια χρειάζεται attention
+- Οικονομική ροή: τι έχει εισπραχθεί vs τι εκκρεμεί
+
+## 🔴 ΚΡΙΣΙΜΑ — ΑΜΕΣΗ ΔΡΑΣΗ
+Για κάθε κρίσιμο θέμα (blocked, at risk, πολύ αργός ρυθμός, deadline <10 ημέρες):
+- Project: [όνομα] | Εταιρεία: [εταιρεία]
+- Πρόβλημα: [συγκεκριμένα]
+- Τι πρέπει να κάνει ο CEO: [action item]
+
+## 🟡 ΠΡΟΣΟΧΗ — ΠΑΡΑΚΟΛΟΥΘΗΣΗ
+Projects που κινδυνεύουν αν δεν ληφθούν μέτρα σύντομα.
+
+## 🟢 ΘΕΤΙΚΑ
+Τι πάει καλά, ποιες ομάδες αποδίδουν.
+
+## 📋 TOP 5 CEO ACTION ITEMS
+Οι 5 ενέργειες με σειρά προτεραιότητας που πρέπει να κάνει ο CEO αυτή την εβδομάδα.
+
+## 💰 ΟΙΚΟΝΟΜΙΚΗ ΣΥΝΟΨΗ
+- Συνολική αξία συμβάσεων
+- Εισπραχθέντα
+- Εκκρεμή
+- Projects που χρεώνονται λιγότερο από την πρόοδό τους (under-billed risk)
+
+Γράψε direct, χωρίς padding. Ο CEO δεν έχει χρόνο για γενικολογίες.`;
+}
+
+
+// ════ CONTRACT FILE UPLOAD ════
+let pendingContractFile = null; // {name, type, size, dataUrl}
+
+function handleContractUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Το αρχείο είναι μεγαλύτερο από 10MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    pendingContractFile = {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      dataUrl: e.target.result
+    };
+    showContractPreview(pendingContractFile, 'contract-file-preview', true);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showContractPreview(cf, containerId, showRemove) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const isPDF = cf.type === 'application/pdf' || cf.name.endsWith('.pdf');
+  const isImg = cf.type.startsWith('image/');
+  const sizeStr = cf.size ? (cf.size > 1024*1024 ? (cf.size/1024/1024).toFixed(1)+'MB' : (cf.size/1024).toFixed(0)+'KB') : '';
+  const icon = isPDF ? '📄' : isImg ? '🖼️' : '📎';
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="contract-file-thumb">
+      <div class="cft-icon">${icon}</div>
+      <div class="cft-info">
+        <div class="cft-name">${cf.name}</div>
+        <div class="cft-size">${sizeStr}</div>
+      </div>
+      <div class="cft-actions">
+        <div class="cft-btn view" onclick="viewContractFile('${containerId}')">👁 Προβολή</div>
+        ${showRemove ? `<div class="cft-btn remove" onclick="removeContractFile('${containerId}')">✕ Αφαίρεση</div>` : ''}
+      </div>
+    </div>
+    <div id="${containerId}-viewer" style="display:none;margin-top:8px;border-radius:8px;overflow:hidden;border:1px solid var(--border);">
+      ${isPDF
+        ? ``+`<div style="padding:12px;text-align:center;"><a href="${cf.dataUrl}" target="_blank" class="cft-btn view" style="text-decoration:none;">📄 Άνοιγμα PDF</a></div>`+``
+        : isImg
+          ? `<img src="${cf.dataUrl}" class="contract-img-embed" alt="${cf.name}">`
+          : `<div style="padding:20px;text-align:center;color:var(--text-dim);">Δεν υποστηρίζεται preview για αυτό το αρχείο.</div>`
+      }
+    </div>`;
+}
+
+function viewContractFile(containerId) {
+  const viewer = document.getElementById(containerId + '-viewer');
+  if (!viewer) return;
+  const open = viewer.style.display === 'none';
+  viewer.style.display = open ? 'block' : 'none';
+}
+
+function removeContractFile(containerId) {
+  pendingContractFile = null;
+  const el = document.getElementById(containerId);
+  if (el) { el.style.display = 'none'; el.innerHTML = ''; }
+  document.getElementById('p-contract-file').value = '';
+  // reset upload area appearance
+  const area = document.getElementById('contract-upload-area');
+  if (area) area.style.borderColor = '';
+}
+
+function renderContractFilePanel(p) {
+  if (!p.contractFile) {
+    return `<div class="contract-doc-panel">
+      <div class="ph">
+        <div class="ph-title">Υπογεγραμμένη Σύμβαση</div>
+        <span class="contract-doc-badge missing">⚠ Δεν έχει ανέβει</span>
+      </div>
+      <div class="pb" style="text-align:center;padding:20px;color:var(--text-dim);font-size:13px;">
+        <div style="font-size:28px;margin-bottom:8px;opacity:0.4;">📄</div>
+        <div>Δεν υπάρχει ανεβασμένη σύμβαση.</div>
+        <div style="margin-top:10px;">
+          <label style="display:inline-block;padding:8px 18px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.3);border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">
+            📎 Ανέβασε τώρα
+            <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="uploadContractInline('${p.id}',this)">
+          </label>
+        </div>
+      </div>
+    </div>`;
+  }
+  const cf = p.contractFile;
+  const isPDF = cf.type === 'application/pdf' || cf.name.endsWith('.pdf');
+  const isImg = cf.type && cf.type.startsWith('image/');
+  const icon = isPDF ? '📄' : isImg ? '🖼️' : '📎';
+  const sizeStr = cf.size ? (cf.size > 1024*1024 ? (cf.size/1024/1024).toFixed(1)+'MB' : (cf.size/1024).toFixed(0)+'KB') : '';
+  const pid = p.id;
+  return `<div class="contract-doc-panel">
+    <div class="ph">
+      <div class="ph-title">Υπογεγραμμένη Σύμβαση</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="contract-doc-badge">✓ Ανεβασμένη</span>
+        <div class="cft-btn" onclick="openContractAI('${pid}')" style="background:rgba(139,92,246,0.12);color:#8b5cf6;border:1px solid rgba(139,92,246,0.3);display:flex;align-items:center;gap:5px;font-size:11px;">
+          ✦ AI Ανάλυση Σύμβασης
+        </div>
+        <label style="display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--surface3);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;color:var(--text-mid);">
+          ↑ Αντικατάσταση
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="uploadContractInline('${pid}',this)">
+        </label>
+      </div>
+    </div>
+    <div class="pb">
+      <div class="contract-file-thumb" style="margin-bottom:12px;">
+        <div class="cft-icon">${icon}</div>
+        <div class="cft-info">
+          <div class="cft-name">${cf.name}</div>
+          <div class="cft-size">${sizeStr} · Ανεβάστηκε ${cf.uploadedAt||''}</div>
+        </div>
+        <div class="cft-actions">
+          <a href="${cf.dataUrl}" download="${cf.name}" class="cft-btn view" style="text-decoration:none;">⬇ Download</a>
+          <div class="cft-btn remove" onclick="removeContractInline('${pid}')">✕ Αφαίρεση</div>
+        </div>
+      </div>
+      ${isPDF
+        ? `<div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+            <span style="font-size:28px;">📄</span>
+            <div style="flex:1;">
+              <div style="font-size:13px;font-weight:700;color:var(--text);">${cf.name}</div>
+              <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">PDF Document · ${sizeStr}</div>
+            </div>
+            <a href="${cf.dataUrl}" target="_blank" class="cft-btn view" style="text-decoration:none;white-space:nowrap;">👁 Άνοιγμα PDF</a>
+          </div>`
+        : isImg
+          ? `<img src="${cf.dataUrl}" class="contract-img-embed" style="border-radius:8px;border:1px solid var(--border);" alt="${cf.name}">`
+          : ''
+      }
+    </div>
+  </div>`;
+}
+
+function uploadContractInline(projId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 10 * 1024 * 1024) { alert('Το αρχείο είναι μεγαλύτερο από 10MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const p = S.projects.find(x=>x.id===projId);
+    if (!p) return;
+    const now = new Date();
+    p.contractFile = {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      dataUrl: e.target.result,
+      uploadedAt: now.toLocaleDateString('el-GR') + ' ' + now.toLocaleTimeString('el-GR', {hour:'2-digit',minute:'2-digit'})
+    };
+    p.contractSummary = null; // reset so re-extraction happens
+    openDetail(projId);
+    // Auto-extract summary
+    setTimeout(() => extractContractSummary(projId), 400);
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeContractInline(projId) {
+  if (!confirm('Αφαίρεση σύμβασης;')) return;
+  const p = S.projects.find(x=>x.id===projId);
+  if (p) { p.contractFile = null; openDetail(projId); }
+}
+
+async function openAIReport() {
+  document.getElementById('ai-modal').style.display='flex';
+  document.getElementById('ai-report-content').innerHTML='';
+  document.getElementById('ai-loading').style.display='flex';
+  document.getElementById('ai-error').style.display='none';
+
+  try {
+    const prompt = buildAIPrompt();
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: injectApiKey({ 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' }),
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await response.json();
+    const text = data.content?.[0]?.text || '';
+    if (!text) throw new Error('Δεν επιστράφηκε κείμενο');
+    document.getElementById('ai-loading').style.display='none';
+    document.getElementById('ai-report-content').innerHTML = renderAIMarkdown(text);
+    document.getElementById('ai-generated-at').textContent = 'Δημιουργήθηκε: ' + new Date().toLocaleString('el-GR');
+  } catch(err) {
+    document.getElementById('ai-loading').style.display='none';
+    document.getElementById('ai-error').style.display='block';
+    document.getElementById('ai-error').textContent = '⚠ Σφάλμα: ' + err.message;
+  }
+}
+
+function renderAIMarkdown(text) {
+  return text
+    .replace(/^## (.+)$/gm, '<div class="ai-section-title">$1</div>')
+    .replace(/^\*\*(.+?)\*\*/gm, '<strong>$1</strong>')
+    .replace(/^- (.+)$/gm, '<div class="ai-bullet">$1</div>')
+    .replace(/^(\d+)\. (.+)$/gm, '<div class="ai-numbered"><span class="ai-num">$1</span>$2</div>')
+    .replace(/\n{2,}/g, '<div class="ai-spacer"></div>')
+    .replace(/\n/g, '<br>');
+}
+</script>
+
+<!-- AI REPORT MODAL -->
+<div id="ai-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)document.getElementById('ai-modal').style.display='none'">
+<div class="modal" style="width:780px;max-height:88vh;">
+  <div class="modal-head" style="background:linear-gradient(135deg,#1e1b4b,#2d1f5e);border-bottom:1px solid rgba(139,92,246,0.3);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">✦</span>
+      <div>
+        <div class="modal-title" style="color:#c4b5fd;font-size:15px;">AI CEO Report</div>
+        <div style="font-size:10px;color:#7c6aab;font-family:'Nunito Sans',sans-serif;margin-top:1px;" id="ai-generated-at">Generating...</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div onclick="openAIReport()" style="padding:6px 14px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:6px;color:#a78bfa;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;" title="Refresh">↺ Refresh</div>
+      <div class="modal-close" onclick="document.getElementById('ai-modal').style.display='none'" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:#7c6aab;">✕</div>
+    </div>
+  </div>
+
+  <div id="ai-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;">
+    <div class="ai-spinner"></div>
+    <div style="color:#7c6aab;font-size:13px;font-family:'Nunito',sans-serif;">Αναλύω το portfolio...</div>
+    <div style="color:#4c4575;font-size:11px;font-family:'Nunito Sans',sans-serif;">Ελέγχω projects, deadlines, οικονομικά στοιχεία</div>
+  </div>
+
+  <div id="ai-error" style="display:none;margin:20px;padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-family:'Nunito',sans-serif;"></div>
+
+  <div id="ai-report-content" class="ai-report-body"></div>
+</div>
+</div>
+
+<style>
+
+/* ── CONTRACT SUMMARY CARD ── */
+.contract-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.cscard-header {
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.cscard-title {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+}
+.cscard-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 3px 9px; border-radius: 8px;
+  font-family: 'Nunito Sans', sans-serif;
+  background: var(--green-dim); color: var(--green);
+}
+.cscard-badge.unsigned { background: var(--yellow-dim); color: var(--yellow); }
+.cscard-loading {
+  padding: 24px 20px;
+  display: flex; align-items: center; gap: 12px;
+  color: var(--text-dim); font-size: 13px;
+}
+.cscard-body {
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.cscard-field {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+}
+.cscard-field.full { grid-column: 1 / -1; }
+.cscard-field-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-dim);
+  font-family: 'Nunito Sans', sans-serif;
+  margin-bottom: 6px;
+}
+.cscard-field-value {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  line-height: 1.5;
+}
+.cscard-field-value.big { font-size: 20px; font-weight: 800; }
+.cscard-field-value.red    { color: var(--red); }
+.cscard-field-value.yellow { color: var(--yellow); }
+.cscard-field-value.accent { color: var(--accent); }
+.cscard-obligation {
+  display: flex; gap: 10px; padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px; font-weight: 500; color: var(--text);
+}
+.cscard-obligation:last-child { border-bottom: none; }
+.cscard-obligation-num { font-weight: 700; min-width: 18px; }
+.cscard-penalty-box {
+  background: var(--red-dim); border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px; padding: 12px 14px;
+  grid-column: 1 / -1;
+}
+.cscard-penalty-label {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--red);
+  font-family: 'Nunito Sans', sans-serif; margin-bottom: 6px;
+}
+.cscard-penalty-val { font-size: 13px; font-weight: 600; color: var(--red); line-height: 1.5; }
+.cscard-regenerate {
+  font-size: 11px; font-weight: 700;
+  padding: 5px 12px; border-radius: 6px;
+  background: var(--surface3); border: 1px solid var(--border-bright);
+  color: var(--text-dim); cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 5px;
+}
+.cscard-regenerate:hover { color: var(--accent); border-color: var(--accent); }
+.cscard-parties { display: flex; gap: 8px; flex-wrap: wrap; }
+.cscard-party {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; font-weight: 600;
+  padding: 4px 12px; border-radius: 12px;
+  background: var(--accent-dim); color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.2);
+}
+/* export button */
+.cscard-export-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700;
+  padding: 6px 14px; border-radius: 6px;
+  background: var(--accent-dim); color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.3);
+  cursor: pointer; font-family: 'Nunito', sans-serif;
+  transition: all 0.15s;
+}
+.cscard-export-btn:hover { background: var(--accent); color: #fff; }
+
+/* ── PRINT STYLES ── */
+@media print {
+  body * { visibility: hidden !important; }
+  #contract-print-area, #contract-print-area * { visibility: visible !important; }
+  #contract-print-area {
+    position: fixed !important; inset: 0 !important;
+    background: #fff !important; padding: 28px !important;
+    font-family: 'Nunito', sans-serif !important;
+    color: #1a202c !important;
+  }
+  .no-print { display: none !important; }
+}
+/* ── CONTRACT UPLOAD ── */
+.contract-upload-area{
+  border:2px dashed var(--border-bright);border-radius:10px;
+  padding:28px 20px;text-align:center;cursor:pointer;
+  transition:all 0.2s;background:var(--surface2);
+  margin-bottom:8px;
+}
+.contract-upload-area:hover{
+  border-color:var(--accent);background:var(--accent-dim);
+}
+.contract-upload-area.drag-over{
+  border-color:var(--accent);background:var(--accent-dim);
+  transform:scale(1.01);
+}
+.cup-icon{font-size:28px;margin-bottom:8px;}
+.cup-label{font-size:13px;font-weight:700;color:var(--text-mid);margin-bottom:4px;}
+.cup-sub{font-size:11px;color:var(--text-dim);}
+
+.contract-file-thumb{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;
+  margin-bottom:8px;
+}
+.cft-icon{font-size:32px;flex-shrink:0;}
+.cft-info{flex:1;min-width:0;}
+.cft-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cft-size{font-size:11px;color:var(--text-dim);margin-top:2px;font-family:'Nunito Sans',sans-serif;}
+.cft-actions{display:flex;gap:8px;flex-shrink:0;}
+.cft-btn{
+  padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.15s;
+}
+.cft-btn.view{background:var(--accent-dim);color:var(--accent);border:1px solid rgba(59,130,246,0.3);}
+.cft-btn.view:hover{background:var(--accent);color:#fff;}
+.cft-btn.remove{background:var(--red-dim);color:var(--red);border:1px solid rgba(220,38,38,0.2);}
+.cft-btn.remove:hover{background:var(--red);color:#fff;}
+
+/* Contract panel in detail view */
+.contract-doc-panel{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;margin-bottom:0;
+  box-shadow:0 1px 4px rgba(0,0,0,0.04);
+}
+.contract-doc-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10px;font-weight:700;padding:3px 9px;
+  border-radius:8px;background:var(--green-dim);color:var(--green);
+  font-family:'Nunito Sans',sans-serif;
+}
+.contract-doc-badge.missing{background:var(--red-dim);color:var(--red);}
+.contract-doc-embed{
+  width:100%;height:340px;border:none;border-radius:0 0 10px 10px;
+  background:var(--surface2);
+}
+.contract-img-embed{
+  width:100%;max-height:340px;object-fit:contain;
+  border-radius:0 0 10px 10px;background:var(--surface2);padding:8px;
+}
+
+
+
+/* ════ NOTIFICATION SYSTEM ════ */
+.notif-bell-wrap {
+  position: relative;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  display: flex; align-items: center;
+}
+.notif-bell-wrap:hover { background: rgba(255,255,255,0.08); }
+.notif-bell-icon { font-size: 18px; color: var(--sidebar-text); }
+.notif-badge {
+  position: absolute; top: 2px; right: 2px;
+  min-width: 18px; height: 18px;
+  background: var(--red); color: #fff;
+  border-radius: 9px; font-size: 9px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px; font-family: 'Nunito Sans', sans-serif;
+  border: 2px solid var(--sidebar-bg);
+  animation: notif-pulse 2s ease infinite;
+}
+@keyframes notif-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.notif-badge.hidden { display: none; }
+
+.notif-dropdown {
+  position: fixed;
+  top: 0; left: 228px;
+  width: 380px; max-height: 520px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  z-index: 500;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  animation: mIn 0.15s ease;
+}
+.notif-dropdown.open { display: flex; }
+
+.notif-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2);
+}
+.notif-header-title { font-size: 13px; font-weight: 800; color: var(--text); }
+.notif-clear {
+  font-size: 10px; font-weight: 700; color: var(--text-dim);
+  cursor: pointer; padding: 3px 8px; border-radius: 4px;
+  font-family: 'Nunito Sans', sans-serif;
+  transition: color 0.15s;
+}
+.notif-clear:hover { color: var(--red); }
+
+.notif-list { overflow-y: auto; flex: 1; }
+
+.notif-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+}
+.notif-item:hover { background: var(--surface2); }
+.notif-item.unread::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  border-radius: 0 2px 2px 0;
+}
+.notif-item.unread.critical::before { background: var(--red); }
+.notif-item.unread.warning::before  { background: var(--yellow); }
+.notif-item.unread.info::before     { background: var(--accent); }
+.notif-item.unread.money::before    { background: var(--finance); }
+.notif-item.unread.blocked::before  { background: var(--marketing); }
+
+.notif-ico {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.notif-ico.critical  { background: var(--red-dim); }
+.notif-ico.warning   { background: var(--yellow-dim); }
+.notif-ico.info      { background: var(--accent-dim); }
+.notif-ico.money     { background: var(--finance-dim); }
+.notif-ico.blocked   { background: var(--marketing-dim); }
+
+.notif-content { flex: 1; min-width: 0; }
+.notif-title { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.notif-body  { font-size: 11px; color: var(--text-dim); line-height: 1.5; font-weight: 500; }
+.notif-time  { font-size: 9px; color: var(--text-dim); font-family: 'Nunito Sans', sans-serif; margin-top: 4px; }
+
+.notif-empty {
+  padding: 40px 20px; text-align: center;
+  color: var(--text-dim); font-size: 12px;
+}
+.notif-empty-ico { font-size: 28px; margin-bottom: 8px; opacity: 0.4; }
+
+/* Toast notification */
+.notif-toast {
+  position: fixed; bottom: 24px; right: 24px;
+  min-width: 320px; max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+  z-index: 9999;
+  animation: toastIn 0.3s ease;
+  cursor: pointer;
+}
+@keyframes toastIn {
+  from { opacity:0; transform: translateX(20px); }
+  to   { opacity:1; transform: none; }
+}
+.toast-border { position: absolute; top:0; left:0; bottom:0; width:4px; border-radius:10px 0 0 10px; }
+.toast-ico { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.toast-content { flex: 1; }
+.toast-title { font-size: 12px; font-weight: 800; color: var(--text); margin-bottom: 3px; }
+.toast-body  { font-size: 11px; color: var(--text-dim); line-height: 1.5; font-weight: 500; }
+.toast-close {
+  font-size: 13px; color: var(--text-dim); cursor: pointer;
+  padding: 0 2px; transition: color 0.15s; flex-shrink: 0;
+}
+.toast-close:hover { color: var(--red); }
+
+/* ════ GUIDE ════ */
+.guide-tab{
+  padding:8px 18px;border-radius:20px;font-size:12px;font-weight:700;
+  cursor:pointer;border:1px solid var(--border-bright);
+  background:var(--surface);color:var(--text-mid);
+  transition:all 0.15s;font-family:'Nunito',sans-serif;
+}
+.guide-tab:hover{background:var(--surface2);color:var(--text);}
+.guide-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+.guide-panel{display:none;}
+.guide-panel.active{display:block;}
+
+.g-section-title{
+  font-size:20px;font-weight:900;color:var(--text);
+  margin-bottom:12px;padding-bottom:10px;
+  border-bottom:2px solid var(--border);
+}
+.g-subsection{
+  font-size:13px;font-weight:800;color:var(--text);
+  margin:20px 0 10px;display:flex;align-items:center;gap:6px;
+}
+.g-desc{
+  font-size:13px;color:var(--text-mid);line-height:1.7;
+  margin-bottom:10px;font-weight:500;
+}
+.g-step-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px;
+}
+.g-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:9px;padding:14px;
+}
+.g-card-icon{
+  width:36px;height:36px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;font-weight:800;margin-bottom:8px;
+}
+.g-card-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.g-card-desc{font-size:11px;color:var(--text-dim);line-height:1.5;font-weight:500;}
+
+.g-tip{
+  background:rgba(59,130,246,0.07);border:1px solid rgba(59,130,246,0.2);
+  border-left:3px solid var(--accent);border-radius:0 8px 8px 0;
+  padding:11px 14px;font-size:12px;color:var(--text-mid);
+  margin:14px 0;line-height:1.6;font-weight:500;
+}
+.g-steps{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+.g-step{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:10px 14px;background:var(--surface2);
+  border:1px solid var(--border);border-radius:8px;
+  font-size:13px;color:var(--text);line-height:1.6;font-weight:500;
+}
+.g-step-num{
+  min-width:26px;height:26px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;
+}
+.g-badge-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;}
+.g-badge{
+  font-size:11px;font-weight:700;padding:4px 12px;border-radius:12px;
+  font-family:'Nunito Sans',sans-serif;
+}
+.g-badge.red{background:var(--red-dim);color:var(--red);}
+.g-badge.green{background:var(--green-dim);color:var(--green);}
+.g-badge.yellow{background:var(--yellow-dim);color:var(--yellow);}
+.g-badge.blue{background:var(--accent-dim);color:var(--accent);}
+.g-badge.purple{background:rgba(124,58,237,0.1);color:var(--dev);}
+
+.g-hierarchy{display:flex;flex-direction:column;gap:6px;margin:10px 0 14px;}
+.g-hier-item{
+  padding:10px 14px;border:1px solid;border-radius:7px;
+  font-size:13px;font-weight:500;
+}
+
+.g-ai-block{
+  border:1px solid;border-radius:10px;overflow:hidden;
+}
+.g-ai-header{
+  padding:14px 18px;display:flex;align-items:center;gap:12px;
+}
+.g-ai-title{font-size:14px;font-weight:800;}
+.g-ai-sub{font-size:11px;color:var(--text-dim);margin-top:2px;font-weight:500;}
+.g-ai-body{padding:16px 18px;}
+
+.g-gloss-row{
+  display:flex;gap:14px;padding:11px 14px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+  align-items:flex-start;
+}
+.g-gloss-term{
+  font-size:12px;font-weight:800;color:var(--accent);
+  min-width:140px;flex-shrink:0;padding-top:1px;
+}
+.g-gloss-def{font-size:12px;color:var(--text-mid);line-height:1.6;font-weight:500;}
+
+/* AI Report Modal Styles */
+.ai-report-body{
+  padding:28px 32px;overflow-y:auto;max-height:calc(88vh - 80px);
+  font-family:'Nunito',sans-serif;
+  background:linear-gradient(180deg,#faf9ff 0%,#f5f3ff 100%);
+}
+.ai-section-title{
+  font-size:15px;font-weight:900;color:#1e1b4b;
+  margin:24px 0 12px;padding-bottom:8px;
+  border-bottom:2px solid rgba(139,92,246,0.2);
+  display:flex;align-items:center;gap:8px;
+}
+.ai-section-title:first-child{margin-top:0;}
+.ai-bullet{
+  font-size:13px;color:#374151;line-height:1.7;
+  padding:3px 0 3px 16px;position:relative;font-weight:500;
+}
+.ai-bullet::before{content:'·';position:absolute;left:4px;color:#8b5cf6;font-size:16px;top:1px;}
+.ai-numbered{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:13px;color:#374151;line-height:1.7;
+  padding:4px 0;font-weight:500;
+}
+.ai-num{
+  min-width:22px;height:22px;background:#8b5cf6;color:#fff;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;flex-shrink:0;margin-top:2px;
+}
+.ai-spacer{height:6px;}
+.ai-report-body strong{color:#1e1b4b;font-weight:800;}
+.ai-report-body br{display:block;margin:2px 0;}
+
+/* Spinner */
+.ai-spinner{
+  width:44px;height:44px;border-radius:50%;
+  border:3px solid rgba(139,92,246,0.15);
+  border-top:3px solid #8b5cf6;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Sidebar AI button glow */
+.btn-ai{
+  transition:all 0.2s;
+  box-shadow:0 0 12px rgba(139,92,246,0.15);
+}
+.btn-ai:hover{
+  background:rgba(139,92,246,0.25)!important;
+  box-shadow:0 0 20px rgba(139,92,246,0.3)!important;
+}
+</style>
+
+<!-- CONTRACT AI ANALYSIS MODAL -->
+<div id="contract-ai-modal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)document.getElementById('contract-ai-modal').style.display='none'">
+<div class="modal" style="width:820px;max-height:90vh;">
+  <div class="modal-head" style="background:linear-gradient(135deg,#1a1040,#2d1f5e);border-bottom:1px solid rgba(139,92,246,0.3);">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:22px;">📄✦</span>
+      <div>
+        <div class="modal-title" style="color:#c4b5fd;font-size:15px;" id="cai-proj-title">Ανάλυση Σύμβασης</div>
+        <div style="font-size:10px;color:#7c6aab;font-family:'Nunito Sans',sans-serif;margin-top:1px;" id="cai-generated-at">—</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div id="cai-refresh-btn" style="padding:6px 14px;background:rgba(139,92,246,0.2);border:1px solid rgba(139,92,246,0.4);border-radius:6px;color:#a78bfa;font-size:11px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;">↺ Refresh</div>
+      <div class="modal-close" onclick="document.getElementById('contract-ai-modal').style.display='none'" style="background:rgba(255,255,255,0.05);border-color:rgba(255,255,255,0.1);color:#7c6aab;">✕</div>
+    </div>
+  </div>
+
+  <!-- Verdict banner -->
+  <div id="cai-verdict" style="display:none;"></div>
+
+  <div id="cai-loading" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;">
+    <div class="ai-spinner"></div>
+    <div style="color:#7c6aab;font-size:13px;font-family:'Nunito',sans-serif;">Διαβάζω τη σύμβαση και αναλύω την πρόοδο...</div>
+    <div style="color:#4c4575;font-size:11px;font-family:'Nunito Sans',sans-serif;">Σύγκριση συμφωνηθέντων vs τρέχουσας κατάστασης</div>
+  </div>
+
+  <div id="cai-error" style="display:none;margin:20px;padding:14px 18px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-family:'Nunito',sans-serif;"></div>
+
+  <div id="cai-content" class="ai-report-body" style="display:none;"></div>
+</div>
+</div>
+
+<!-- NOTIFICATION DROPDOWN -->
+<div class="notif-dropdown" id="notif-dropdown">
+  <div class="notif-header">
+    <div class="notif-header-title">🔔 Notifications</div>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <div class="notif-clear" onclick="clearAllNotifs()">Clear all</div>
+      <div style="font-size:13px;color:var(--text-dim);cursor:pointer;" onclick="closeNotifDropdown()">✕</div>
+    </div>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="notif-empty"><div class="notif-empty-ico">🔔</div><div>Δεν υπάρχουν notifications.</div></div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
+</body>
+</html>
