@@ -1,7 +1,6 @@
 package com.next2me.next2view.security;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,7 +36,6 @@ public class JwtService {
     public String generateAccessToken(UUID userId, String email, String role) {
         Instant now = Instant.now();
         Instant expiry = now.plusSeconds(accessTokenExpiryMinutes * 60L);
-
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("email", email)
@@ -74,12 +72,11 @@ public class JwtService {
         return validateAndParseClaims(token).get("role", String.class);
     }
 
-    // ── Key loaders ──
-
     private PrivateKey loadPrivateKey(String pem) throws Exception {
         String clean = pem
                 .replace("-----BEGIN PRIVATE KEY-----", "")
                 .replace("-----END PRIVATE KEY-----", "")
+                .replace("\\n", "")
                 .replaceAll("\\s+", "");
         byte[] decoded = Base64.getDecoder().decode(clean);
         return KeyFactory.getInstance("RSA")
@@ -90,6 +87,7 @@ public class JwtService {
         String clean = pem
                 .replace("-----BEGIN PUBLIC KEY-----", "")
                 .replace("-----END PUBLIC KEY-----", "")
+                .replace("\\n", "")
                 .replaceAll("\\s+", "");
         byte[] decoded = Base64.getDecoder().decode(clean);
         return KeyFactory.getInstance("RSA")
