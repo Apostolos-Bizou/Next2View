@@ -147,7 +147,7 @@ public class ProjectService {
         if (modules == null) return;
         IntStream.range(0, modules.size()).forEach(mi -> {
             var mr = modules.get(mi);
-            Module m = new Module();
+            com.next2me.next2view.model.Module m = new com.next2me.next2view.model.Module();
             m.setProject(p);
             m.setName(mr.name());
             m.setColor(mr.color() != null ? mr.color() : p.getCategory().name());
