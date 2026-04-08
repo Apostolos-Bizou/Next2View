@@ -1,5 +1,5 @@
-# Next2View � Spring Boot Configuration
-# ������ secret ��� � ��� ��� Azure Key Vault / env vars
+﻿# Next2View — Spring Boot Configuration
+# ΚΑΝΕΝΑ secret εδώ — όλα από Azure Key Vault / env vars
 
 spring:
   application:
@@ -8,7 +8,7 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
 
-  # -- DATABASE --
+  # ── DATABASE ──
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -20,7 +20,7 @@ spring:
       connection-timeout: 30000
       idle-timeout: 600000
 
-  # -- JPA --
+  # ── JPA ──
   jpa:
     hibernate:
       ddl-auto: validate
@@ -32,20 +32,20 @@ spring:
         jdbc:
           time_zone: UTC
 
-  # -- FLYWAY --
+  # ── FLYWAY ──
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: false
     validate-on-migrate: true
 
-  # -- FILE UPLOAD --
+  # ── FILE UPLOAD ──
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 11MB
 
-# -- SERVER --
+# ── SERVER ──
 server:
   port: 8080
   servlet:
@@ -54,7 +54,7 @@ server:
     include-message: never
     include-stacktrace: never
 
-# -- JWT --
+# ── JWT ──
 security:
   jwt:
     private-key: ${JWT_PRIVATE_KEY}
@@ -62,7 +62,7 @@ security:
     access-token-expiry-minutes: 15
     refresh-token-expiry-days: 7
 
-# -- AZURE STORAGE --
+# ── AZURE STORAGE ──
 azure:
   storage:
     blob:
@@ -70,17 +70,17 @@ azure:
       container-name: ${AZURE_BLOB_CONTAINER:next2view-contracts}
       sas-token-expiry-hours: 1
 
-  # -- KEY VAULT --
+  # ── KEY VAULT ──
   keyvault:
     secret:
       endpoint: ${AZURE_KEYVAULT_URI}
 
-# -- CORS --
+# ── CORS ──
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
-# -- ACTUATOR --
+# ── ACTUATOR ──
 management:
   endpoints:
     web:
@@ -91,7 +91,7 @@ management:
     health:
       show-details: never
 
-# -- LOGGING --
+# ── LOGGING ──
 logging:
   level:
     root: WARN
