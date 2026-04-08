@@ -213,16 +213,29 @@ function openUserModal(u = null) {
 
 async function saveUser() {
   modalError.value = ''
-  if (!userForm.value.fullName || !userForm.value.email) {
-    modalError.value = 'Όνομα και Email είναι υποχρεωτικά.'
+  if (!userForm.value.fullName || !userForm.value.email || !userForm.value.role) {
+    modalError.value = 'Όνομα, Email και Role είναι υποχρεωτικά.'
+    return
+  }
+  if (!editUser.value?.id && !userForm.value.password) {
+    modalError.value = 'Password είναι υποχρεωτικό για νέο χρήστη.'
     return
   }
   modalSaving.value = true
   try {
+    const payload = {
+      fullName: userForm.value.fullName,
+      email: userForm.value.email,
+      role: userForm.value.role,
+      department: userForm.value.department || null,
+      companyId: userForm.value.companyId || null,
+      active: true,
+    }
+    if (!editUser.value?.id) payload.password = userForm.value.password
     if (editUser.value?.id) {
-      await api.put(`/admin/users/${editUser.value.id}`, userForm.value)
+      await api.put(`/admin/users/${editUser.value.id}`, payload)
     } else {
-      await api.post('/admin/users', userForm.value)
+      await api.post('/admin/users', payload)
     }
     showUserModal.value = false
     await loadUsers()
@@ -230,7 +243,6 @@ async function saveUser() {
     modalError.value = e.response?.data?.message || 'Σφάλμα αποθήκευσης.'
   } finally { modalSaving.value = false }
 }
-
 async function toggleUser(u) {
   try {
     await api.put(`/admin/users/${u.id}`, { ...u, active: !u.active })
