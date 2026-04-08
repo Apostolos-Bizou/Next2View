@@ -13,49 +13,23 @@ const routes = [
     component: () => import("@/views/DashboardLayout.vue"),
     meta: { requiresAuth: true },
     children: [
-      {
-        path: "",
-        name: "Dashboard",
-        component: () => import("@/views/DashboardView.vue"),
-      },
-      {
-        path: "projects",
-        name: "Projects",
-        component: () => import("@/views/ProjectsView.vue"),
-      },
-      {
-        path: "projects/:id",
-        name: "ProjectDetail",
-        component: () => import("@/views/ProjectDetailView.vue"),
-      },
-      {
-        path: "guide",
-        name: "Guide",
-        component: () => import("@/views/GuideView.vue"),
-      },
+      { path: "", name: "Dashboard", component: () => import("@/views/DashboardView.vue") },
+      { path: "projects", name: "Projects", component: () => import("@/views/ProjectsView.vue") },
+      { path: "projects/:id", name: "ProjectDetail", component: () => import("@/views/ProjectDetailView.vue") },
+      { path: "guide", name: "Guide", component: () => import("@/views/GuideView.vue") },
+      { path: "admin", name: "Admin", component: () => import("@/views/AdminView.vue"), meta: { requiresCEO: true } },
     ],
   },
 ];
 
-const router = createRouter({
-  history: createWebHistory(),
-  routes,
-});
+const router = createRouter({ history: createWebHistory(), routes });
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore();
-
-  // Περιμένουμε το init να ολοκληρωθεί πρώτα
-  if (!auth.initialized) {
-    await auth.init();
-  }
-
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return { name: "Login" };
-  }
-  if (to.path === "/login" && auth.isAuthenticated) {
-    return { path: "/" };
-  }
+  if (!auth.initialized) await auth.init();
+  if (to.meta.requiresAuth && !auth.isAuthenticated) return { name: "Login" };
+  if (to.path === "/login" && auth.isAuthenticated) return { path: "/" };
+  if (to.meta.requiresCEO && auth.user?.role !== "CEO") return { path: "/" };
 });
 
 export default router;

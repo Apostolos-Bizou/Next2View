@@ -18,6 +18,9 @@
         <router-link to="/guide" class="nav-item" active-class="active">
           <span class="nav-ico" style="color:#f6ad55;">?</span>Guide
         </router-link>
+        <router-link to="/admin" class="nav-item" active-class="active">
+          <span class="nav-ico" style="color:var(--text-dim);">⚙</span>Admin
+        </router-link>
 
         <div class="nav-section" style="margin-top:6px;">Κατηγορία</div>
         <router-link to="/projects?category=finance" class="nav-item" active-class="active">
