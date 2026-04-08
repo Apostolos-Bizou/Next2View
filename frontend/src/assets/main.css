@@ -1,0 +1,100 @@
+:root {
+  --bg: #f0f2f7;
+  --surface: #ffffff;
+  --surface2: #f7f8fb;
+  --surface3: #eef0f5;
+  --border: rgba(0,0,0,0.08);
+  --border-bright: rgba(0,0,0,0.14);
+  --sidebar-bg: #1c2333;
+  --sidebar-border: rgba(255,255,255,0.07);
+  --sidebar-text: #a8b0c4;
+  --sidebar-text-dim: #5a6478;
+  --sidebar-active-bg: rgba(99,179,237,0.12);
+  --sidebar-active-border: #63b3ed;
+  --text: #1a202c;
+  --text-dim: #718096;
+  --text-mid: #4a5568;
+  --accent: #3b82f6;
+  --accent-glow: rgba(59,130,246,0.10);
+  --accent-dim: rgba(59,130,246,0.08);
+  --finance: #059669;
+  --finance-dim: rgba(5,150,105,0.10);
+  --legal: #d97706;
+  --legal-dim: rgba(217,119,6,0.10);
+  --dev: #7c3aed;
+  --dev-dim: rgba(124,58,237,0.10);
+  --marketing: #db2777;
+  --marketing-dim: rgba(219,39,119,0.10);
+  --red: #dc2626;
+  --red-dim: rgba(220,38,38,0.09);
+  --yellow: #d97706;
+  --yellow-dim: rgba(217,119,6,0.09);
+  --green: #059669;
+  --green-dim: rgba(5,150,105,0.09);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Nunito", sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+
+.btn-primary {
+  padding: 8px 20px;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: #fff;
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-primary:hover { background: #2563eb; }
+
+.btn-secondary {
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid var(--border-bright);
+  border-radius: 6px;
+  color: var(--text-mid);
+  font-family: "Nunito", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+.badge.blue { background: var(--accent-dim); color: var(--accent); }
+.badge.red  { background: var(--red-dim);    color: var(--red); }
+.badge.green{ background: var(--green-dim);  color: var(--green); }
+
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-family: "Nunito Sans", sans-serif;
+}
+.cat-pill.finance  { background: var(--finance-dim);  color: var(--finance); }
+.cat-pill.legal    { background: var(--legal-dim);    color: var(--legal); }
+.cat-pill.dev      { background: var(--dev-dim);      color: var(--dev); }
+.cat-pill.marketing{ background: var(--marketing-dim);color: var(--marketing); }
