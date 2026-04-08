@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.repository;
+package com.next2me.next2view.repository;
 
 import com.next2me.next2view.model.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;

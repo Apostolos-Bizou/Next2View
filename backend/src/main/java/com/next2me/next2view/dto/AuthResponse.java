@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.dto;
+package com.next2me.next2view.dto;
 
 public record AuthResponse(
     String accessToken,

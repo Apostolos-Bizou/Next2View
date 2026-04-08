@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.security;
+package com.next2me.next2view.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

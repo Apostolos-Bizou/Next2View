@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.model;
+package com.next2me.next2view.model;
 
 import jakarta.persistence.*;
 import lombok.*;

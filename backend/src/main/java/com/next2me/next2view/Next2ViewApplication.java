@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view;
+package com.next2me.next2view;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

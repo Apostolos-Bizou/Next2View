@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.security;
+package com.next2me.next2view.security;
 
 import com.next2me.next2view.model.User;
 import com.next2me.next2view.repository.UserRepository;

@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.security;
+package com.next2me.next2view.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;

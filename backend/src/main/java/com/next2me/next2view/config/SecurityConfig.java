@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.config;
+package com.next2me.next2view.config;
 
 import com.next2me.next2view.security.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;

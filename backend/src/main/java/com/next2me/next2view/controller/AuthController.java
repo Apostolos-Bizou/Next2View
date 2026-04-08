@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.controller;
+package com.next2me.next2view.controller;
 
 import com.next2me.next2view.dto.AuthResponse;
 import com.next2me.next2view.dto.LoginRequest;
