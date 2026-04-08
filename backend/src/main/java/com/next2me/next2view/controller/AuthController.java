@@ -55,8 +55,10 @@ public class AuthController {
             @AuthenticationPrincipal String userId,
             HttpServletResponse response
     ) {
-        if (userId != null) {
-            authService.logout(UUID.fromString(userId));
+        if (userId != null && !userId.equals("anonymousUser")) {
+            try {
+                authService.logout(UUID.fromString(userId));
+            } catch (Exception ignored) {}
         }
         clearAccessTokenCookie(response);
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
@@ -66,11 +68,15 @@ public class AuthController {
     public ResponseEntity<AuthResponse.UserInfo> me(
             @AuthenticationPrincipal String userId
     ) {
-        if (userId == null) {
+        if (userId == null || userId.equals("anonymousUser")) {
             return ResponseEntity.status(401).build();
         }
-        AuthResponse.UserInfo info = authService.getUserInfo(UUID.fromString(userId));
-        return ResponseEntity.ok(info);
+        try {
+            AuthResponse.UserInfo info = authService.getUserInfo(UUID.fromString(userId));
+            return ResponseEntity.ok(info);
+        } catch (Exception e) {
+            return ResponseEntity.status(401).build();
+        }
     }
 
     private void setAccessTokenCookie(HttpServletResponse response, String token) {
