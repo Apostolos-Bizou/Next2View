@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.controller;
+package com.next2me.next2view.controller;
 
 import com.next2me.next2view.dto.AuthResponse;
 import com.next2me.next2view.dto.LoginRequest;
@@ -31,13 +31,10 @@ public class AuthController {
     ) {
         String ip = httpRequest.getRemoteAddr();
         AuthResponse auth = authService.login(request, ip);
-
         if (auth.mfaRequired()) {
             return ResponseEntity.ok(auth);
         }
-
         setAccessTokenCookie(response, auth.accessToken());
-
         return ResponseEntity.ok(new AuthResponse(
                 null, auth.tokenType(), auth.expiresIn(), auth.user(), false));
     }
