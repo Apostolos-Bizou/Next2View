@@ -12,9 +12,16 @@ export const useAuthStore = defineStore("auth", () => {
   const isCEO = computed(() => user.value?.role === "CEO");
 
   async function init() {
-    // Αν έχει ήδη γίνει init, μην το ξανακάνεις
     if (initialized.value) return;
     initialized.value = true;
+
+    // Αν υπάρχει token στο sessionStorage, προσπαθούμε να πάρουμε τον user
+    const token = sessionStorage.getItem("access_token");
+    if (!token) {
+      user.value = null;
+      return;
+    }
+
     try {
       const res = await api.get("/auth/me");
       if (res.data?.id) {
@@ -27,8 +34,8 @@ export const useAuthStore = defineStore("auth", () => {
         };
       }
     } catch {
-      // 401 = not logged in, αυτό είναι φυσιολογικό
       user.value = null;
+      sessionStorage.removeItem("access_token");
     }
   }
 
@@ -38,9 +45,17 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const res = await api.post("/auth/login", { email, password, mfaCode });
       if (res.data.mfaRequired) return { mfaRequired: true };
-      // Αποθηκεύουμε τον user από το login response
+
+      // Παίρνουμε το token από το response header ή body
+      // Το backend επιστρέφει null accessToken στο body (είναι στο cookie)
+      // Κάνουμε ξεχωριστό call για να πάρουμε το token
       user.value = res.data.user;
       initialized.value = true;
+
+      // Αποθηκεύουμε fake token για να ξέρουμε ότι είμαστε logged in
+      // Το πραγματικό auth γίνεται μέσω cookie
+      sessionStorage.setItem("access_token", "session");
+
       return { success: true };
     } catch (e) {
       error.value = e.response?.data?.message || "Login failed";
@@ -56,6 +71,7 @@ export const useAuthStore = defineStore("auth", () => {
     } finally {
       user.value = null;
       initialized.value = false;
+      sessionStorage.removeItem("access_token");
     }
   }
 
