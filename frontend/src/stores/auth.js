@@ -15,7 +15,6 @@ export const useAuthStore = defineStore("auth", () => {
     if (initialized.value) return;
     initialized.value = true;
 
-    // Αν υπάρχει token στο sessionStorage, προσπαθούμε να πάρουμε τον user
     const token = sessionStorage.getItem("access_token");
     if (!token) {
       user.value = null;
@@ -46,16 +45,12 @@ export const useAuthStore = defineStore("auth", () => {
       const res = await api.post("/auth/login", { email, password, mfaCode });
       if (res.data.mfaRequired) return { mfaRequired: true };
 
-      // Παίρνουμε το token από το response header ή body
-      // Το backend επιστρέφει null accessToken στο body (είναι στο cookie)
-      // Κάνουμε ξεχωριστό call για να πάρουμε το token
+      // Αποθηκεύουμε το πραγματικό JWT token
+      if (res.data.accessToken) {
+        sessionStorage.setItem("access_token", res.data.accessToken);
+      }
       user.value = res.data.user;
       initialized.value = true;
-
-      // Αποθηκεύουμε fake token για να ξέρουμε ότι είμαστε logged in
-      // Το πραγματικό auth γίνεται μέσω cookie
-      sessionStorage.setItem("access_token", "session");
-
       return { success: true };
     } catch (e) {
       error.value = e.response?.data?.message || "Login failed";

@@ -4,7 +4,6 @@ import com.next2me.next2view.dto.AuthResponse;
 import com.next2me.next2view.dto.LoginRequest;
 import com.next2me.next2view.dto.RefreshRequest;
 import com.next2me.next2view.service.AuthService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -34,9 +33,14 @@ public class AuthController {
         if (auth.mfaRequired()) {
             return ResponseEntity.ok(auth);
         }
-        setAccessTokenCookie(response, auth.accessToken());
-        return ResponseEntity.ok(new AuthResponse(
-                null, auth.tokenType(), auth.expiresIn(), auth.user(), false));
+        // Cookie για backward compat
+        String cookieHeader = String.format(
+            "access_token=%s; Max-Age=900; Path=/; Secure; HttpOnly; SameSite=None",
+            auth.accessToken()
+        );
+        response.addHeader("Set-Cookie", cookieHeader);
+        // Επιστρέφουμε ΚΑΙ το token στο body για cross-origin clients
+        return ResponseEntity.ok(auth);
     }
 
     @PostMapping("/refresh")
@@ -45,9 +49,12 @@ public class AuthController {
             HttpServletResponse response
     ) {
         AuthResponse auth = authService.refresh(request.refreshToken());
-        setAccessTokenCookie(response, auth.accessToken());
-        return ResponseEntity.ok(new AuthResponse(
-                null, auth.tokenType(), auth.expiresIn(), auth.user(), false));
+        String cookieHeader = String.format(
+            "access_token=%s; Max-Age=900; Path=/; Secure; HttpOnly; SameSite=None",
+            auth.accessToken()
+        );
+        response.addHeader("Set-Cookie", cookieHeader);
+        return ResponseEntity.ok(auth);
     }
 
     @PostMapping("/logout")
@@ -60,7 +67,8 @@ public class AuthController {
                 authService.logout(UUID.fromString(userId));
             } catch (Exception ignored) {}
         }
-        clearAccessTokenCookie(response);
+        String cookieHeader = "access_token=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None";
+        response.addHeader("Set-Cookie", cookieHeader);
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
@@ -77,19 +85,5 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(401).build();
         }
-    }
-
-    private void setAccessTokenCookie(HttpServletResponse response, String token) {
-        // SameSite=None + Secure για cross-origin (frontend σε διαφορετικό domain από backend)
-        String cookieHeader = String.format(
-            "access_token=%s; Max-Age=900; Path=/; Secure; HttpOnly; SameSite=None",
-            token
-        );
-        response.addHeader("Set-Cookie", cookieHeader);
-    }
-
-    private void clearAccessTokenCookie(HttpServletResponse response) {
-        String cookieHeader = "access_token=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None";
-        response.addHeader("Set-Cookie", cookieHeader);
     }
 }
