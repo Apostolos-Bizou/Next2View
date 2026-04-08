@@ -28,6 +28,11 @@ const routes = [
         name: "ProjectDetail",
         component: () => import("@/views/ProjectDetailView.vue"),
       },
+      {
+        path: "guide",
+        name: "Guide",
+        component: () => import("@/views/GuideView.vue"),
+      },
     ],
   },
 ];
