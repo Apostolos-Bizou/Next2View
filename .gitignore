@@ -1,0 +1,33 @@
+﻿# ════ SECURITY — NEVER COMMIT ════
+*.pem
+*.key
+*.p12
+*.jks
+application-local.yml
+application-secrets.yml
+.env
+.env.*
+
+# ════ BUILD ════
+backend/target/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+__pycache__/
+*.pyc
+ai-functions/.python_packages/
+
+# ════ IDE ════
+.idea/
+*.iml
+.vscode/
+*.suo
+*.user
+
+# ════ OS ════
+.DS_Store
+Thumbs.db
+
+# ════ LOGS ════
+*.log
+logs/
