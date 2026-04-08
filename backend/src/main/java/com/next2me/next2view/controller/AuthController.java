@@ -80,21 +80,16 @@ public class AuthController {
     }
 
     private void setAccessTokenCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie("access_token", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(15 * 60);
-        cookie.setAttribute("SameSite", "Strict");
-        response.addCookie(cookie);
+        // SameSite=None + Secure για cross-origin (frontend σε διαφορετικό domain από backend)
+        String cookieHeader = String.format(
+            "access_token=%s; Max-Age=900; Path=/; Secure; HttpOnly; SameSite=None",
+            token
+        );
+        response.addHeader("Set-Cookie", cookieHeader);
     }
 
     private void clearAccessTokenCookie(HttpServletResponse response) {
-        Cookie cookie = new Cookie("access_token", "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        String cookieHeader = "access_token=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None";
+        response.addHeader("Set-Cookie", cookieHeader);
     }
 }
