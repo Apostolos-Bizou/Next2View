@@ -1,4 +1,4 @@
-package com.next2me.next2view.controller;
+﻿package com.next2me.next2view.controller;
 
 import com.next2me.next2view.dto.AuthResponse;
 import com.next2me.next2view.dto.LoginRequest;
@@ -36,10 +36,8 @@ public class AuthController {
             return ResponseEntity.ok(auth);
         }
 
-        // Set access token as HttpOnly cookie
         setAccessTokenCookie(response, auth.accessToken());
 
-        // Return response without token in body (it's in cookie)
         return ResponseEntity.ok(new AuthResponse(
                 null, auth.tokenType(), auth.expiresIn(), auth.user(), false));
     }
@@ -60,19 +58,23 @@ public class AuthController {
             @AuthenticationPrincipal String userId,
             HttpServletResponse response
     ) {
-        authService.logout(UUID.fromString(userId));
+        if (userId != null) {
+            authService.logout(UUID.fromString(userId));
+        }
         clearAccessTokenCookie(response);
         return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<Map<String, String>> me(
+    public ResponseEntity<AuthResponse.UserInfo> me(
             @AuthenticationPrincipal String userId
     ) {
-        return ResponseEntity.ok(Map.of("userId", userId));
+        if (userId == null) {
+            return ResponseEntity.status(401).build();
+        }
+        AuthResponse.UserInfo info = authService.getUserInfo(UUID.fromString(userId));
+        return ResponseEntity.ok(info);
     }
-
-    // ── Cookie helpers ──
 
     private void setAccessTokenCookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie("access_token", token);

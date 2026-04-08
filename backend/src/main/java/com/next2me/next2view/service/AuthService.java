@@ -1,4 +1,4 @@
-package com.next2me.next2view.service;
+﻿package com.next2me.next2view.service;
 
 import com.next2me.next2view.dto.AuthResponse;
 import com.next2me.next2view.dto.LoginRequest;
@@ -45,38 +45,30 @@ public class AuthService {
         User user = userRepository.findByEmailAndActiveTrue(request.email())
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
-        // Check lockout
         if (user.isLocked()) {
             throw new LockedException("Account locked. Try again later.");
         }
 
-        // Verify password
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             handleFailedAttempt(user);
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        // MFA check for CEO
         if (user.getMfaEnabled() && user.getRole() == User.Role.CEO) {
             if (request.mfaCode() == null || request.mfaCode().isBlank()) {
-                return new AuthResponse(null, null, 0,
-                        buildUserInfo(user), true);
+                return new AuthResponse(null, null, 0, buildUserInfo(user), true);
             }
-            // MFA validation would go here via TotpService
         }
 
-        // Reset failed attempts on success
         user.setFailedAttempts(0);
         user.setLockedUntil(null);
         userRepository.save(user);
 
-        // Generate tokens
         String accessToken = jwtService.generateAccessToken(
                 user.getId(), user.getEmail(), user.getRole().name());
         String rawRefresh = UUID.randomUUID().toString();
         String refreshHash = hashToken(rawRefresh);
 
-        // Save refresh token
         refreshTokenRepository.save(RefreshToken.builder()
                 .user(user)
                 .tokenHash(refreshHash)
@@ -85,13 +77,7 @@ public class AuthService {
 
         log.info("Login success: {} from {}", user.getEmail(), ipAddress);
 
-        return new AuthResponse(
-                accessToken,
-                "Bearer",
-                15 * 60,
-                buildUserInfo(user),
-                false
-        );
+        return new AuthResponse(accessToken, "Bearer", 15 * 60, buildUserInfo(user), false);
     }
 
     @Transactional
@@ -115,6 +101,13 @@ public class AuthService {
     public void logout(UUID userId) {
         refreshTokenRepository.revokeAllByUserId(userId);
         log.info("Logout: all refresh tokens revoked for user {}", userId);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponse.UserInfo getUserInfo(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BadCredentialsException("User not found"));
+        return buildUserInfo(user);
     }
 
     private void handleFailedAttempt(User user) {

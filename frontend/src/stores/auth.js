@@ -1,4 +1,4 @@
-import { defineStore } from "pinia";
+﻿import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 import api from "@/services/api";
 
@@ -13,9 +13,14 @@ export const useAuthStore = defineStore("auth", () => {
   async function init() {
     try {
       const res = await api.get("/auth/me");
-      if (res.data?.userId) {
-        // fetch full user info
-        user.value = { id: res.data.userId };
+      if (res.data?.id) {
+        user.value = {
+          id: res.data.id,
+          fullName: res.data.fullName,
+          email: res.data.email,
+          role: res.data.role,
+          department: res.data.department,
+        };
       }
     } catch {
       user.value = null;
