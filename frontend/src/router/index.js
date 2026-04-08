@@ -44,6 +44,12 @@ const router = createRouter({
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore();
+
+  // Περιμένουμε το init να ολοκληρωθεί πρώτα
+  if (!auth.initialized) {
+    await auth.init();
+  }
+
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: "Login" };
   }
