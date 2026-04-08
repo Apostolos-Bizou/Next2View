@@ -196,6 +196,64 @@
         <div class="g-ai-title">📄 AI Κλήρωση Στοιχείων Σύμβασης</div>
         <div class="g-desc">Μόλις ανεβάσεις σύμβαση (PDF/JPG/PNG), το AI εξάγει αυτόματα τα βασικά στοιχεία και τα εμφανίζει σε δομημένη καρτέλα μέσα στο Project Detail.</div>
         <div class="g-tip">💡 Υποστηρίζει PDF και εικόνες. Αναγνωρίζει Ελληνικά και Αγγλικά κείμενα.</div>
+        <div class="g-subsection">📋 Παράδειγμα — Έτσι φαίνεται το αποτέλεσμα</div>
+        <div class="g-contract-preview">
+          <div class="g-cp-header">
+            <div class="g-cp-title">Ενεργός Σύμβαση <span class="g-cp-badge">✓ Προεπισκόπηση</span></div>
+            <div class="g-cp-actions">
+              <span class="g-cp-btn ai">✦ AI Ανάλυση</span>
+              <span class="g-cp-btn">Export</span>
+              <span class="g-cp-btn">εκτύπωση</span>
+            </div>
+          </div>
+          <div class="g-cp-body">
+            <div class="g-cp-desc">Παροχή υπηρεσιών ανάπτυξης ολοκληρωμένου ERP συστήματος διαχείρισης πληρωμάτων και στόλου για θαλάσσιες μεταφορές, περιλαμβανομένης εκπαίδευσης χρηστών και υποστήριξης 12 μηνών.</div>
+            <div class="g-cp-parties">
+              <span class="g-cp-party">🏢 Crossworld Marine Services Itd</span>
+              <span class="g-cp-party">🏢 OceanSoft Ltd</span>
+            </div>
+            <div class="g-cp-grid">
+              <div class="g-cp-field">
+                <div class="g-cp-label">ΑΞΙ ΣΥΜΒΑΣΗΣ</div>
+                <div class="g-cp-value finance">€45,000 EUR</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">ΟΡΟΙ ΠΛΗΡΩΜΗΣ</div>
+                <div class="g-cp-value small">30% προκαταβολή, 40% παράδοση beta, 30% τελική παράδοση</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">ΗΜΕΡ. ΕΝΑΡΞΗΣ</div>
+                <div class="g-cp-value">1 Φεβρουαρίου 2026</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">ΗΜΕΡΟΜΗΝΙΑ ΛΗΞΗΣ</div>
+                <div class="g-cp-value risk">20 Απριλίου 2026</div>
+              </div>
+            </div>
+            <div class="g-cp-obligations">
+              <div class="g-cp-obl-title">ΚΥΡΙΕΣ ΥΠΟΧΡΕΩΣΕΙΣ</div>
+              <div class="g-cp-obl-item">1. Ανάπτυξη και παράδοση πλήρους ERP με modules Dashboard, Roster, RPA Hub, Payroll, Sign-Off</div>
+              <div class="g-cp-obl-item">2. Εκπαίδευση χρηστών μέχρι 3 ημέρες πριν την τελική παράδοση</div>
+              <div class="g-cp-obl-item">3. Τεχνική υποστήριξη 12 μηνών μετά την παράδοση, SLA 24 ωρών</div>
+              <div class="g-cp-obl-item">4. Παράδοση πλήρους τεκμηρίωσης και source code σε αποθετήριο αποστολέα</div>
+            </div>
+            <div class="g-cp-penalty">
+              <div class="g-cp-penalty-label">⚠ ΡΗΤΡΕΣ / ΠΟΙΝΕΣ</div>
+              <div class="g-cp-penalty-val">Καθυστέρηση παράδοσης: 0,5% της συμβατικής αξίας ανά εβδομάδα καθυστέρησης, μέχρι 10% του συνόλου. Μη συμμόρφωση SLA: αποζημίωση 1% ανά παρέβαση</div>
+            </div>
+            <div class="g-cp-footer-grid">
+              <div class="g-cp-field">
+                <div class="g-cp-label">ΕΦΑΡΜΟΣΤΕΟ ΔΙΚΑΙΟ</div>
+                <div class="g-cp-value small">Κυπριακό Δίκαιο — Δικαστήρια Λεμεσού</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">ΕΙΔΙΚΟΙ ΟΡΟΙ</div>
+                <div class="g-cp-value small">Αποκλειστικότητα χρήσης κώδικα για 24 μήνες. NDA ισχύς 5 ετών μετά λήξη.</div>
+              </div>
+            </div>
+            <div class="g-cp-notice">* Τα αποτελέσματα εξήχθηκαν αυτόματα από το Project detail και δεν αντικαθιστούν νομική συμβουλή.</div>
+          </div>
+        </div>
       </div>
 
       <div class="g-ai-section" style="margin-top:20px;">
@@ -426,4 +484,31 @@ const glossary = [
 .g-mgmt-ico   { font-size: 20px; margin-bottom: 6px; }
 .g-mgmt-title { font-size: 12px; font-weight: 800; margin-bottom: 4px; }
 .g-mgmt-desc  { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+.g-contract-preview { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-top: 12px; }
+.g-cp-header { background: var(--surface2); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; }
+.g-cp-title { font-size: 13px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.g-cp-badge { font-size: 10px; font-weight: 700; background: var(--green-dim); color: var(--green); padding: 2px 8px; border-radius: 5px; }
+.g-cp-actions { display: flex; gap: 6px; }
+.g-cp-btn { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 5px; cursor: pointer; background: var(--surface3); border: 1px solid var(--border-bright); color: var(--text-mid); }
+.g-cp-btn.ai { background: rgba(124,58,237,0.1); border-color: rgba(124,58,237,0.3); color: #7c3aed; }
+.g-cp-body { padding: 16px; }
+.g-cp-desc { font-size: 12px; color: var(--text-mid); line-height: 1.6; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.g-cp-parties { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.g-cp-party { background: var(--surface2); border: 1px solid var(--border); border-radius: 5px; padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--text-mid); }
+.g-cp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.g-cp-field { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px 12px; }
+.g-cp-label { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 4px; font-family: "Nunito Sans", sans-serif; }
+.g-cp-value { font-size: 15px; font-weight: 800; color: var(--text); }
+.g-cp-value.finance { color: var(--finance); font-size: 18px; }
+.g-cp-value.risk { color: var(--red); }
+.g-cp-value.small { font-size: 12px; font-weight: 600; color: var(--text-mid); }
+.g-cp-obligations { background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 12px; margin-bottom: 12px; }
+.g-cp-obl-title { font-size: 9px; font-weight: 700; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; }
+.g-cp-obl-item { font-size: 12px; color: var(--text-mid); padding: 4px 0; border-bottom: 1px solid var(--border); }
+.g-cp-obl-item:last-child { border-bottom: none; }
+.g-cp-penalty { background: var(--red-dim); border: 1px solid rgba(220,38,38,0.2); border-radius: 7px; padding: 12px; margin-bottom: 12px; }
+.g-cp-penalty-label { font-size: 11px; font-weight: 800; color: var(--red); margin-bottom: 6px; }
+.g-cp-penalty-val { font-size: 12px; color: var(--red); line-height: 1.6; }
+.g-cp-footer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.g-cp-notice { font-size: 10px; color: var(--text-dim); font-style: italic; text-align: center; }
 </style>
