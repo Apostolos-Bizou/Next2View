@@ -117,7 +117,7 @@
             <template v-if="!collapsedMods.has(m.id)">
               <div v-for="t in m.tasks" :key="t.id" class="gantt-task-row">
                 <div class="gantt-task-lbl">
-                  <div :class="`task-chk ${t.isDone ? 'done' : t.isBlocked ? 'block' : ''}`">{{ t.isDone ? '✓' : '' }}</div>
+                  <div :class="`task-chk ${t.isDone ? 'done' : t.isBlocked ? 'block' : ''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone ? '✓' : '' }}</div>
                   <span :class="`task-name-g ${t.isDone ? 'done' : ''}`">{{ t.name }}</span>
                   <span v-if="t.isBlocked" class="task-blocked-ico">⚠</span>
                 </div>
@@ -158,7 +158,7 @@
           </div>
           <div v-if="openAcc.has(m.id)" class="task-list">
             <div v-for="t in m.tasks" :key="t.id+'acc'" class="task-item">
-              <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`">{{ t.isDone?'✓':'' }}</div>
+              <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
               <div style="flex:1;">
                 <div :class="`task-name ${t.isDone?'done':''}`">{{ t.name }}</div>
                 <div v-if="t.blockNote" class="task-note">⚠ {{ t.blockNote }}</div>
@@ -178,7 +178,7 @@
         <div class="specs-title">📋 Specifications</div>
         <div class="specs-list">
           <div v-for="s in project.specs" :key="s.id" class="spec-item">
-            <div :class="specCheckClass(s)">{{ s.isDone ? '✓' : '' }}</div>
+            <div :class="specCheckClass(s)" @click.stop="toggleSpec(s)" style="cursor:pointer;">{{ s.isDone ? '✓' : '' }}</div>
             <div style="flex:1;">
               <div :class="specTxtClass(s)">{{ s.description }}</div>
               <div v-if="s.startDate || s.endDate" class="spec-dates-display">
@@ -493,6 +493,74 @@ function formatSize(bytes) {
   if (bytes < 1024) return bytes + " B"
   if (bytes < 1048576) return (bytes/1024).toFixed(1) + " KB"
   return (bytes/1048576).toFixed(1) + " MB"
+}
+
+async function toggleTask(t) {
+  t.isDone = !t.isDone
+  t.progress = t.isDone ? 100 : 0
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title,
+      companyId: project.value.companyId,
+      category: project.value.category,
+      budget: project.value.budget || 0,
+      startDate: project.value.startDate || null,
+      deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '',
+      status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({
+        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
+        startDate: s.startDate || null, endDate: s.endDate || null
+      })),
+      modules: (project.value.modules || []).map(m => ({
+        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+        tasks: (m.tasks || []).map(t2 => ({
+          name: t2.name, assignee: t2.assignee, progress: t2.progress,
+          isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote,
+          comment: t2.comment, deadline: t2.deadline,
+          startWeek: t2.startWeek, durationWeeks: t2.durationWeeks,
+          startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0
+        }))
+      }))
+    })
+    await loadProject()
+  } catch(e) {
+    t.isDone = !t.isDone
+    t.progress = t.isDone ? 100 : 0
+  }
+}
+
+async function toggleSpec(s) {
+  s.isDone = !s.isDone
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title,
+      companyId: project.value.companyId,
+      category: project.value.category,
+      budget: project.value.budget || 0,
+      startDate: project.value.startDate || null,
+      deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '',
+      status: project.value.status,
+      specs: (project.value.specs || []).map(s2 => ({
+        description: s2.description, isDone: s2.isDone, sortOrder: s2.sortOrder || 0,
+        startDate: s2.startDate || null, endDate: s2.endDate || null
+      })),
+      modules: (project.value.modules || []).map(m => ({
+        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+        tasks: (m.tasks || []).map(t => ({
+          name: t.name, assignee: t.assignee, progress: t.progress,
+          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+          comment: t.comment, deadline: t.deadline,
+          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
+          startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0
+        }))
+      }))
+    })
+    await loadProject()
+  } catch(e) {
+    s.isDone = !s.isDone
+  }
 }
 
 function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
