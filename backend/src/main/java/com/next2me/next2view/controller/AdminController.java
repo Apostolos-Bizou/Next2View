@@ -95,7 +95,7 @@ public class AdminController {
                 u.getDepartment() != null ? u.getDepartment().name() : null,
                 u.getCompany() != null ? u.getCompany().getId() : null,
                 u.getCompany() != null ? u.getCompany().getName() : null,
-                u.isActive() != null ? u.isActive() : true
+                u.getActive() != null ? u.getActive() : true
         );
     }
 }
