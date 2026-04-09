@@ -55,7 +55,7 @@
       </div>
 
       <!-- GANTT TIMELINE -->
-      <div v-if="project.modules && project.modules.length" class="gantt-panel">
+      <div v-if="(project.modules && project.modules.length) || (project.specs && project.specs.some(s => s.startDate))" class="gantt-panel">
         <div class="gantt-ph">
           <div class="gantt-ph-title">📊 Project Timeline</div>
           <div class="gantt-ph-sub">{{ project.title }} · {{ ganttWeeks.length }} weeks</div>
@@ -95,6 +95,33 @@
               <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
             </div>
           </div>
+
+          <!-- SPECS TIMELINE (when specs have dates) -->
+          <template v-if="project.specs && project.specs.some(s => s.startDate)">
+            <div class="gantt-mod-row" style="cursor:default;">
+              <div class="gantt-mod-lbl">
+                <span class="mod-dot legal"></span>
+                <span class="mod-name">📋 Specifications</span>
+              </div>
+              <div class="gantt-track">
+                <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
+              </div>
+            </div>
+            <div v-for="s in project.specs.filter(s => s.startDate)" :key="s.id" class="gantt-task-row">
+              <div class="gantt-lbl-col" style="display:flex;align-items:center;gap:6px;padding-left:24px;">
+                <div :class="s.isDone ? 'task-chk done' : 'task-chk'" @click.stop="toggleSpec(s)" style="cursor:pointer;">{{ s.isDone ? '✓' : '' }}</div>
+                <span :class="`task-name-g ${s.isDone ? 'done' : ''}`" style="font-size:11px;">{{ s.description }}</span>
+              </div>
+              <div class="gantt-track">
+                <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
+                <div v-if="specBarStyle(s).show" class="gantt-bar"
+                  :style="`left:${specBarStyle(s).left}%;width:${specBarStyle(s).width}%;background:${s.isDone ? '#a0a0b8' : 'var(--legal)'};opacity:0.85;border-radius:4px;height:14px;position:absolute;top:50%;transform:translateY(-50%);`"
+                  :title="s.description">
+                  <span style="font-size:9px;color:#fff;padding:0 4px;white-space:nowrap;overflow:hidden;">{{ s.description }}</span>
+                </div>
+              </div>
+            </div>
+          </template>
 
           <!-- MODULES + TASKS -->
           <template v-for="m in project.modules" :key="m.id">
@@ -936,6 +963,18 @@ function taskBarStyle(t) {
     return { show: true, left, width: Math.min(width, 100 - left) }
   }
   return { show: false }
+}
+
+function specBarStyle(s) {
+  if (!s.startDate || !project.value?.startDate) return { show: false }
+  const projStart = new Date(project.value.startDate).getTime()
+  const specStart = new Date(s.startDate).getTime()
+  const specEnd = s.endDate ? new Date(s.endDate).getTime() : specStart + 86400000
+  const totalDays = GANTT_WEEKS * 7
+  const left = (specStart - projStart) / 86400000 / totalDays * 100
+  const width = Math.max(1, (specEnd - specStart) / 86400000 / totalDays * 100)
+  if (left >= 100 || left + width < 0) return { show: false }
+  return { show: true, left: Math.max(0, left), width: Math.min(width, 100 - Math.max(0, left)) }
 }
 
 function moduleBarStyle(m) {
