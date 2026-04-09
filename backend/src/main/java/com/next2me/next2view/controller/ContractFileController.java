@@ -61,14 +61,16 @@ public class ContractFileController {
         try {
             if (storageAccount != null && !storageAccount.isBlank() &&
                 storageKey != null && !storageKey.isBlank()) {
-                String connStr = String.format(
-                    "DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;EndpointSuffix=core.windows.net",
-                    storageAccount, storageKey);
                 sharedKeyCredential = new StorageSharedKeyCredential(storageAccount, storageKey);
+                // Use credential-based builder (required for SAS generation)
                 BlobServiceClient client = new BlobServiceClientBuilder()
-                    .connectionString(connStr).buildClient();
+                    .credential(sharedKeyCredential)
+                    .endpoint("https://" + storageAccount + ".blob.core.windows.net")
+                    .buildClient();
                 containerClient = client.getBlobContainerClient("contracts");
-                log.info("Azure Blob Storage initialized: {}", storageAccount);
+                log.info("Azure Blob Storage initialized with SharedKey: {}", storageAccount);
+            } else {
+                log.warn("Azure Storage not configured: account={}", storageAccount);
             }
         } catch (Exception e) {
             log.warn("Azure Storage init failed: {}", e.getMessage());
