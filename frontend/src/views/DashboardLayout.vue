@@ -36,7 +36,7 @@
           <span class="nav-ico" style="color:var(--yellow);">🔔</span>Notifications
           <span v-if="store.atRisk.length" class="nav-count" style="background:var(--red);color:#fff;">{{ store.atRisk.length }}</span>
         </router-link>
-        <router-link to="/admin" class="nav-item" active-class="active">
+        <router-link v-if="permStore.isCEO()" to="/admin" class="nav-item" active-class="active">
           <span class="nav-ico" style="color:var(--text-dim);">⚙</span>Admin
         </router-link>
 
@@ -504,7 +504,7 @@ const emptyForm = () => ({
 const form = ref(emptyForm())
 
 onMounted(async () => {
-  await Promise.all([store.fetchProjects(), store.fetchCompanies()])
+  await Promise.all([store.fetchProjects(), store.fetchCompanies(), permStore.loadMyPermissions()])
 })
 
 function openNewProject() {
