@@ -91,6 +91,12 @@ management:
     health:
       show-details: never
 
+# ── AZURE STORAGE ──
+azure:
+  storage:
+    account: ${AZURE_STORAGE_ACCOUNT:}
+    key: ${AZURE_STORAGE_KEY:}
+
 # ── ANTHROPIC ──
 anthropic:
   api:
