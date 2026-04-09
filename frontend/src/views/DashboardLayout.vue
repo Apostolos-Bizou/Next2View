@@ -88,8 +88,8 @@
         </button>
         <button class="btn-sidebar" @click="openNewProject">+ New Project</button>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <button class="btn-sidebar" style="font-size:9px;">+ Company</button>
-          <button class="btn-sidebar" style="font-size:9px;">+ User</button>
+          <button class="btn-sidebar" style="font-size:9px;" @click="openNewCompany">+ Company</button>
+          <button class="btn-sidebar" style="font-size:9px;" @click="openNewUser">+ User</button>
         </div>
       </div>
 
@@ -327,6 +327,89 @@
     </div>
   </div>
 
+  <!-- NEW COMPANY MODAL -->
+  <div v-if="showNewCompany" class="modal-overlay" @click.self="showNewCompany=false">
+    <div class="modal" style="width:460px;">
+      <div class="modal-header">
+        <div class="modal-title">🏢 New Company</div>
+        <button class="modal-close" @click="showNewCompany=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Company Name *</label>
+          <input v-model="companyForm.name" type="text" class="form-input" placeholder="e.g. Polaris Financial Services" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Code *</label>
+            <input v-model="companyForm.code" type="text" class="form-input" placeholder="e.g. PFS" maxlength="6" />
+          </div>
+          <div class="form-group">
+            <label>Color</label>
+            <select v-model="companyForm.color" class="form-input">
+              <option value="finance">Finance (Green)</option>
+              <option value="legal">Legal (Orange)</option>
+              <option value="dev">Dev (Purple)</option>
+              <option value="marketing">Marketing (Pink)</option>
+            </select>
+          </div>
+        </div>
+        <div v-if="companyError" class="form-error">{{ companyError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showNewCompany=false">Cancel</button>
+        <button class="btn-submit" @click="saveNewCompany" :disabled="companySaving">
+          {{ companySaving ? 'Saving...' : 'Create Company' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW USER MODAL -->
+  <div v-if="showNewUser" class="modal-overlay" @click.self="showNewUser=false">
+    <div class="modal" style="width:460px;">
+      <div class="modal-header">
+        <div class="modal-title">👤 New User</div>
+        <button class="modal-close" @click="showNewUser=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name *</label>
+            <input v-model="userForm.firstName" type="text" class="form-input" placeholder="Apostolos" />
+          </div>
+          <div class="form-group">
+            <label>Last Name *</label>
+            <input v-model="userForm.lastName" type="text" class="form-input" placeholder="Bizou" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email *</label>
+          <input v-model="userForm.email" type="email" class="form-input" placeholder="user@next2me.com" />
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input v-model="userForm.password" type="password" class="form-input" placeholder="Min 8 characters" />
+        </div>
+        <div class="form-group">
+          <label>Role</label>
+          <select v-model="userForm.role" class="form-input">
+            <option value="CEO">CEO</option>
+            <option value="MANAGER">Manager</option>
+            <option value="MEMBER">Member</option>
+          </select>
+        </div>
+        <div v-if="userError" class="form-error">{{ userError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showNewUser=false">Cancel</button>
+        <button class="btn-submit" @click="saveNewUser" :disabled="userSaving">
+          {{ userSaving ? 'Saving...' : 'Create User' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup>
@@ -340,6 +423,69 @@ const auth = useAuthStore()
 const store = useProjectStore()
 const router = useRouter()
 const route = useRoute()
+
+// ════ NEW COMPANY ════
+const showNewCompany = ref(false)
+const companyForm = ref({ name: '', code: '', color: 'finance' })
+const companyError = ref('')
+const companySaving = ref(false)
+
+function openNewCompany() {
+  companyForm.value = { name: '', code: '', color: 'finance' }
+  companyError.value = ''
+  showNewCompany.value = true
+}
+
+async function saveNewCompany() {
+  if (!companyForm.value.name.trim() || !companyForm.value.code.trim()) {
+    companyError.value = 'Name and Code are required.'; return
+  }
+  companySaving.value = true
+  companyError.value = ''
+  try {
+    await api.post('/companies', {
+      name: companyForm.value.name,
+      code: companyForm.value.code.toUpperCase(),
+      color: companyForm.value.color
+    })
+    showNewCompany.value = false
+    await store.loadAll()
+  } catch(e) {
+    companyError.value = e.response?.data?.message || 'Error creating company.'
+  } finally { companySaving.value = false }
+}
+
+// ════ NEW USER ════
+const showNewUser = ref(false)
+const userForm = ref({ firstName: '', lastName: '', email: '', password: '', role: 'MEMBER' })
+const userError = ref('')
+const userSaving = ref(false)
+
+function openNewUser() {
+  userForm.value = { firstName: '', lastName: '', email: '', password: '', role: 'MEMBER' }
+  userError.value = ''
+  showNewUser.value = true
+}
+
+async function saveNewUser() {
+  if (!userForm.value.firstName || !userForm.value.email || !userForm.value.password) {
+    userError.value = 'First name, email and password are required.'; return
+  }
+  userSaving.value = true
+  userError.value = ''
+  try {
+    await api.post('/auth/register', {
+      firstName: userForm.value.firstName,
+      lastName: userForm.value.lastName,
+      email: userForm.value.email,
+      password: userForm.value.password,
+      role: userForm.value.role
+    })
+    showNewUser.value = false
+  } catch(e) {
+    userError.value = e.response?.data?.message || 'Error creating user.'
+  } finally { userSaving.value = false }
+}
 const sidebarOpen = ref(false)
 
 // Close sidebar on route change
