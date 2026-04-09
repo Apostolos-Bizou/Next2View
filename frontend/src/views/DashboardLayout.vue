@@ -83,11 +83,11 @@
       </div>
 
       <div class="sidebar-actions">
-        <button class="btn-sidebar btn-ai" @click="openAiReport">
+        <button v-if="permStore.isCEO() || permStore.can('aiCeoReport')" class="btn-sidebar btn-ai" @click="openAiReport">
           <span style="font-size:16px;">✦</span> AI Report
         </button>
-        <button class="btn-sidebar" @click="openNewProject">+ New Project</button>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject">+ New Project</button>
+        <div v-if="permStore.isCEO()" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
           <button class="btn-sidebar" style="font-size:9px;" @click="openNewCompany">+ Company</button>
           <button class="btn-sidebar" style="font-size:9px;" @click="openNewUser">+ User</button>
         </div>
@@ -110,7 +110,7 @@
           <div class="page-title">{{ pageTitle }}</div>
           <div class="page-subtitle">{{ pageSubtitle }}</div>
         </div>
-        <button class="topbar-btn" @click="openNewProject">+ New Project</button>
+        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="topbar-btn" @click="openNewProject">+ New Project</button>
       </div>
       <router-view />
     </main>
