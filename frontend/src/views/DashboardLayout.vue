@@ -154,10 +154,22 @@
             Specifications
             <button class="add-btn" @click="addSpec">+ Προσθήκη</button>
           </div>
-          <div v-for="(s, i) in form.specs" :key="i" class="spec-row">
-            <input type="checkbox" v-model="s.isDone" class="spec-check-input" />
-            <input v-model="s.description" placeholder="Specification..." class="form-input spec-input" />
-            <button class="del-btn" @click="form.specs.splice(i, 1)">✕</button>
+          <div v-for="(s, i) in form.specs" :key="i" class="spec-row-full">
+            <div class="spec-row">
+              <input type="checkbox" v-model="s.isDone" class="spec-check-input" />
+              <input v-model="s.description" placeholder="Specification..." class="form-input spec-input" />
+              <button class="del-btn" @click="form.specs.splice(i, 1)">✕</button>
+            </div>
+            <div class="spec-dates">
+              <div class="spec-date-field">
+                <label class="spec-date-lbl">Εναρξη</label>
+                <input v-model="s.startDate" type="date" class="form-input spec-date-input" />
+              </div>
+              <div class="spec-date-field">
+                <label class="spec-date-lbl">Ληξη</label>
+                <input v-model="s.endDate" type="date" class="form-input spec-date-input" />
+              </div>
+            </div>
           </div>
 
           <!-- MODULES & TASKS -->
@@ -260,7 +272,7 @@ function closeModal() {
   formError.value = ''
 }
 function addSpec() {
-  form.value.specs.push({ description: '', isDone: false, sortOrder: form.value.specs.length })
+  form.value.specs.push({ description: '', isDone: false, sortOrder: form.value.specs.length, startDate: null, endDate: null })
 }
 function addModule() {
   form.value.modules.push({ name: '', color: form.value.category || 'dev', sortOrder: form.value.modules.length, tasks: [] })
@@ -284,7 +296,13 @@ async function submitProject() {
       budget: form.value.budget ? Number(form.value.budget) : null,
       deadline: form.value.deadline || null,
       contractDesc: form.value.contractDesc || null,
-      specs: form.value.specs.filter(s => s.description.trim()),
+      specs: form.value.specs.filter(s => s.description.trim()).map(s => ({
+        description: s.description,
+        isDone: s.isDone,
+        sortOrder: s.sortOrder,
+        startDate: s.startDate || null,
+        endDate: s.endDate || null
+      })),
       modules: form.value.modules.filter(m => m.name.trim()).map((m, mi) => ({
         name: m.name, color: m.color, sortOrder: mi,
         tasks: m.tasks.filter(t => t.name.trim()).map((t, ti) => ({
@@ -424,7 +442,12 @@ function renderMarkdown(text) {
 .form-input:focus { border-color: var(--accent); }
 textarea.form-input { resize: vertical; min-height: 60px; }
 .add-btn { font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 10px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 5px; color: var(--accent); cursor: pointer; }
+.spec-row-full { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px; }
 .spec-row { display: flex; align-items: center; gap: 8px; }
+.spec-dates { display: flex; gap: 10px; padding-left: 24px; }
+.spec-date-field { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.spec-date-lbl { font-family: 'Nunito Sans', sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+.spec-date-input { font-size: 12px; padding: 5px 8px; }
 .spec-check-input { width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--accent); }
 .spec-input { flex: 1; }
 .del-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 14px; padding: 4px 6px; border-radius: 4px; flex-shrink: 0; }

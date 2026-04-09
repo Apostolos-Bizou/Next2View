@@ -509,6 +509,7 @@ function formatDate(iso) {
 .spec-check.done { background: var(--green); border-color: var(--green); color: #fff; }
 .spec-txt { font-size: 13px; color: var(--text-mid); }
 .spec-txt.done { color: var(--text-dim); text-decoration: line-through; }
+.spec-dates-display { font-size: 10px; color: var(--text-dim); font-family: 'Nunito Sans', sans-serif; margin-top: 3px; display: flex; gap: 6px; align-items: center; }
 .contract-desc-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
 .cd-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; }
 .cd-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
