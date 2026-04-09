@@ -641,7 +641,7 @@ function renderMarkdown(text) {
 </script>
 
 <style scoped>
-.shell { display: flex; min-height: 100vh; }
+.shell { display: flex; height: 100vh; overflow: hidden; }
 .mobile-header { display: none; }
 .main { flex: 1; min-width: 0; overflow-y: auto; }
 .sidebar { width: 228px; background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border); display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
@@ -670,7 +670,7 @@ function renderMarkdown(text) {
 .user-role { font-size: 9px; color: var(--sidebar-text-dim); font-family: 'Nunito Sans', sans-serif; }
 .logout-btn { margin-left: auto; background: none; border: none; color: var(--sidebar-text-dim); cursor: pointer; font-size: 16px; padding: 4px; transition: color 0.15s; }
 .logout-btn:hover { color: var(--red); }
-.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 .topbar { padding: 18px 32px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
 .page-title { font-size: 20px; font-weight: 900; color: var(--text); }
 .page-subtitle { font-size: 12px; color: var(--text-dim); font-family: 'Nunito Sans', sans-serif; margin-top: 3px; font-weight: 600; }
