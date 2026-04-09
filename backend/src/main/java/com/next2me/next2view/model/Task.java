@@ -47,6 +47,12 @@ public class Task extends BaseEntity {
     @Builder.Default
     private Integer durationWeeks = 1;
 
+    @Column(name = "start_day")
+    private Integer startDay;
+
+    @Column(name = "duration_days")
+    private Integer durationDays;
+
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private Integer sortOrder = 0;

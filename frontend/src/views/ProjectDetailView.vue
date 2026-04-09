@@ -63,11 +63,22 @@
           <!-- HEADER -->
           <div class="gantt-header">
             <div class="gantt-lbl-col">MODULE / TASK</div>
-            <div class="gantt-weeks-row">
-              <div v-for="w in ganttWeeks" :key="w.num"
-                :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]">
-                <div class="gantt-wk-num">W{{ w.num }}</div>
-                <div class="gantt-wk-date">{{ w.dateLabel }}</div>
+            <div class="gantt-weeks-col">
+              <!-- Week row -->
+              <div class="gantt-week-row">
+                <div v-for="w in ganttWeeks" :key="w.num"
+                  :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]"
+                  :style="'flex: 7'">
+                  <div class="gantt-wk-num">W{{ w.num }}</div>
+                  <div class="gantt-wk-date">{{ w.dateLabel }}</div>
+                </div>
+              </div>
+              <!-- Day row -->
+              <div class="gantt-day-row">
+                <div v-for="d in ganttDays" :key="d.index"
+                  :class="['gantt-day-hd', { 'gantt-day-today': d.isToday, 'gantt-day-weekend': d.isWeekend }]">
+                  <span class="gantt-day-num">{{ d.dayNum }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -354,7 +365,7 @@ const loading = ref(true)
 const collapsedMods = ref(new Set())
 const openAcc = ref(new Set())
 
-const GANTT_WEEKS = 12
+const GANTT_WEEKS = 3
 
 onMounted(async () => {
   project.value = await store.fetchProject(route.params.id)
@@ -578,6 +589,29 @@ const todayPct = computed(() => {
   return Math.min(100, Math.max(0, (now - start) / (end - start) * 100))
 })
 
+const ganttDays = computed(() => {
+  const days = []
+  const totalDays = GANTT_WEEKS * 7
+  for (let i = 0; i < totalDays; i++) {
+    const d = new Date(ganttStart.value)
+    d.setDate(d.getDate() + i)
+    const now = new Date()
+    const isToday = d.toDateString() === now.toDateString()
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6
+    days.push({ index: i, dayNum: d.getDate(), isToday, isWeekend, date: d })
+  }
+  return days
+})
+
+const totalGanttDays = computed(() => GANTT_WEEKS * 7)
+
+function dayPct(dayIndex) {
+  return (dayIndex / totalGanttDays.value) * 100
+}
+function dayWidthPct(days) {
+  return (days / totalGanttDays.value) * 100
+}
+
 function weekPct(weekNum) {
   return ((weekNum - 1) / GANTT_WEEKS) * 100
 }
@@ -586,16 +620,29 @@ function weekWidthPct(weeks) {
 }
 
 function taskBarStyle(t) {
+  if (t.startDay != null && t.durationDays != null) {
+    const left = dayPct(t.startDay)
+    const width = Math.max(dayWidthPct(1), dayWidthPct(t.durationDays))
+    if (left >= 100) return { show: false }
+    return { show: true, left, width: Math.min(width, 100 - left) }
+  }
   if (!t.startWeek) return { show: false }
   const left = weekPct(t.startWeek)
   const width = Math.max(weekWidthPct(t.durationWeeks || 1), weekWidthPct(1))
-  if (left >= 100) return { show: false }
   return { show: true, left, width: Math.min(width, 100 - left) }
 }
 
 function moduleBarStyle(m) {
-  const tasks = m.tasks.filter(t => t.startWeek)
+  const tasks = m.tasks.filter(t => t.startDay != null || t.startWeek)
   if (!tasks.length) return { show: false }
+  let minDay, maxDay
+  if (tasks[0].startDay != null) {
+    minDay = Math.min(...tasks.map(t => t.startDay))
+    maxDay = Math.max(...tasks.map(t => (t.startDay || 0) + (t.durationDays || 1)))
+    const left = dayPct(minDay)
+    const width = dayPct(maxDay) - left
+    return { show: true, left, width: Math.min(width, 100 - left) }
+  }
   const minW = Math.min(...tasks.map(t => t.startWeek))
   const maxW = Math.max(...tasks.map(t => (t.startWeek || 1) + (t.durationWeeks || 1)))
   const left = weekPct(minW)
@@ -656,7 +703,16 @@ function formatDate(iso) {
 .gantt-scroll { overflow-x: auto; min-width: 0; }
 .gantt-header { display: flex; border-bottom: 2px solid var(--border); background: var(--surface2); position: sticky; top: 0; z-index: 3; }
 .gantt-lbl-col { width: 260px; flex-shrink: 0; padding: 10px 16px; font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: flex; align-items: flex-end; }
-.gantt-weeks-row { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); min-width: 600px; }
+.gantt-weeks-col { flex: 1; display: flex; flex-direction: column; min-width: 600px; }
+.gantt-week-row { display: flex; border-bottom: 1px solid var(--border); }
+.gantt-day-row { display: flex; border-bottom: 1px solid var(--border); }
+.gantt-wk-hd { flex: 7; padding: 5px 4px; text-align: center; border-left: 1px solid var(--border); }
+.gantt-day-hd { flex: 1; padding: 3px 1px; text-align: center; border-left: 1px solid var(--border); min-width: 0; }
+.gantt-day-num { font-family: "Nunito Sans", sans-serif; font-size: 8px; color: var(--text-dim); }
+.gantt-day-today { background: var(--accent-dim); }
+.gantt-day-today .gantt-day-num { color: var(--accent); font-weight: 800; }
+.gantt-day-weekend { background: var(--surface3); }
+.gantt-track { flex: 1; position: relative; height: 52px; display: flex; align-items: center; min-width: 600px; }
 .gantt-wk-hd { padding: 8px 4px; text-align: center; border-left: 1px solid var(--border); }
 .gantt-wk-num { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; color: var(--text-dim); }
 .gantt-wk-date { font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); margin-top: 2px; }
