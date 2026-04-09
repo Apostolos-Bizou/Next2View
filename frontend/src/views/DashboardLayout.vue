@@ -85,6 +85,7 @@
           <div class="user-name">{{ auth.user?.fullName?.split(' ')[0] || 'CEO' }}</div>
           <div class="user-role">CEO · Full Access</div>
         </div>
+        <button class="mfa-btn" @click="openMfaModal" title="MFA">🔐</button>
         <button class="logout-btn" @click="handleLogout" title="Logout">↩</button>
       </div>
     </aside>
