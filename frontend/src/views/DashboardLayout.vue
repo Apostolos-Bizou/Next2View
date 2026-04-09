@@ -443,6 +443,7 @@ function renderMarkdown(text) {
 textarea.form-input { resize: vertical; min-height: 60px; }
 .add-btn { font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700; padding: 3px 10px; background: var(--accent-dim); border: 1px solid var(--accent); border-radius: 5px; color: var(--accent); cursor: pointer; }
 .spec-row-full { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px; }
+.spec-row-full { display: flex; flex-direction: column; gap: 6px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 10px; }
 .spec-row { display: flex; align-items: center; gap: 8px; }
 .spec-dates { display: flex; gap: 10px; padding-left: 24px; }
 .spec-date-field { display: flex; flex-direction: column; gap: 3px; flex: 1; }
