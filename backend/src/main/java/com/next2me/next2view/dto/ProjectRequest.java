@@ -33,7 +33,7 @@ public record ProjectRequest(
         boolean isDone, boolean isBlocked,
         String blockNote, String comment,
         LocalDate startDate,
-    LocalDate deadline, Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress,
+    LocalDate deadline, Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress, LocalDate endDate,
         int sortOrder
     ) {}
 }

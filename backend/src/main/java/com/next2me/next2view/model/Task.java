@@ -53,6 +53,12 @@ public class Task extends BaseEntity {
     @Column(name = "duration_days")
     private Integer durationDays;
 
+    @Column(name = "start_date")
+    private java.time.LocalDate startDate;
+
+    @Column(name = "end_date")
+    private java.time.LocalDate endDate;
+
     @Column(name = "manual_progress")
     @Builder.Default
     private Boolean manualProgress = false;
