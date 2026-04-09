@@ -628,34 +628,39 @@ function weekWidthPct(weeks) {
 }
 
 function taskBarStyle(t) {
+  const totalDays = GANTT_WEEKS * 7
   if (t.startDay != null && t.durationDays != null) {
-    const left = dayPct(t.startDay)
-    const width = Math.max(dayWidthPct(1), dayWidthPct(t.durationDays))
+    const left = (t.startDay / totalDays) * 100
+    const width = Math.max((1 / totalDays) * 100, (t.durationDays / totalDays) * 100)
     if (left >= 100) return { show: false }
     return { show: true, left, width: Math.min(width, 100 - left) }
   }
-  if (!t.startWeek) return { show: false }
-  const left = weekPct(t.startWeek)
-  const width = Math.max(weekWidthPct(t.durationWeeks || 1), weekWidthPct(1))
-  return { show: true, left, width: Math.min(width, 100 - left) }
+  if (t.startWeek != null) {
+    const left = ((t.startWeek - 1) * 7 / totalDays) * 100
+    const dur = (t.durationWeeks || 1) * 7
+    const width = Math.max((1 / totalDays) * 100, (dur / totalDays) * 100)
+    if (left >= 100) return { show: false }
+    return { show: true, left, width: Math.min(width, 100 - left) }
+  }
+  return { show: false }
 }
 
 function moduleBarStyle(m) {
-  const tasks = m.tasks.filter(t => t.startDay != null || t.startWeek)
+  const totalDays = GANTT_WEEKS * 7
+  const tasks = m.tasks.filter(t => t.startDay != null || t.startWeek != null)
   if (!tasks.length) return { show: false }
-  let minDay, maxDay
   if (tasks[0].startDay != null) {
-    minDay = Math.min(...tasks.map(t => t.startDay))
-    maxDay = Math.max(...tasks.map(t => (t.startDay || 0) + (t.durationDays || 1)))
-    const left = dayPct(minDay)
-    const width = dayPct(maxDay) - left
+    const minDay = Math.min(...tasks.map(t => t.startDay || 0))
+    const maxDay = Math.max(...tasks.map(t => (t.startDay || 0) + (t.durationDays || 1)))
+    const left = (minDay / totalDays) * 100
+    const width = ((maxDay - minDay) / totalDays) * 100
     return { show: true, left, width: Math.min(width, 100 - left) }
   }
-  const minW = Math.min(...tasks.map(t => t.startWeek))
+  const minW = Math.min(...tasks.map(t => t.startWeek || 1))
   const maxW = Math.max(...tasks.map(t => (t.startWeek || 1) + (t.durationWeeks || 1)))
-  const left = weekPct(minW)
-  const width = weekPct(maxW) - left
-  return { show: true, left, width: Math.min(width, 100 - left) }
+  const left = ((minW - 1) * 7 / totalDays) * 100
+  const width = ((maxW - minW) * 7 / totalDays) * 100
+  return { show: true, left, width: Math.min(Math.max(width, 3), 100 - left) }
 }
 
 const catLabel = (c) => ({ finance:'Finance', legal:'Legal', dev:'Developing', marketing:'Marketing' }[c] || c)
