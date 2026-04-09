@@ -153,7 +153,7 @@
               <span class="task-assignee">{{ t.assignee||'—' }}</span>
               <div class="task-pct-wrap">
                 <div class="task-bar"><div class="task-bar-fill" :style="`width:${t.progress}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
-                <div class="task-pct" :style="`color:${t.isDone?'var(--green)':'var(--)'+( m.color||project.category)};`">{{ t.progress }}%</div>
+                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ t.progress }}%</div>
               </div>
             </div>
           </div>
