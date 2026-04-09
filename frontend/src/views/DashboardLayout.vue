@@ -551,7 +551,9 @@ async function submitProject() {
       modules: form.value.modules.filter(m => m.name.trim()).map((m, mi) => ({
         name: m.name, color: m.color, sortOrder: mi,
         tasks: m.tasks.filter(t => t.name.trim()).map((t, ti) => ({
-          ...t, sortOrder: ti, isDone: t.progress === 100
+          ...t, sortOrder: ti, isDone: t.progress === 100,
+          startWeek: t.startWeek || (mi + 1),
+          durationWeeks: t.durationWeeks || 1
         }))
       }))
     }
