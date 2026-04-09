@@ -13,7 +13,8 @@
       </div>
 
       <!-- CONTRACT HEADER -->
-      <div :class="`contract-header ${project.category}`">
+      <div :class="`contract-header ${project.category}`" style="position:relative;">
+        <button class="edit-project-btn" @click="openEditModal" title="Επεξεργασία">✎ Επεξεργασία</button>
         <div class="ch-top">
           <div>
             <div class="ch-title">{{ project.title }}</div>
