@@ -37,5 +37,5 @@ public record ProjectDto(
         String comment, LocalDate deadline,
         Integer startWeek, Integer durationWeeks
     ) {}
-    public record SpecDto(UUID id, String description, boolean isDone, int sortOrder) {}
+    public record SpecDto(UUID id, String description, boolean isDone, int sortOrder, java.time.LocalDate startDate, java.time.LocalDate endDate) {}
 }

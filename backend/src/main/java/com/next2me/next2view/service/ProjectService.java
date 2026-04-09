@@ -222,7 +222,7 @@ public class ProjectService {
         }).toList();
 
         var specs = p.getSpecs().stream().map(s ->
-                new ProjectDto.SpecDto(s.getId(), s.getDescription(), s.getIsDone(), s.getSortOrder())
+                new ProjectDto.SpecDto(s.getId(), s.getDescription(), s.getIsDone(), s.getSortOrder(), s.getStartDate(), s.getEndDate())
         ).toList();
 
         return new ProjectDto(

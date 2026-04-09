@@ -22,7 +22,7 @@ public record ProjectRequest(
     List<SpecRequest> specs,
     List<ModuleRequest> modules
 ) {
-    public record SpecRequest(String description, boolean isDone, int sortOrder) {}
+    public record SpecRequest(String description, boolean isDone, int sortOrder, LocalDate startDate, LocalDate endDate) {}
     public record ModuleRequest(
         String name, String color, int sortOrder,
         List<TaskRequest> tasks
