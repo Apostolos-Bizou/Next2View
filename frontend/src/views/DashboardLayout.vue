@@ -140,6 +140,10 @@
               <input v-model="form.budget" type="number" placeholder="0" class="form-input" />
             </div>
             <div class="form-group">
+              <label>Ημ. Εναρξης</label>
+              <input v-model="form.startDate" type="date" class="form-input" />
+            </div>
+            <div class="form-group">
               <label>Deadline</label>
               <input v-model="form.deadline" type="date" class="form-input" />
             </div>
@@ -253,7 +257,7 @@ const submitting = ref(false)
 const formError = ref('')
 
 const emptyForm = () => ({
-  title: '', companyId: '', category: '', budget: '', deadline: '',
+  title: '', companyId: '', category: '', budget: '', startDate: '', deadline: '',
   contractDesc: '', specs: [], modules: []
 })
 const form = ref(emptyForm())
