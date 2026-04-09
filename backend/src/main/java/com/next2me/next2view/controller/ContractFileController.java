@@ -140,22 +140,19 @@ public class ContractFileController {
         ContractFile cf = em.find(ContractFile.class, fileId);
         if (cf == null) return ResponseEntity.notFound().build();
 
-        if (containerClient != null) {
+        if (containerClient != null && sharedKeyCredential != null) {
             try {
-                BlobClient blobClient = new com.azure.storage.blob.BlobServiceClientBuilder()
-                    .credential(sharedKeyCredential)
-                    .endpoint("https://" + storageAccount + ".blob.core.windows.net")
-                    .buildClient()
-                    .getBlobContainerClient("contracts")
-                    .getBlobClient(cf.getBlobPath());
+                BlobClient blobClient = containerClient.getBlobClient(cf.getBlobPath());
                 BlobSasPermission permission = new BlobSasPermission().setReadPermission(true);
                 BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(
                     OffsetDateTime.now().plusHours(1), permission);
+                com.azure.storage.blob.specialized.BlobClientBase base2 = blobClient;
                 String sasToken = blobClient.generateSas(values);
                 String sasUrl = blobClient.getBlobUrl() + "?" + sasToken;
+                log.info("SAS URL generated for: {}", cf.getBlobPath());
                 return ResponseEntity.ok(Map.of("url", sasUrl, "fileName", cf.getFileName()));
             } catch (Exception e) {
-                log.error("Download error: {}", e.getMessage());
+                log.error("SAS generation error: {}", e.getMessage(), e);
             }
         }
         return ResponseEntity.ok(Map.of("fileName", cf.getFileName(), "url", ""));
