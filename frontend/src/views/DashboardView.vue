@@ -122,10 +122,10 @@
         <div style="display:flex;gap:8px;align-items:center;">
           <select v-model="ganttFilter" class="gantt-select">
             <option value="">Όλες κατηγορίες</option>
-            <option value="finance">Finance</option>
-            <option value="legal">Legal</option>
-            <option value="dev">Developing</option>
-            <option value="marketing">Marketing</option>
+            <option value="finance">$ Finance</option>
+            <option value="legal">⚖ Legal</option>
+            <option value="dev">⌨ Developing</option>
+            <option value="marketing">◈ Marketing</option>
           </select>
           <div class="ph-badge badge blue">{{ ganttProjects.length }} projects</div>
         </div>
@@ -222,9 +222,8 @@ const ganttWeeks = computed(() => {
   for (let i = 0; i < GANTT_WEEKS; i++) {
     const d = new Date(ganttStart.value)
     d.setDate(d.getDate() + i * 7)
-    const weekEnd = new Date(d); weekEnd.setDate(weekEnd.getDate() + 7)
-    const now2 = new Date(); const isCurrentWeek = now2 >= d && now2 < weekEnd
-    weeks.push({ num: i + 1, dateLabel: d.getDate() + ' ' + ['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'][d.getMonth()], isCurrentWeek })
+    const isToday = i === 0
+    weeks.push({ num: i + 1, dateLabel: `${d.getDate()} ${months[d.getMonth()]}`, isCurrentWeek: isToday })
   }
   return weeks
 })
@@ -254,20 +253,20 @@ function barStyle(p) {
 }
 
 function dashBarStyle(p) {
-function dashBarStyle(p) {
   if (!p.deadline) return { show: false }
   const end = new Date(p.deadline)
+  const start = new Date(end)
+  start.setDate(start.getDate() - 28)
   const gs = ganttStart.value.getTime()
   const ge = ganttEnd.value.getTime()
   const range = ge - gs
-  // Use startDate if available, else fallback to ganttStart
-  const startRaw = p.startDate ? new Date(p.startDate) : new Date(gs)
-  const left = Math.max(0, (startRaw.getTime() - gs) / range * 100)
+  const left = Math.max(0, (start.getTime() - gs) / range * 100)
   const right = Math.min(100, (end.getTime() - gs) / range * 100)
   const width = Math.max(2, right - left)
   if (right <= 0 || left >= 100) return { show: false }
   return { show: true, left, width }
 }
+
 function coShort(name) {
   const m = { 'Polaris Financial Services':'Polaris Financial', 'Crossworld Marine Services':'Crossworld Marine', 'WiMAS Training Center':'WiMAS', 'Varship Management':'Varship' }
   return m[name] || name.split(' ').slice(0,2).join(' ')
