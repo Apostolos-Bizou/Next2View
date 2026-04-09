@@ -115,10 +115,10 @@
               <div class="gantt-track">
                 <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
                 <div v-if="specBarStyle(s).show" class="gantt-bar"
-                  :style="`left:${specBarStyle(s).left}%;width:${specBarStyle(s).width}%;background:${s.isDone ? '#a0a0b8' : 'var(--legal)'};opacity:0.85;border-radius:4px;height:14px;position:absolute;top:50%;transform:translateY(-50%);`"
+                <div v-if="specBarStyle(s).show" class="gantt-bar"
+                  :style="`left:${specBarStyle(s).left}%;width:${specBarStyle(s).width}%;background:${s.isDone ? `"#a0a0b8`" : `"var(--legal)`"};opacity:0.9;border-radius:4px;height:20px;position:absolute;top:50%;transform:translateY(-50%);display:flex;align-items:center;overflow:hidden;min-width:20px;`"
                   :title="s.description">
-                  <span style="font-size:9px;color:#fff;padding:0 4px;white-space:nowrap;overflow:hidden;">{{ s.description }}</span>
-                </div>
+                  <span style="font-size:10px;color:#fff;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;width:100%;display:block;">{{ s.description }}</span>
               </div>
             </div>
           </template>
