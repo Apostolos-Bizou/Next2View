@@ -83,10 +83,10 @@
       </div>
 
       <div class="sidebar-actions">
-        <button v-if="permStore.isCEO() || permStore.can('aiCeoReport')" class="btn-sidebar btn-ai" @click="openAiReport">
+        <button v-if="permStore.isCEO() || permStore.can('aiCeoReport')" class="btn-sidebar btn-ai" @click="openAiReport" title="Δημιουργεί AI αναφορά για όλα τα active projects. Αναλύει progress, κινδύνους και δίνει προτάσεις στα Ελληνικά.">
           <span style="font-size:16px;">✦</span> AI Report
         </button>
-        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject">+ New Project</button>
+        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject" title="Δημιούργησε νέο project. Βάλε τίτλο, εταιρεία, κατηγορία, budget, ημερομηνίες, modules και tasks.">+ New Project</button>
         <div v-if="permStore.isCEO()" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
           <button class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" title="Πρόσθεσε νέα εταιρεία στον Όμιλο. Βάλε όνομα, κωδικό (π.χ. PFS) και χρώμα κατηγορίας.">+ Company</button>
           <button class="btn-sidebar" style="font-size:9px;" @click="openNewUser" title="Πρόσθεσε νέο χρήστη. Βάλε email, κωδικό και ρόλο (CEO / Manager / Member).">+ User</button>
