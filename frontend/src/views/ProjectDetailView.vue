@@ -217,7 +217,7 @@
         <div v-if="showNoteInput" class="note-input-wrap">
           <textarea v-model="newNote" placeholder="Γράψε σημείωση..." class="note-textarea" rows="3"></textarea>
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
-            <button class="note-cancel" @click="showNoteInput=false;newNote='">Ακύρωση</button>
+            <button class="note-cancel" @click="cancelNote">Ακύρωση</button>
             <button class="note-save" @click="saveNote" :disabled="!newNote.trim()">Αποθήκευση</button>
           </div>
         </div>
@@ -276,6 +276,11 @@ async function loadNotes() {
     const res = await api.get(`/projects/${project.value.id}/notes`)
     notes.value = res.data
   } catch { notes.value = [] }
+}
+
+function cancelNote() {
+  showNoteInput.value = false
+  newNote.value = ''
 }
 
 async function saveNote() {
