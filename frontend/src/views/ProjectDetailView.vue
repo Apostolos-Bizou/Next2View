@@ -482,7 +482,7 @@ const loading = ref(true)
 const collapsedMods = ref(new Set())
 const openAcc = ref(new Set())
 
-const GANTT_WEEKS = 3
+const GANTT_WEEKS = 12
 
 const ganttStart = computed(() => {
   if (project.value?.startDate) return new Date(project.value.startDate)
