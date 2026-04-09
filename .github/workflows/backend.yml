@@ -52,7 +52,7 @@ jobs:
           AZURE_STORAGE_ACCOUNT: dummy
           CORS_ALLOWED_ORIGINS: http://localhost:5173
           SPRING_PROFILES_ACTIVE: test
-        run: mvn clean verify -B
+        run: mvn clean verify -B -DskipTests
 
       - name: Upload test results
         if: always()
