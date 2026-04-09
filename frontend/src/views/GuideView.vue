@@ -113,6 +113,89 @@
         <div class="g-tree-task">· Task — π.χ. "Payroll calculator" <span class="g-tree-pct" style="color:var(--accent);">40%</span></div>
       </div>
 
+
+      <div class="g-subsection">📊 Γράφημα Δομής Project</div>
+      <div class="g-chart-wrap">
+        <svg width="100%" viewBox="0 0 680 580" role="img" style="max-width:680px;display:block;margin:0 auto;">
+          <title>Next2View — Δομή Project Schedule</title>
+          <defs><marker id="garrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <!-- PROJECT -->
+          <g>
+            <rect x="200" y="30" width="280" height="48" rx="10" fill="#7F77DD" fill-opacity="0.15" stroke="#7F77DD" stroke-width="1"/>
+            <text x="340" y="51" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#7F77DD">📋 Project</text>
+            <text x="340" y="68" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#7F77DD">Τίτλος · Εταιρεία · startDate · deadline</text>
+          </g>
+          <!-- Lines Project to Modules -->
+          <path d="M340 78 L340 95 L190 95 L190 110" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow)"/>
+          <path d="M340 78 L340 95 L490 95 L490 110" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow)"/>
+          <!-- MODULE 1 -->
+          <g>
+            <rect x="80" y="110" width="220" height="44" rx="8" fill="#1D9E75" fill-opacity="0.12" stroke="#1D9E75" stroke-width="1"/>
+            <text x="190" y="128" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#1D9E75">Module 1</text>
+            <text x="190" y="144" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#1D9E75">Χρώμα · sortOrder</text>
+          </g>
+          <!-- MODULE 2 -->
+          <g>
+            <rect x="380" y="110" width="220" height="44" rx="8" fill="#1D9E75" fill-opacity="0.12" stroke="#1D9E75" stroke-width="1"/>
+            <text x="490" y="128" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#1D9E75">Module 2</text>
+            <text x="490" y="144" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#1D9E75">Χρώμα · sortOrder</text>
+          </g>
+          <!-- Lines Modules to Tasks -->
+          <path d="M190 154 L190 170 L120 170 L120 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow)"/>
+          <path d="M190 154 L190 170 L300 170 L300 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow)"/>
+          <path d="M490 154 L490 170 L420 170 L420 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow)"/>
+          <path d="M490 154 L490 170 L590 170 L590 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow)"/>
+          <!-- TASKS -->
+          <g><rect x="40" y="190" width="160" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="120" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task A</text><text x="120" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <g><rect x="220" y="190" width="160" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="300" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task B</text><text x="300" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <g><rect x="340" y="190" width="160" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="420" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task C</text><text x="420" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <g><rect x="520" y="190" width="140" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="590" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task D</text><text x="590" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <!-- GANTT -->
+          <rect x="20" y="270" width="640" height="240" rx="10" fill="none" stroke="#ccc" stroke-width="0.5" stroke-dasharray="4 4"/>
+          <text x="40" y="295" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#555">📊 Gantt Timeline</text>
+          <rect x="40" y="305" width="600" height="24" rx="4" fill="#f0f0f0"/>
+          <text x="180" y="321" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">W1 · startDate</text>
+          <text x="380" y="321" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">W2</text>
+          <text x="570" y="321" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">W3 · deadline</text>
+          <text x="40" y="348" font-family="Nunito,sans-serif" font-size="11" fill="#888">Module 1</text>
+          <rect x="140" y="337" width="200" height="16" rx="3" fill="#1D9E75" opacity="0.8"/>
+          <text x="40" y="376" font-family="Nunito,sans-serif" font-size="11" fill="#888">Module 2</text>
+          <rect x="340" y="365" width="240" height="16" rx="3" fill="#1D9E75" opacity="0.8"/>
+          <text x="40" y="404" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task A</text>
+          <rect x="140" y="393" width="100" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <text x="40" y="422" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task B</text>
+          <rect x="240" y="411" width="100" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <text x="40" y="440" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task C</text>
+          <rect x="340" y="429" width="120" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <text x="40" y="458" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task D</text>
+          <rect x="460" y="447" width="120" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <line x1="310" y1="305" x2="310" y2="465" stroke="#63B3ED" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <text x="313" y="478" font-family="Nunito,sans-serif" font-size="10" fill="#63B3ED">Σήμερα</text>
+          <rect x="40" y="488" width="620" height="16" rx="5" fill="#EFF6FF"/>
+          <text x="350" y="500" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#63B3ED">Auto progress: (σήμερα − taskStart) / (taskEnd − taskStart) × 100</text>
+        </svg>
+      </div>
+
+      <div class="g-subsection">⚙️ Πώς υπολογίζεται το Progress</div>
+      <div class="g-progress-rules">
+        <div class="g-progress-rule">
+          <div class="g-progress-rule-num">1</div>
+          <div><strong>Κανείς δεν άγγιξε το task</strong> → progress = auto<br><span style="color:var(--text-dim);font-size:12px;">Ανεβαίνει μόνο του κάθε μέρα: (ημέρες που πέρασαν / συνολικές) × 100</span></div>
+        </div>
+        <div class="g-progress-rule">
+          <div class="g-progress-rule-num">2</div>
+          <div><strong>Κάποιος έβαλε manual %</strong> → το manual κερδίζει, το auto σταματά<br><span style="color:var(--text-dim);font-size:12px;">Π.χ. αν βάλεις 30%, παραμένει 30% ανεξάρτητα από τις ημέρες.</span></div>
+        </div>
+        <div class="g-progress-rule warning">
+          <div class="g-progress-rule-num" style="background:var(--red-dim);color:var(--red);">⚠</div>
+          <div><strong>Manual &lt; Auto − 20%</strong> → ειδοποίηση στον CEO<br><span style="color:var(--text-dim);font-size:12px;">Π.χ. Day 8/10 → auto=80%, manual=30% → διαφορά 50% → ⚠ "Task είναι πίσω από το πρόγραμμα"</span></div>
+        </div>
+        <div class="g-progress-rule success">
+          <div class="g-progress-rule-num" style="background:var(--green);color:#fff;">✓</div>
+          <div><strong>Πατάει ✅ checkbox</strong> → 100% αμέσως, κλείνει η εργασία</div>
+        </div>
+      </div>
+      <div class="g-tip">💡 Το ⚠ εμφανίζεται δίπλα στο % του task στο Project Detail — ο CEO βλέπει αμέσως ποια tasks είναι πίσω από το πρόγραμμα.</div>
       <div class="g-subsection">✏ Πώς ενημερώνω ένα task</div>
       <div class="g-steps">
         <div class="g-step"><span class="g-step-num">1</span><div>Πήγαινε στο <strong>Project Detail</strong> (κλικ στο project).</div></div>
@@ -464,6 +547,12 @@ const glossary = [
 .g-gloss-row:last-child { border-bottom: none; }
 .g-gloss-term { padding: 10px 14px; font-size: 12px; font-weight: 800; color: var(--accent); background: var(--surface2); border-right: 1px solid var(--border); }
 .g-gloss-def  { padding: 10px 14px; font-size: 12px; color: var(--text-mid); line-height: 1.6; }
+.g-chart-wrap { margin: 16px 0; overflow-x: auto; }
+.g-progress-rules { display: flex; flex-direction: column; gap: 10px; margin: 12px 0; }
+.g-progress-rule { display: flex; align-items: flex-start; gap: 12px; background: var(--surface2); border-radius: 8px; padding: 12px 14px; }
+.g-progress-rule.warning { background: var(--red-dim); }
+.g-progress-rule.success { background: rgba(5,150,105,0.08); }
+.g-progress-rule-num { width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
 .g-ai-section { background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.2); border-radius: 10px; padding: 18px 20px; }
 .g-ai-title { font-size: 15px; font-weight: 800; color: #7c3aed; margin-bottom: 10px; }
 .g-notif-cards { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; }
