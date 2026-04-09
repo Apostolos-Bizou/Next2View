@@ -183,6 +183,29 @@
         <div class="cd-text">{{ project.contractDesc }}</div>
       </div>
 
+      <!-- CONTRACT FILES -->
+      <div class="files-panel" style="margin-top:14px;">
+        <div class="files-header">
+          <div class="files-title">📎 Συμβόλαια & Αρχεία</div>
+          <label class="files-upload-btn" :class="{uploading: uploading}">
+            <input type="file" @change="uploadFile" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="uploading" />
+            {{ uploading ? "Ανέβασμα..." : "+ Ανέβασμα" }}
+          </label>
+        </div>
+        <div v-if="files.length" class="files-list">
+          <div v-for="f in files" :key="f.id" class="file-item">
+            <span class="file-icon">{{ fileIcon(f.contentType) }}</span>
+            <div class="file-info">
+              <div class="file-name">{{ f.fileName }}</div>
+              <div class="file-meta">{{ formatSize(f.fileSizeBytes) }} · {{ f.uploadedBy }} · {{ formatInstant(f.uploadedAt) }}</div>
+            </div>
+            <button class="file-del" @click="deleteFile(f.id)" title="Διαγραφή">✕</button>
+          </div>
+        </div>
+        <div v-else-if="!uploading" class="files-empty">Δεν υπάρχουν αρχεία. Ανέβασε συμβόλαιο ή έγγραφο.</div>
+        <div v-if="uploadError" class="files-error">{{ uploadError }}</div>
+      </div>
+
       <!-- FINANCIAL OVERVIEW -->
       <div v-if="project.budget" class="fin-panel" style="margin-top:14px;">
         <div class="fin-title">💰 Financial Overview</div>
@@ -270,6 +293,7 @@ onMounted(async () => {
     openAcc.value.add(project.value.modules[0].id)
   }
   await loadNotes()
+  await loadFiles()
 })
 
 // ════ CEO NOTES ════
@@ -283,6 +307,63 @@ async function loadNotes() {
     const res = await api.get(`/projects/${project.value.id}/notes`)
     notes.value = res.data
   } catch { notes.value = [] }
+}
+
+// ════ CONTRACT FILES ════
+const files = ref([])
+const uploading = ref(false)
+const uploadError = ref("")
+
+async function loadFiles() {
+  if (!project.value) return
+  try {
+    const res = await api.get(`/projects/${project.value.id}/files`)
+    files.value = res.data
+  } catch { files.value = [] }
+}
+
+async function uploadFile(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  uploading.value = true
+  uploadError.value = ""
+  try {
+    const fd = new FormData()
+    fd.append("file", file)
+    await api.post(`/projects/${project.value.id}/files`, fd, {
+      headers: { "Content-Type": "multipart/form-data" }
+    })
+    await loadFiles()
+  } catch (e) {
+    uploadError.value = e.response?.data?.message || "Σφάλμα ανεβάσματος."
+  } finally {
+    uploading.value = false
+    event.target.value = ""
+  }
+}
+
+async function deleteFile(fileId) {
+  if (!confirm("Διαγραφή αρχείου;")) return
+  try {
+    await api.delete(`/projects/${project.value.id}/files/${fileId}`)
+    await loadFiles()
+  } catch {}
+}
+
+function fileIcon(ct) {
+  if (!ct) return "📄"
+  if (ct.includes("pdf")) return "📕"
+  if (ct.includes("word") || ct.includes("doc")) return "📘"
+  if (ct.includes("sheet") || ct.includes("excel")) return "📗"
+  if (ct.includes("image")) return "🖼"
+  return "📄"
+}
+
+function formatSize(bytes) {
+  if (!bytes) return "0 B"
+  if (bytes < 1024) return bytes + " B"
+  if (bytes < 1048576) return (bytes/1024).toFixed(1) + " KB"
+  return (bytes/1048576).toFixed(1) + " MB"
 }
 
 function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
@@ -562,4 +643,21 @@ function formatDate(iso) {
 .note-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
 .note-del:hover { color: var(--red); background: var(--red-dim); }
 .notes-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
+.files-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.files-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
+.files-title { font-size: 13px; font-weight: 800; }
+.files-upload-btn { font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: var(--accent); border: none; border-radius: 6px; color: #fff; cursor: pointer; transition: background 0.2s; }
+.files-upload-btn:hover { background: #2563eb; }
+.files-upload-btn.uploading { opacity: 0.6; cursor: not-allowed; }
+.files-list { padding: 0 20px; }
+.file-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.file-item:last-child { border-bottom: none; }
+.file-icon { font-size: 22px; flex-shrink: 0; }
+.file-info { flex: 1; }
+.file-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.file-meta { font-size: 10px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; margin-top: 2px; }
+.file-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 14px; padding: 4px 8px; border-radius: 4px; }
+.file-del:hover { color: var(--red); background: var(--red-dim); }
+.files-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
+.files-error { padding: 10px 20px; color: var(--red); font-size: 12px; background: var(--red-dim); }
 </style>
