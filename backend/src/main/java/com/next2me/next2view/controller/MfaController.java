@@ -91,7 +91,7 @@ public class MfaController {
             @AuthenticationPrincipal String userId) {
         User user = userRepo.findById(UUID.fromString(userId))
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return ResponseEntity.ok(Map.of("mfaEnabled", user.isMfaEnabled()));
+        return ResponseEntity.ok(Map.of("mfaEnabled", user.getMfaEnabled()));
     }
 
     private boolean verifyCode(String secret, String code) {
