@@ -53,6 +53,10 @@ public class Task extends BaseEntity {
     @Column(name = "duration_days")
     private Integer durationDays;
 
+    @Column(name = "manual_progress")
+    @Builder.Default
+    private Boolean manualProgress = false;
+
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private Integer sortOrder = 0;

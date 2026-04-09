@@ -36,7 +36,7 @@ public record ProjectDto(
         UUID id, String name, String assignee, int progress,
         boolean isDone, boolean isBlocked, String blockNote,
         String comment, LocalDate deadline,
-        Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays
+        Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress
     ) {}
     public record SpecDto(UUID id, String description, boolean isDone, int sortOrder, java.time.LocalDate startDate, java.time.LocalDate endDate) {}
 }

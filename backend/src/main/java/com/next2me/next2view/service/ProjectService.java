@@ -171,6 +171,7 @@ public class ProjectService {
                     t.setDurationWeeks(tr.durationWeeks() != null ? tr.durationWeeks() : 1);
                     t.setStartDay(tr.startDay());
                     t.setDurationDays(tr.durationDays());
+                    t.setManualProgress(tr.manualProgress() != null ? tr.manualProgress() : false);
                     t.setSortOrder(ti);
                     m.getTasks().add(t);
                 });
@@ -220,7 +221,7 @@ public class ProjectService {
             var tasks = m.getTasks().stream().map(t -> new ProjectDto.TaskDto(
                     t.getId(), t.getName(), t.getAssignee(), t.getProgress(),
                     t.getIsDone(), t.getIsBlocked(), t.getBlockNote(),
-                    t.getComment(), t.getDeadline(), t.getStartWeek(), t.getDurationWeeks(), t.getStartDay(), t.getDurationDays()
+                    t.getComment(), t.getDeadline(), t.getStartWeek(), t.getDurationWeeks(), t.getStartDay(), t.getDurationDays(), t.getManualProgress()
             )).toList();
             return new ProjectDto.ModuleDto(m.getId(), m.getName(), m.getColor(), mc, tasks);
         }).toList();

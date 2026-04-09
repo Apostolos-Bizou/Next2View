@@ -169,8 +169,8 @@
               </div>
               <span class="task-assignee">{{ t.assignee||'—' }}</span>
               <div class="task-pct-wrap">
-                <div class="task-bar"><div class="task-bar-fill" :style="`width:${t.progress}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
-                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ t.progress }}%</div>
+                <div class="task-bar"><div class="task-bar-fill" :style="`width:${displayProgress(t)}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
+                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" title="Πίσω από το πρόγραμμα!" style="color:var(--red);margin-left:4px;">⚠</span></div>
               </div>
             </div>
           </div>
@@ -504,6 +504,7 @@ async function toggleTask(t) {
   const prevPct = t.progress
   t.isDone = !t.isDone
   t.progress = t.isDone ? 100 : 0
+  t.manualProgress = true
   try {
     await api.put('/projects/' + project.value.id, {
       title: project.value.title,
@@ -525,7 +526,7 @@ async function toggleTask(t) {
           isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote,
           comment: t2.comment, deadline: t2.deadline,
           startWeek: t2.startWeek, durationWeeks: t2.durationWeeks,
-          startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0
+          startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0, manualProgress: t2.manualProgress || false
         }))
       }))
     })
@@ -610,7 +611,7 @@ async function confirmDeleteTask(t, m) {
       specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
       modules: (project.value.modules || []).map(m2 => ({
         name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
-        tasks: (m2.tasks || []).map(t2 => ({ name: t2.name, assignee: t2.assignee, progress: t2.progress, isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote, comment: t2.comment, deadline: t2.deadline, startWeek: t2.startWeek, durationWeeks: t2.durationWeeks, startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0 }))
+        tasks: (m2.tasks || []).map(t2 => ({ name: t2.name, assignee: t2.assignee, progress: t2.progress, isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote, comment: t2.comment, deadline: t2.deadline, startWeek: t2.startWeek, durationWeeks: t2.durationWeeks, startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0, manualProgress: t2.manualProgress || false }))
       }))
     })
   } catch(e) { await loadProject() }
@@ -786,6 +787,31 @@ function weekPct(weekNum) {
 }
 function weekWidthPct(weeks) {
   return (weeks / GANTT_WEEKS) * 100
+}
+
+// ════ AUTO PROGRESS ════
+function autoProgressPct(t) {
+  if (t.startDay == null || t.durationDays == null || !project.value?.startDate) return null
+  const projStart = new Date(project.value.startDate).getTime()
+  const taskStart = projStart + t.startDay * 86400000
+  const taskEnd = taskStart + t.durationDays * 86400000
+  const now = new Date().getTime()
+  if (now <= taskStart) return 0
+  if (now >= taskEnd) return 100
+  return Math.round((now - taskStart) / (taskEnd - taskStart) * 100)
+}
+
+function displayProgress(t) {
+  if (t.manualProgress) return t.progress
+  const auto = autoProgressPct(t)
+  return auto !== null ? auto : t.progress
+}
+
+function mismatchAlert(t) {
+  if (!t.manualProgress) return false
+  const auto = autoProgressPct(t)
+  if (auto === null) return false
+  return (auto - t.progress) > 20
 }
 
 function taskBarStyle(t) {
