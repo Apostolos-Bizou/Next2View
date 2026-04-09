@@ -18,6 +18,7 @@ public record ProjectDto(
     BigDecimal budget,
     BigDecimal paid,
     BigDecimal invoiced,
+    LocalDate startDate,
     LocalDate deadline,
     String contractDesc,
     int completion,

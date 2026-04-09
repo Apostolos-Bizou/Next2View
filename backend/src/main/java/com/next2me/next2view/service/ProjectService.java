@@ -54,6 +54,7 @@ public class ProjectService {
                 .budget(req.budget())
                 .paid(req.paid() != null ? req.paid() : java.math.BigDecimal.ZERO)
                 .invoiced(req.invoiced() != null ? req.invoiced() : java.math.BigDecimal.ZERO)
+                .startDate(req.startDate())
                 .deadline(req.deadline())
                 .contractDesc(req.contractDesc())
                 .status(Project.Status.on_track)
@@ -231,7 +232,7 @@ public class ProjectService {
                 p.getCompany().getCode(), p.getCompany().getColor(),
                 p.getCategory(), p.getStatus(),
                 p.getBudget(), p.getPaid(), p.getInvoiced(),
-                p.getDeadline(), p.getContractDesc(),
+                p.getStartDate(), p.getDeadline(), p.getContractDesc(),
                 completion, (int) tasksTotal, (int) tasksDone,
                 updatedAgo, modules, specs
         );

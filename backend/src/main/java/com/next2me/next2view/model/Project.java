@@ -39,6 +39,7 @@ public class Project extends BaseEntity {
     @Builder.Default
     private BigDecimal invoiced = BigDecimal.ZERO;
 
+    private LocalDate startDate;
     private LocalDate deadline;
 
     @Column(name = "contract_desc", columnDefinition = "TEXT")

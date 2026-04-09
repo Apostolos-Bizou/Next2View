@@ -17,6 +17,7 @@ public record ProjectRequest(
     BigDecimal budget,
     BigDecimal paid,
     BigDecimal invoiced,
+    LocalDate startDate,
     LocalDate deadline,
     String contractDesc,
     List<SpecRequest> specs,
@@ -31,7 +32,8 @@ public record ProjectRequest(
         String name, String assignee, int progress,
         boolean isDone, boolean isBlocked,
         String blockNote, String comment,
-        LocalDate deadline, Integer startWeek, Integer durationWeeks,
+        LocalDate startDate,
+    LocalDate deadline, Integer startWeek, Integer durationWeeks,
         int sortOrder
     ) {}
 }
