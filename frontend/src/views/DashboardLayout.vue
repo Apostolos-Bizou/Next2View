@@ -238,6 +238,43 @@
   </div>
 
   </div>
+  <!-- MFA MODAL -->
+  <div v-if="showMfaModal" class="modal-overlay" @click.self="showMfaModal=false">
+    <div class="modal" style="width:460px;">
+      <div class="modal-header">
+        <div class="modal-title">🔐 Two-Factor Authentication</div>
+        <button class="modal-close" @click="showMfaModal=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div v-if="!mfaSetupData && !mfaEnabled" class="mfa-info">
+          <div class="mfa-status off">⚠ MFA απενεργοποιημένο</div>
+          <p class="mfa-desc">Ενεργοποίησε MFA για επιπλέον ασφάλεια. Χρειάζεσαι Google Authenticator ή Authy.</p>
+          <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : "Ενεργοποίηση MFA" }}</button>
+        </div>
+        <div v-if="mfaSetupData" class="mfa-setup">
+          <div class="mfa-status">📱 Σκάναρε το QR Code</div>
+          <div class="mfa-qr-wrap">
+            <img :src="qrCodeUrl" class="mfa-qr" alt="QR" />
+          </div>
+          <div class="mfa-secret-box">
+            <span class="mfa-secret-label">Manual key:</span>
+            <code class="mfa-secret">{{ mfaSetupData.secret }}</code>
+          </div>
+          <p class="mfa-desc">Μετά το scan, εισήγαγε τον 6-ψήφιο κωδικό:</p>
+          <input v-model="mfaCode" type="text" maxlength="6" placeholder="000000" class="form-input mfa-code-input" />
+          <div v-if="mfaError" class="form-error">{{ mfaError }}</div>
+          <button class="btn-submit" @click="verifyMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "Επαλήθευση..." : "Επαλήθευση & Ενεργοποίηση" }}</button>
+        </div>
+        <div v-if="mfaEnabled && !mfaSetupData" class="mfa-info">
+          <div class="mfa-status on">✅ MFA ενεργοποιημένο</div>
+          <p class="mfa-desc">Το 2FA προστατεύει τον λογαριασμό σου.</p>
+          <input v-model="mfaCode" type="text" maxlength="6" placeholder="Κωδικός για απενεργοποίηση..." class="form-input mfa-code-input" />
+          <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : "Απενεργοποίηση MFA" }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup>
