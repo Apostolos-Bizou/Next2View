@@ -98,3 +98,24 @@ body {
 .cat-pill.legal    { background: var(--legal-dim);    color: var(--legal); }
 .cat-pill.dev      { background: var(--dev-dim);      color: var(--dev); }
 .cat-pill.marketing{ background: var(--marketing-dim);color: var(--marketing); }
+/* ═══ MOBILE OVERFLOW FIX ═══ */
+html {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+* {
+  max-width: 100%;
+}
+img, table, video, iframe {
+  max-width: 100%;
+}
+@media (max-width: 768px) {
+  .content { overflow-x: hidden !important; }
+  .panel { overflow-x: hidden !important; }
+  .shell { overflow-x: hidden !important; max-width: 100vw !important; }
+  .main { overflow-x: hidden !important; max-width: 100vw !important; }
+}
