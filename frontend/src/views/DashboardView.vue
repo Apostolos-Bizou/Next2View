@@ -402,7 +402,12 @@ function formatAgo(mins) {
 
 @media (max-width: 768px) {
   .content { padding: 16px 12px; }
-  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .kpi-strip { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+  .g2 { grid-template-columns: 1fr !important; gap: 10px; }
+  .g4 { grid-template-columns: 1fr !important; gap: 10px; }
+  .panel { margin-bottom: 10px; }
+  .kpi { padding: 16px 12px; }
+  .kpi-val { font-size: 28px; }
   .kpi { padding: 14px 12px; }
   .kpi-val { font-size: 20px; }
   .dash-grid { flex-direction: column; }
