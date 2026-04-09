@@ -780,6 +780,24 @@ function formatDate(iso) {
 .notes-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
 .edit-project-btn { position: absolute; top: 14px; right: 16px; font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: #fff; cursor: pointer; transition: background 0.2s; }
 .edit-project-btn:hover { background: rgba(255,255,255,0.25); }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal { background: var(--surface); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; }
+.modal-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface2); }
+.modal-title { font-size: 15px; font-weight: 800; color: var(--text); }
+.modal-close { background: none; border: none; font-size: 18px; color: var(--text-dim); cursor: pointer; padding: 4px 8px; border-radius: 4px; }
+.modal-close:hover { background: var(--surface3); color: var(--text); }
+.modal-body { padding: 24px; overflow-y: auto; flex: 1; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; background: var(--surface2); }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.form-group label { font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); }
+.form-input { background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 7px; padding: 9px 12px; color: var(--text); font-family: 'Nunito Sans', sans-serif; font-size: 13px; width: 100%; box-sizing: border-box; }
+.form-input:focus { outline: none; border-color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.btn-cancel { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 20px; border: 1px solid var(--border-bright); border-radius: 7px; background: var(--surface2); color: var(--text-mid); cursor: pointer; }
+.btn-submit { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; padding: 9px 20px; border: none; border-radius: 7px; background: var(--accent); color: #fff; cursor: pointer; }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.form-error { color: var(--red); font-size: 12px; margin-top: 8px; }
+.form-section-title { font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
 .modal-edit { width: 620px; max-height: 85vh; }
 .form-section-title { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
 .files-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
