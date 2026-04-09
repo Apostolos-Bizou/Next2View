@@ -48,7 +48,12 @@ public class User extends BaseEntity {
     private Instant lockedUntil;
 
     @Column(nullable = false)
-    private Boolean active = true;
+    private boolean active = true;
+    @Column(name = "mfa_secret")
+    private String mfaSecret;
+    @Column(name = "mfa_enabled", nullable = false)
+    @Builder.Default
+    private boolean mfaEnabled = false;
 
     public enum Role {
         CEO, DEPT_HEAD, VIEWER
