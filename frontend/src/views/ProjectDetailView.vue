@@ -339,6 +339,39 @@
         </div>
         <div v-if="editError" class="form-error">{{ editError }}</div>
       </div>
+      <!-- MODULES SECTION -->
+      <div class="modal-body" style="border-top:1px solid var(--border);padding-top:20px;">
+        <div class="form-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+          MODULES & TASKS
+          <button @click="editAddModule" style="font-size:11px;padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;">+ Module</button>
+        </div>
+        <div v-for="(m, mi) in editForm.modules" :key="mi" style="margin-bottom:16px;background:var(--surface2);border-radius:8px;padding:12px;">
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+            <input v-model="m.name" type="text" class="form-input" style="flex:1;" :placeholder="'Module ' + (mi+1) + ' name'" />
+            <select v-model="m.color" class="form-input" style="width:130px;">
+              <option value="finance">Finance</option>
+              <option value="legal">Legal</option>
+              <option value="dev">Dev</option>
+              <option value="marketing">Marketing</option>
+            </select>
+            <button @click="editForm.modules.splice(mi,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 8px;cursor:pointer;">✕</button>
+          </div>
+          <div v-for="(t, ti) in m.tasks" :key="ti" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;padding-left:12px;">
+            <input v-model="t.name" type="text" class="form-input" style="flex:2;" placeholder="Task name" />
+            <input v-model="t.assignee" type="text" class="form-input" style="flex:1;" placeholder="Assignee" />
+            <input v-model.number="t.progress" type="number" class="form-input" style="width:65px;" min="0" max="100" placeholder="%" />
+            <button @click="m.tasks.splice(ti,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 6px;cursor:pointer;">✕</button>
+          </div>
+          <button @click="m.tasks.push({name:'',assignee:'',progress:0,isDone:false,isBlocked:false,blockNote:'',comment:'',deadline:null,startWeek:mi+1,durationWeeks:1,sortOrder:m.tasks.length})"
+            style="font-size:11px;padding:3px 10px;background:var(--surface3);color:var(--text-mid);border:1px solid var(--border-bright);border-radius:5px;cursor:pointer;margin-left:12px;">
+            + Task
+          </button>
+        </div>
+        <div v-if="editForm.modules.length===0" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;">
+          Δεν υπάρχουν modules. Πάτα + Module για να προσθέσεις.
+        </div>
+      </div>
+
       <div class="modal-footer">
         <button class="btn-cancel" @click="showEditModal=false">Ακύρωση</button>
         <button class="btn-submit" @click="saveEdit" :disabled="editSaving">
@@ -528,6 +561,13 @@ async function saveEdit() {
   } catch (e) {
     editError.value = e.response?.data?.message || "Σφάλμα αποθήκευσης."
   } finally { editSaving.value = false }
+}
+
+function editAddModule() {
+  editForm.value.modules.push({
+    name: '', color: editForm.value.category || 'dev', sortOrder: editForm.value.modules.length,
+    tasks: []
+  })
 }
 
 function cancelNote() {
