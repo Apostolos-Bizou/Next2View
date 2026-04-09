@@ -120,6 +120,7 @@
                 <div class="gantt-task-lbl">
                   <div :class="`task-chk ${t.isDone ? 'done' : t.isBlocked ? 'block' : ''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone ? '✓' : '' }}</div>
                   <span :class="`task-name-g ${t.isDone ? 'done' : ''}`">{{ t.name }}</span>
+                  <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" title="Διαγραφή task">🗑</button>
                   <span v-if="t.isBlocked" class="task-blocked-ico">⚠</span>
                 </div>
                 <div class="gantt-track">
@@ -163,6 +164,7 @@
               <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
               <div style="flex:1;">
                 <div :class="`task-name ${t.isDone?'done':''}`">{{ t.name }}</div>
+                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" title="Διαγραφή task">🗑</button>
                 <div v-if="t.blockNote" class="task-note">⚠ {{ t.blockNote }}</div>
               </div>
               <span class="task-assignee">{{ t.assignee||'—' }}</span>
