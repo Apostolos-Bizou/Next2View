@@ -1,4 +1,4 @@
-﻿# Next2View — Spring Boot Configuration
+# Next2View — Spring Boot Configuration
 # ΚΑΝΕΝΑ secret εδώ — όλα από Azure Key Vault / env vars
 
 spring:
@@ -90,6 +90,11 @@ management:
   endpoint:
     health:
       show-details: never
+
+# ── ANTHROPIC ──
+anthropic:
+  api:
+    key: ${ANTHROPIC_API_KEY:}
 
 # ── LOGGING ──
 logging:
