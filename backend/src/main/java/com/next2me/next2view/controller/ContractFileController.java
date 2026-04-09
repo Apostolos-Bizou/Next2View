@@ -2,6 +2,7 @@ package com.next2me.next2view.controller;
 
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.common.StorageSharedKeyCredential;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
 import java.time.OffsetDateTime;
 import com.azure.storage.blob.sas.BlobSasPermission;
@@ -53,6 +54,7 @@ public class ContractFileController {
     private String storageKey;
 
     private BlobContainerClient containerClient;
+    private StorageSharedKeyCredential sharedKeyCredential;
 
     @PostConstruct
     public void init() {
@@ -62,6 +64,7 @@ public class ContractFileController {
                 String connStr = String.format(
                     "DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s;EndpointSuffix=core.windows.net",
                     storageAccount, storageKey);
+                sharedKeyCredential = new StorageSharedKeyCredential(storageAccount, storageKey);
                 BlobServiceClient client = new BlobServiceClientBuilder()
                     .connectionString(connStr).buildClient();
                 containerClient = client.getBlobContainerClient("contracts");
@@ -139,7 +142,12 @@ public class ContractFileController {
 
         if (containerClient != null) {
             try {
-                BlobClient blobClient = containerClient.getBlobClient(cf.getBlobPath());
+                BlobClient blobClient = new com.azure.storage.blob.BlobServiceClientBuilder()
+                    .credential(sharedKeyCredential)
+                    .endpoint("https://" + storageAccount + ".blob.core.windows.net")
+                    .buildClient()
+                    .getBlobContainerClient("contracts")
+                    .getBlobClient(cf.getBlobPath());
                 BlobSasPermission permission = new BlobSasPermission().setReadPermission(true);
                 BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(
                     OffsetDateTime.now().plusHours(1), permission);
