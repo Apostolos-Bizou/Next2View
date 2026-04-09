@@ -30,6 +30,7 @@
             <td>
               <button class="icon-btn" @click="openUserModal(u)" title="Edit">✎</button>
               <button class="icon-btn red" @click="toggleUser(u)" :title="u.active ? 'Deactivate' : 'Activate'">{{ u.active ? '⏸' : '▶' }}</button>
+              <button class="icon-btn red" @click="confirmDelete(u)" title="Delete">🗑</button>
             </td>
           </tr>
         </tbody>
@@ -248,6 +249,16 @@ async function toggleUser(u) {
     await api.put(`/admin/users/${u.id}`, { ...u, active: !u.active })
     await loadUsers()
   } catch {}
+}
+
+async function confirmDelete(u) {
+  if (!confirm(`Διαγραφή χρήστη "${u.fullName}"; Αυτή η ενέργεια δεν αναιρείται.`)) return
+  try {
+    await api.delete(`/admin/users/${u.id}`)
+    await loadUsers()
+  } catch (e) {
+    alert(e.response?.data?.message || "Σφάλμα διαγραφής.")
+  }
 }
 
 function openCoModal(co = null) {
