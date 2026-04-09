@@ -247,7 +247,7 @@
 
       <!-- SPECS -->
       <div v-if="project.specs && project.specs.length" class="specs-panel" style="margin-top:14px;">
-        <div class="specs-title">📋 Specifications</div>
+        <div class="specs-title" style="display:flex;align-items:center;justify-content:space-between;">📋 Specifications <button @click="quickAddModule" style="font-size:11px;padding:4px 12px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:700;">+ Module</button></div>
         <div class="specs-list">
           <div v-for="s in project.specs" :key="s.id" class="spec-item" @click="openSpecDetail(s)" style="cursor:pointer;">
             <div :class="specCheckClass(s)" @click.stop="toggleSpec(s)" style="cursor:pointer;">{{ s.isDone ? '✓' : '' }}</div>
@@ -748,6 +748,49 @@ async function saveSpecDetail() {
   } catch(e) {
     specSaveError.value = 'Σφάλμα αποθήκευσης.'
   } finally { specSaving.value = false }
+}
+
+async function quickAddModule() {
+  const name = prompt('Όνομα νέου Module:')
+  if (!name || !name.trim()) return
+  const newModule = {
+    name: name.trim(),
+    color: project.value.category || 'dev',
+    sortOrder: (project.value.modules || []).length,
+    tasks: []
+  }
+  project.value.modules = [...(project.value.modules || []), newModule]
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title,
+      companyId: project.value.companyId,
+      category: project.value.category,
+      budget: project.value.budget || 0,
+      startDate: project.value.startDate || null,
+      deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '',
+      status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({
+        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
+        startDate: s.startDate || null, endDate: s.endDate || null
+      })),
+      modules: (project.value.modules || []).map((m, mi) => ({
+        name: m.name, color: m.color, sortOrder: mi,
+        tasks: (m.tasks || []).map((t, ti) => ({
+          name: t.name, assignee: t.assignee, progress: t.progress,
+          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+          comment: t.comment, deadline: t.deadline,
+          startWeek: t.startWeek || (mi + 1), durationWeeks: t.durationWeeks || 1,
+          startDay: t.startDay, durationDays: t.durationDays,
+          sortOrder: ti, manualProgress: t.manualProgress || false
+        }))
+      }))
+    })
+    await loadProject()
+  } catch(e) {
+    project.value.modules.pop()
+    alert('Σφάλμα κατά την προσθήκη module.')
+  }
 }
 
 function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
