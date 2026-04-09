@@ -140,6 +140,47 @@
                 </div>
               </div>
 
+  <!-- SPEC DETAIL MODAL -->
+  <div v-if="showSpecModal" class="modal-overlay" @click.self="showSpecModal=false">
+    <div class="modal" style="width:500px;">
+      <div class="modal-header">
+        <div class="modal-title">📋 Specification</div>
+        <button class="modal-close" @click="showSpecModal=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Περιγραφή</label>
+          <textarea v-model="selectedSpec.description" class="form-input" rows="4" placeholder="Περιγραφή specification..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Ημ. Έναρξης</label>
+            <input v-model="selectedSpec.startDate" type="date" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Ημ. Λήξης</label>
+            <input v-model="selectedSpec.endDate" type="date" class="form-input" />
+          </div>
+        </div>
+        <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+          <label style="text-transform:none;letter-spacing:0;font-size:13px;">Ολοκληρωμένο</label>
+          <div :class="selectedSpec.isDone ? 'spec-check done' : 'spec-check'"
+            @click="selectedSpec.isDone = !selectedSpec.isDone"
+            style="cursor:pointer;width:20px;height:20px;font-size:11px;">
+            {{ selectedSpec.isDone ? '✓' : '' }}
+          </div>
+        </div>
+        <div v-if="specSaveError" class="form-error">{{ specSaveError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showSpecModal=false">Ακύρωση</button>
+        <button class="btn-submit" @click="saveSpecDetail" :disabled="specSaving">
+          {{ specSaving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </template>
           </template>
         </div>
@@ -181,7 +222,7 @@
       <div v-if="project.specs && project.specs.length" class="specs-panel" style="margin-top:14px;">
         <div class="specs-title">📋 Specifications</div>
         <div class="specs-list">
-          <div v-for="s in project.specs" :key="s.id" class="spec-item">
+          <div v-for="s in project.specs" :key="s.id" class="spec-item" @click="openSpecDetail(s)" style="cursor:pointer;">
             <div :class="specCheckClass(s)" @click.stop="toggleSpec(s)" style="cursor:pointer;">{{ s.isDone ? '✓' : '' }}</div>
             <div style="flex:1;">
               <div :class="specTxtClass(s)">{{ s.description }}</div>
@@ -615,6 +656,58 @@ async function confirmDeleteTask(t, m) {
       }))
     })
   } catch(e) { await loadProject() }
+}
+
+// ════ SPEC DETAIL MODAL ════
+const showSpecModal = ref(false)
+const selectedSpec = ref({})
+const specSaveError = ref('')
+const specSaving = ref(false)
+
+function openSpecDetail(s) {
+  selectedSpec.value = { ...s }
+  specSaveError.value = ''
+  showSpecModal.value = true
+}
+
+async function saveSpecDetail() {
+  specSaving.value = true
+  specSaveError.value = ''
+  // Update in project.specs
+  const idx = project.value.specs.findIndex(s => s.id === selectedSpec.value.id)
+  if (idx !== -1) {
+    project.value.specs[idx] = { ...selectedSpec.value }
+  }
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title,
+      companyId: project.value.companyId,
+      category: project.value.category,
+      budget: project.value.budget || 0,
+      startDate: project.value.startDate || null,
+      deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '',
+      status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({
+        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
+        startDate: s.startDate || null, endDate: s.endDate || null
+      })),
+      modules: (project.value.modules || []).map(m => ({
+        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+        tasks: (m.tasks || []).map(t => ({
+          name: t.name, assignee: t.assignee, progress: t.progress,
+          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+          comment: t.comment, deadline: t.deadline,
+          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
+          startDay: t.startDay, durationDays: t.durationDays,
+          sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false
+        }))
+      }))
+    })
+    showSpecModal.value = false
+  } catch(e) {
+    specSaveError.value = 'Σφάλμα αποθήκευσης.'
+  } finally { specSaving.value = false }
 }
 
 function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
