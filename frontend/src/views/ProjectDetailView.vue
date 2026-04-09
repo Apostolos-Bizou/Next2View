@@ -828,7 +828,8 @@ async function saveEdit() {
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
           comment: t.comment, deadline: t.deadline,
-          startWeek: t.startWeek, durationWeeks: t.durationWeeks, sortOrder: t.sortOrder || 0
+          startWeek: t.startWeek, durationWeeks: t.durationWeeks, sortOrder: t.sortOrder || 0,
+          startDate: t.startDate || null, endDate: t.endDate || null
         }))
       })),
       specs: editForm.value.specs.map(s => ({
@@ -974,6 +975,19 @@ function mismatchAlert(t) {
 
 function taskBarStyle(t) {
   const totalDays = GANTT_WEEKS * 7
+  // Πρώτα: αν υπάρχουν startDate/endDate χρησιμοποίησε τα (V13)
+  if (t.startDate && project.value?.startDate) {
+    const projStart = new Date(project.value.startDate).getTime()
+    const gs = ganttStart.value.getTime()
+    const taskStart = new Date(t.startDate).getTime()
+    const taskEnd = t.endDate ? new Date(t.endDate).getTime() : taskStart + 7 * 86400000
+    const left = (taskStart - gs) / (totalDays * 86400000) * 100
+    const width = Math.max((1 / totalDays) * 100, (taskEnd - taskStart) / 86400000 / totalDays * 100)
+    if (left >= 100 || left + width < 0) return { show: false }
+    const l = Math.max(0, left)
+    const w = Math.min(width, 100 - l)
+    return { show: true, left: l, width: w }
+  }
   if (t.startDay != null && t.durationDays != null) {
     const left = (t.startDay / totalDays) * 100
     const width = Math.max((1 / totalDays) * 100, (t.durationDays / totalDays) * 100)
