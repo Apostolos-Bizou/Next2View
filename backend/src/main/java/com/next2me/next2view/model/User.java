@@ -34,7 +34,7 @@ public class User extends BaseEntity {
     private Instant lockedUntil;
     @Column(nullable = false)
     @Builder.Default
-    private boolean active = true;
+    private Boolean active = true;
 
     public enum Role { CEO, DEPT_HEAD, VIEWER }
     public enum Department { finance, legal, dev, marketing, management }
