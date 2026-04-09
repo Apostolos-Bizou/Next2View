@@ -93,6 +93,7 @@ public class ProjectService {
         p.setBudget(req.budget());
         if (req.paid() != null) p.setPaid(req.paid());
         if (req.invoiced() != null) p.setInvoiced(req.invoiced());
+        p.setStartDate(req.startDate());
         p.setDeadline(req.deadline());
         p.setContractDesc(req.contractDesc());
         p.setLastUpdatedBy(actor);
