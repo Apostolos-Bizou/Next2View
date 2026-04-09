@@ -846,6 +846,10 @@ async function saveEdit() {
   } finally { editSaving.value = false }
 }
 
+async function loadProject() {
+  project.value = await store.fetchProject(route.params.id)
+}
+
 function editAddModule() {
   editForm.value.modules.push({
     name: '', color: editForm.value.category || 'dev', sortOrder: editForm.value.modules.length,
