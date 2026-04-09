@@ -18,7 +18,7 @@
           <div>
             <div class="ch-title">{{ project.title }}</div>
             <div class="ch-meta">
-              <span :style="`color:${project.companyColor};font-weight:700;`">{{ project.companyCode }}</span>
+              <span :style="`color:var(--${project.category});font-weight:700;`">{{ project.companyCode }}</span>
               <span>{{ project.companyName }}</span>
               <span v-if="project.deadline">Deadline: {{ formatDate(project.deadline) }}</span>
               <span v-if="project.budget">Budget: €{{ Number(project.budget).toLocaleString() }}</span>
@@ -26,8 +26,6 @@
           </div>
           <span :class="`ch-badge ${project.category}`">{{ catLabel(project.category) }}</span>
         </div>
-
-        <!-- STATS ROW -->
         <div class="contract-stats">
           <div class="cs-item">
             <div class="cs-lbl">Overall</div>
@@ -39,17 +37,13 @@
           </div>
           <div class="cs-item">
             <div class="cs-lbl">Status</div>
-            <div class="cs-val" :class="`status-val-${project.status}`" style="font-size:13px;">
-              {{ statusLabel(project.status) }}
-            </div>
+            <div class="cs-val" :class="`sv-${project.status}`" style="font-size:13px;">{{ statusLabel(project.status) }}</div>
           </div>
           <div v-if="project.budget" class="cs-item">
             <div class="cs-lbl">Budget</div>
             <div class="cs-val">€{{ Number(project.budget).toLocaleString() }}</div>
           </div>
         </div>
-
-        <!-- PROGRESS BAR -->
         <div class="ch-progress-wrap">
           <div class="ch-progress-bar">
             <div class="ch-progress-fill" :style="`width:${project.completion}%;background:var(--${project.category});`"></div>
@@ -58,60 +52,126 @@
         </div>
       </div>
 
-      <!-- SPECS -->
-      <div v-if="project.specs && project.specs.length" class="specs-panel">
-        <div class="specs-title">📋 Specifications</div>
-        <div class="specs-list">
-          <div v-for="s in project.specs" :key="s.id" class="spec-item">
-            <div :class="`spec-check ${s.isDone ? 'done' : ''}`">{{ s.isDone ? "✓" : "" }}</div>
-            <div :class="`spec-txt ${s.isDone ? 'done' : ''}`">{{ s.description }}</div>
+      <!-- GANTT TIMELINE -->
+      <div v-if="project.modules && project.modules.length" class="gantt-panel">
+        <div class="gantt-ph">
+          <div class="gantt-ph-title">📊 Project Timeline</div>
+          <div class="gantt-ph-sub">{{ project.title }} · {{ ganttWeeks.length }} weeks</div>
+        </div>
+        <div class="gantt-scroll">
+          <!-- HEADER -->
+          <div class="gantt-header">
+            <div class="gantt-lbl-col">MODULE / TASK</div>
+            <div class="gantt-weeks-row">
+              <div v-for="w in ganttWeeks" :key="w.num"
+                :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]">
+                <div class="gantt-wk-num">W{{ w.num }}</div>
+                <div class="gantt-wk-date">{{ w.dateLabel }}</div>
+              </div>
+            </div>
           </div>
+
+          <!-- PROJECT ROW -->
+          <div class="gantt-proj-row">
+            <div class="gantt-proj-lbl">
+              <span :class="`cat-icon ${project.category}`">{{ catIcon(project.category) }}</span>
+              <strong>{{ project.title }}</strong>
+              <span class="gantt-proj-co">{{ project.companyName }}</span>
+            </div>
+            <div class="gantt-proj-track">
+              <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
+            </div>
+          </div>
+
+          <!-- MODULES + TASKS -->
+          <template v-for="m in project.modules" :key="m.id">
+            <!-- MODULE ROW -->
+            <div class="gantt-mod-row" @click="toggleMod(m.id)">
+              <div class="gantt-mod-lbl">
+                <span :class="`mod-dot ${m.color || project.category}`"></span>
+                <span class="mod-name">{{ m.name }}</span>
+                <span class="mod-pct" :style="`color:var(--${m.color || project.category});`">{{ m.completion }}%</span>
+              </div>
+              <div class="gantt-track">
+                <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
+                <!-- Module span bar -->
+                <div v-if="moduleBarStyle(m).show" class="gantt-mod-bar"
+                  :style="`left:${moduleBarStyle(m).left}%;width:${moduleBarStyle(m).width}%;background:var(--${m.color || project.category});opacity:0.15;`">
+                </div>
+              </div>
+            </div>
+
+            <!-- TASK ROWS -->
+            <template v-if="!collapsedMods.has(m.id)">
+              <div v-for="t in m.tasks" :key="t.id" class="gantt-task-row">
+                <div class="gantt-task-lbl">
+                  <div :class="`task-chk ${t.isDone ? 'done' : t.isBlocked ? 'block' : ''}`">{{ t.isDone ? '✓' : '' }}</div>
+                  <span :class="`task-name-g ${t.isDone ? 'done' : ''}`">{{ t.name }}</span>
+                  <span v-if="t.isBlocked" class="task-blocked-ico">⚠</span>
+                </div>
+                <div class="gantt-track">
+                  <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
+                  <div v-if="taskBarStyle(t).show"
+                    class="gantt-task-bar"
+                    :style="`
+                      left:${taskBarStyle(t).left}%;
+                      width:${taskBarStyle(t).width}%;
+                      background:var(--${t.isDone ? 'green' : t.isBlocked ? 'red' : (m.color || project.category)});
+                      opacity:${t.isDone ? 0.9 : 0.75};
+                    `">
+                    <div class="gantt-task-fill"
+                      :style="`width:${t.progress}%;background:rgba(255,255,255,0.35);`"></div>
+                    <span class="gantt-task-label">{{ t.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </template>
         </div>
       </div>
 
-      <!-- MODULES -->
-      <div v-if="project.modules && project.modules.length">
-        <div class="modules-title">Modules & Tasks</div>
-        <div v-for="m in project.modules" :key="m.id" class="module-group">
-          <div class="mg-header" @click="toggleMod(m.id)">
-            <span class="mg-expand">{{ openMods.has(m.id) ? "▼" : "▶" }}</span>
+      <!-- MODULES ACCORDION (detail) -->
+      <div v-if="project.modules && project.modules.length" style="margin-top:14px;">
+        <div class="modules-title">Modules & Tasks Detail</div>
+        <div v-for="m in project.modules" :key="m.id+'acc'" class="module-group">
+          <div class="mg-header" @click="toggleAcc(m.id)">
+            <span class="mg-expand">{{ openAcc.has(m.id) ? '▼' : '▶' }}</span>
             <span class="mg-name">{{ m.name }}</span>
             <div class="mg-right">
-              <div class="mg-bar-wrap">
-                <div class="mg-bar">
-                  <div class="mg-bar-fill" :style="`width:${m.completion}%;background:var(--${m.color});`"></div>
-                </div>
-              </div>
-              <span class="mg-pct" :style="`color:var(--${m.color});`">{{ m.completion }}%</span>
+              <div class="mg-bar-wrap"><div class="mg-bar"><div class="mg-bar-fill" :style="`width:${m.completion}%;background:var(--${m.color||project.category});`"></div></div></div>
+              <span class="mg-pct" :style="`color:var(--${m.color||project.category});`">{{ m.completion }}%</span>
               <span class="mg-tasks">{{ m.tasks.filter(t=>t.isDone).length }}/{{ m.tasks.length }}</span>
             </div>
           </div>
-
-          <div v-if="openMods.has(m.id)" class="task-list">
-            <div v-for="t in m.tasks" :key="t.id" class="task-item">
-              <div :class="`task-check ${t.isDone ? 'done' : t.isBlocked ? 'block' : ''}`">
-                {{ t.isDone ? "✓" : "" }}
-              </div>
+          <div v-if="openAcc.has(m.id)" class="task-list">
+            <div v-for="t in m.tasks" :key="t.id+'acc'" class="task-item">
+              <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`">{{ t.isDone?'✓':'' }}</div>
               <div style="flex:1;">
-                <div :class="`task-name ${t.isDone ? 'done' : ''}`">{{ t.name }}</div>
+                <div :class="`task-name ${t.isDone?'done':''}`">{{ t.name }}</div>
                 <div v-if="t.blockNote" class="task-note">⚠ {{ t.blockNote }}</div>
-                <div v-if="t.comment" class="task-comment">💬 {{ t.comment }}</div>
               </div>
-              <span class="task-assignee">{{ t.assignee || "—" }}</span>
+              <span class="task-assignee">{{ t.assignee||'—' }}</span>
               <div class="task-pct-wrap">
-                <div class="task-bar">
-                  <div class="task-bar-fill" :style="`width:${t.progress}%;background:${t.isDone ? 'var(--green)' : 'var(--'+m.color+')'};`"></div>
-                </div>
-                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--'+m.color+')'};`">{{ t.progress }}%</div>
+                <div class="task-bar"><div class="task-bar-fill" :style="`width:${t.progress}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
+                <div class="task-pct" :style="`color:${t.isDone?'var(--green)':'var(--)'+( m.color||project.category)};`">{{ t.progress }}%</div>
               </div>
             </div>
-            <div v-if="!m.tasks.length" class="task-empty">Δεν υπάρχουν tasks.</div>
           </div>
         </div>
       </div>
 
-      <!-- CONTRACT DESC -->
-      <div v-if="project.contractDesc" class="contract-desc-panel">
+      <!-- SPECS -->
+      <div v-if="project.specs && project.specs.length" class="specs-panel" style="margin-top:14px;">
+        <div class="specs-title">📋 Specifications</div>
+        <div class="specs-list">
+          <div v-for="s in project.specs" :key="s.id" class="spec-item">
+            <div :class="`spec-check ${s.isDone?'done':''}`">{{ s.isDone?'✓':'' }}</div>
+            <div :class="`spec-txt ${s.isDone?'done':''}`">{{ s.description }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="project.contractDesc" class="contract-desc-panel" style="margin-top:14px;">
         <div class="cd-title">📄 Περιγραφή Σύμβασης</div>
         <div class="cd-text">{{ project.contractDesc }}</div>
       </div>
@@ -122,42 +182,103 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useProjectStore } from "@/stores/projects";
+import { ref, computed, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useProjectStore } from '@/stores/projects'
 
-const route = useRoute();
-const router = useRouter();
-const store = useProjectStore();
+const route = useRoute()
+const router = useRouter()
+const store = useProjectStore()
 
-const project = ref(null);
-const loading = ref(true);
-const openMods = ref(new Set());
+const project = ref(null)
+const loading = ref(true)
+const collapsedMods = ref(new Set())
+const openAcc = ref(new Set())
+
+const GANTT_WEEKS = 12
 
 onMounted(async () => {
-  project.value = await store.fetchProject(route.params.id);
-  loading.value = false;
-  // Ανοίγουμε αυτόματα το πρώτο module
+  project.value = await store.fetchProject(route.params.id)
+  loading.value = false
+  // First module open in accordion
   if (project.value?.modules?.length) {
-    openMods.value.add(project.value.modules[0].id);
+    openAcc.value.add(project.value.modules[0].id)
   }
-});
+})
 
 function toggleMod(id) {
-  const s = new Set(openMods.value);
-  if (s.has(id)) s.delete(id);
-  else s.add(id);
-  openMods.value = s;
+  const s = new Set(collapsedMods.value)
+  if (s.has(id)) s.delete(id); else s.add(id)
+  collapsedMods.value = s
+}
+function toggleAcc(id) {
+  const s = new Set(openAcc.value)
+  if (s.has(id)) s.delete(id); else s.add(id)
+  openAcc.value = s
 }
 
-const catLabel = (c) => ({ finance:"Finance", legal:"Legal", dev:"Developing", marketing:"Marketing" }[c] || c);
-const statusLabel = (s) => ({ on_track:"On Track", delayed:"Delayed", at_risk:"At Risk", stale:"Stale", completed:"Completed" }[s] || s);
+// ════ GANTT LOGIC ════
+const ganttWeeks = computed(() => {
+  const weeks = []
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const start = new Date()
+  start.setDate(start.getDate() - start.getDay())
+  for (let i = 0; i < GANTT_WEEKS; i++) {
+    const d = new Date(start)
+    d.setDate(d.getDate() + i * 7)
+    weeks.push({
+      num: i + 1,
+      dateLabel: `${d.getDate()} ${months[d.getMonth()]}`,
+      isCurrentWeek: i === 0,
+      weekIndex: i
+    })
+  }
+  return weeks
+})
+
+const todayPct = computed(() => {
+  const start = new Date()
+  start.setDate(start.getDate() - start.getDay())
+  const end = new Date(start)
+  end.setDate(end.getDate() + GANTT_WEEKS * 7)
+  const now = new Date()
+  return Math.min(100, Math.max(0, (now - start) / (end - start) * 100))
+})
+
+function weekPct(weekNum) {
+  return ((weekNum - 1) / GANTT_WEEKS) * 100
+}
+function weekWidthPct(weeks) {
+  return (weeks / GANTT_WEEKS) * 100
+}
+
+function taskBarStyle(t) {
+  if (!t.startWeek) return { show: false }
+  const left = weekPct(t.startWeek)
+  const width = Math.max(weekWidthPct(t.durationWeeks || 1), weekWidthPct(1))
+  if (left >= 100) return { show: false }
+  return { show: true, left, width: Math.min(width, 100 - left) }
+}
+
+function moduleBarStyle(m) {
+  const tasks = m.tasks.filter(t => t.startWeek)
+  if (!tasks.length) return { show: false }
+  const minW = Math.min(...tasks.map(t => t.startWeek))
+  const maxW = Math.max(...tasks.map(t => (t.startWeek || 1) + (t.durationWeeks || 1)))
+  const left = weekPct(minW)
+  const width = weekPct(maxW) - left
+  return { show: true, left, width: Math.min(width, 100 - left) }
+}
+
+const catLabel = (c) => ({ finance:'Finance', legal:'Legal', dev:'Developing', marketing:'Marketing' }[c] || c)
+const catIcon  = (c) => ({ finance:'$', legal:'⚖', dev:'⌨', marketing:'◈' }[c] || '·')
+const statusLabel = (s) => ({ on_track:'On Track', delayed:'Delayed', at_risk:'At Risk', stale:'Stale', completed:'Completed' }[s] || s)
 
 function formatDate(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  const m = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"];
-  return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;
+  if (!iso) return '—'
+  const d = new Date(iso)
+  const m = ['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ']
+  return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`
 }
 </script>
 
@@ -165,10 +286,9 @@ function formatDate(iso) {
 .content { padding: 26px 32px; overflow-y: auto; flex: 1; }
 .loading { color: var(--text-dim); font-size: 14px; padding: 40px; text-align: center; }
 .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); margin-bottom: 18px; font-family: "Nunito Sans", sans-serif; }
-.breadcrumb span { cursor: pointer; transition: color 0.15s; font-weight: 600; }
+.breadcrumb span { cursor: pointer; font-weight: 600; transition: color 0.15s; }
 .breadcrumb span:hover { color: var(--accent); }
 .bc-sep { color: var(--border-bright); }
-
 .contract-header { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 14px; position: relative; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
 .contract-header::before { content: ""; position: absolute; top: 0; left: 0; bottom: 0; width: 4px; }
 .contract-header.finance::before  { background: var(--finance); }
@@ -177,7 +297,7 @@ function formatDate(iso) {
 .contract-header.marketing::before{ background: var(--marketing); }
 .ch-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
 .ch-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
-.ch-meta { font-size: 11px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.ch-meta { font-size: 11px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; display: flex; gap: 14px; flex-wrap: wrap; }
 .ch-badge { font-size: 9px; font-weight: 700; padding: 4px 12px; border-radius: 6px; letter-spacing: 1px; }
 .ch-badge.finance  { background: var(--finance-dim);  color: var(--finance); }
 .ch-badge.legal    { background: var(--legal-dim);    color: var(--legal); }
@@ -187,27 +307,69 @@ function formatDate(iso) {
 .cs-item { background: var(--surface2); border-radius: 8px; padding: 12px 14px; border: 1px solid var(--border); text-align: center; }
 .cs-lbl { font-family: "Nunito Sans", sans-serif; font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; font-weight: 700; }
 .cs-val { font-size: 20px; font-weight: 900; color: var(--text); }
-.status-val-on_track { color: var(--green) !important; }
-.status-val-delayed  { color: var(--yellow) !important; }
-.status-val-at_risk  { color: var(--red) !important; }
-.status-val-stale    { color: var(--yellow) !important; }
+.sv-on_track { color: var(--green) !important; }
+.sv-delayed  { color: var(--yellow) !important; }
+.sv-at_risk  { color: var(--red) !important; }
 .ch-progress-wrap { display: flex; align-items: center; gap: 12px; }
 .ch-progress-bar { flex: 1; height: 6px; background: var(--surface3); border-radius: 3px; overflow: hidden; }
 .ch-progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
 .ch-progress-pct { font-family: "Nunito Sans", sans-serif; font-size: 13px; font-weight: 800; min-width: 36px; text-align: right; }
 
-.specs-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-bottom: 14px; }
-.specs-title { font-size: 13px; font-weight: 800; margin-bottom: 12px; }
-.specs-list { display: flex; flex-direction: column; gap: 8px; }
-.spec-item { display: flex; align-items: center; gap: 10px; }
-.spec-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-bright); display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
-.spec-check.done { background: var(--green); border-color: var(--green); color: #fff; }
-.spec-txt { font-size: 13px; font-weight: 500; color: var(--text-mid); }
-.spec-txt.done { color: var(--text-dim); text-decoration: line-through; }
+/* ════ GANTT ════ */
+.gantt-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.gantt-ph { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
+.gantt-ph-title { font-size: 14px; font-weight: 800; }
+.gantt-ph-sub { font-size: 11px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; }
+.gantt-scroll { overflow-x: auto; min-width: 0; }
+.gantt-header { display: flex; border-bottom: 2px solid var(--border); background: var(--surface2); position: sticky; top: 0; z-index: 3; }
+.gantt-lbl-col { width: 260px; flex-shrink: 0; padding: 10px 16px; font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: flex; align-items: flex-end; }
+.gantt-weeks-row { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); min-width: 600px; }
+.gantt-wk-hd { padding: 8px 4px; text-align: center; border-left: 1px solid var(--border); }
+.gantt-wk-num { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; color: var(--text-dim); }
+.gantt-wk-date { font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); margin-top: 2px; }
+.gantt-wk-today .gantt-wk-num { color: var(--accent); }
+.gantt-wk-today .gantt-wk-date { color: var(--accent); }
+.gantt-wk-today { background: var(--accent-dim); }
 
-.modules-title { font-size: 13px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-family: "Nunito Sans", sans-serif; margin-bottom: 10px; margin-top: 4px; }
-.module-group { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-.mg-header { padding: 13px 18px; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); transition: background 0.15s; }
+.gantt-proj-row { display: flex; align-items: center; min-height: 44px; background: var(--surface2); border-bottom: 2px solid var(--border); }
+.gantt-proj-lbl { width: 260px; flex-shrink: 0; padding: 10px 16px; display: flex; align-items: center; gap: 8px; }
+.gantt-proj-lbl strong { font-size: 13px; font-weight: 800; }
+.gantt-proj-co { font-size: 10px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; margin-left: 4px; }
+.cat-icon { font-size: 14px; }
+.gantt-proj-track { flex: 1; position: relative; height: 44px; min-width: 600px; }
+
+.gantt-mod-row { display: flex; align-items: center; min-height: 38px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
+.gantt-mod-row:hover { background: var(--surface2); }
+.gantt-mod-lbl { width: 260px; flex-shrink: 0; padding: 8px 16px; display: flex; align-items: center; gap: 8px; }
+.mod-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.mod-dot.finance  { background: var(--finance); }
+.mod-dot.legal    { background: var(--legal); }
+.mod-dot.dev      { background: var(--dev); }
+.mod-dot.marketing{ background: var(--marketing); }
+.mod-name { font-size: 12px; font-weight: 700; flex: 1; }
+.mod-pct { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; }
+
+.gantt-task-row { display: flex; align-items: center; min-height: 34px; border-bottom: 1px solid var(--border); }
+.gantt-task-row:last-child { border-bottom: 1px solid var(--border); }
+.gantt-task-lbl { width: 260px; flex-shrink: 0; padding: 6px 16px 6px 32px; display: flex; align-items: center; gap: 8px; }
+.task-chk { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid var(--border-bright); display: flex; align-items: center; justify-content: center; font-size: 8px; flex-shrink: 0; }
+.task-chk.done  { background: var(--green); border-color: var(--green); color: #fff; }
+.task-chk.block { background: var(--red-dim); border-color: var(--red); }
+.task-name-g { font-size: 11px; font-weight: 600; color: var(--text-mid); }
+.task-name-g.done { color: var(--text-dim); text-decoration: line-through; }
+.task-blocked-ico { color: var(--red); font-size: 10px; }
+
+.gantt-track { flex: 1; position: relative; height: 34px; display: flex; align-items: center; min-width: 600px; }
+.gantt-today-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); opacity: 0.5; z-index: 2; pointer-events: none; }
+.gantt-mod-bar { position: absolute; height: 100%; border-radius: 3px; z-index: 0; }
+.gantt-task-bar { position: absolute; height: 22px; border-radius: 4px; display: flex; align-items: center; overflow: hidden; min-width: 3px; z-index: 1; }
+.gantt-task-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 4px 0 0 4px; }
+.gantt-task-label { font-size: 10px; font-weight: 700; color: #fff; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
+
+/* ACCORDION */
+.modules-title { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-family: "Nunito Sans", sans-serif; margin-bottom: 8px; }
+.module-group { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 6px; }
+.mg-header { padding: 12px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--surface2); transition: background 0.15s; }
 .mg-header:hover { background: var(--surface3); }
 .mg-expand { font-size: 9px; color: var(--text-dim); width: 10px; }
 .mg-name { font-size: 13px; font-weight: 700; flex: 1; }
@@ -217,25 +379,30 @@ function formatDate(iso) {
 .mg-bar-fill { height: 100%; border-radius: 2px; }
 .mg-pct { font-family: "Nunito Sans", sans-serif; font-size: 12px; font-weight: 800; min-width: 36px; text-align: right; }
 .mg-tasks { font-family: "Nunito Sans", sans-serif; font-size: 11px; color: var(--text-dim); min-width: 36px; text-align: right; }
-
-.task-list { padding: 0 18px; }
-.task-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.task-list { padding: 0 16px; }
+.task-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
 .task-item:last-child { border-bottom: none; }
 .task-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-bright); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 9px; }
 .task-check.done  { background: var(--green); border-color: var(--green); color: #fff; }
 .task-check.block { background: var(--red-dim); border-color: var(--red); }
-.task-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.task-name { font-size: 12px; font-weight: 600; }
 .task-name.done { color: var(--text-dim); text-decoration: line-through; }
-.task-note { font-size: 10px; color: var(--red); font-family: "Nunito Sans", sans-serif; margin-top: 2px; }
-.task-comment { font-size: 10px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; margin-top: 2px; }
-.task-assignee { font-size: 10px; font-family: "Nunito Sans", sans-serif; color: var(--text-dim); background: var(--surface2); padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
+.task-note { font-size: 10px; color: var(--red); margin-top: 2px; }
+.task-assignee { font-size: 10px; color: var(--text-dim); background: var(--surface2); padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
 .task-pct-wrap { display: flex; align-items: center; gap: 6px; }
 .task-bar { width: 60px; height: 3px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
 .task-bar-fill { height: 100%; border-radius: 2px; }
 .task-pct { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; min-width: 32px; text-align: right; }
-.task-empty { padding: 16px 0; color: var(--text-dim); font-size: 12px; text-align: center; }
 
-.contract-desc-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; margin-top: 14px; }
+.specs-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+.specs-title { font-size: 13px; font-weight: 800; margin-bottom: 12px; }
+.specs-list { display: flex; flex-direction: column; gap: 8px; }
+.spec-item { display: flex; align-items: center; gap: 10px; }
+.spec-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-bright); display: flex; align-items: center; justify-content: center; font-size: 9px; flex-shrink: 0; }
+.spec-check.done { background: var(--green); border-color: var(--green); color: #fff; }
+.spec-txt { font-size: 13px; color: var(--text-mid); }
+.spec-txt.done { color: var(--text-dim); text-decoration: line-through; }
+.contract-desc-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
 .cd-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; }
 .cd-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
 </style>
