@@ -750,47 +750,19 @@ async function saveSpecDetail() {
   } finally { specSaving.value = false }
 }
 
-async function quickAddModule() {
-  const name = prompt('Όνομα νέου Module:')
-  if (!name || !name.trim()) return
-  const newModule = {
-    name: name.trim(),
-    color: project.value.category || 'dev',
-    sortOrder: (project.value.modules || []).length,
-    tasks: []
-  }
-  project.value.modules = [...(project.value.modules || []), newModule]
-  try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title,
-      companyId: project.value.companyId,
-      category: project.value.category,
-      budget: project.value.budget || 0,
-      startDate: project.value.startDate || null,
-      deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({
-        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
-        startDate: s.startDate || null, endDate: s.endDate || null
-      })),
-      modules: (project.value.modules || []).map((m, mi) => ({
-        name: m.name, color: m.color, sortOrder: mi,
-        tasks: (m.tasks || []).map((t, ti) => ({
-          name: t.name, assignee: t.assignee, progress: t.progress,
-          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, deadline: t.deadline,
-          startWeek: t.startWeek || (mi + 1), durationWeeks: t.durationWeeks || 1,
-          startDay: t.startDay, durationDays: t.durationDays,
-          sortOrder: ti, manualProgress: t.manualProgress || false
-        }))
-      }))
-    })
-    await loadProject()
-  } catch(e) {
-    project.value.modules.pop()
-    alert('Σφάλμα κατά την προσθήκη module.')
-  }
+function quickAddModule() {
+  // Open edit modal and scroll to modules section
+  openEditModal()
+  nextTick(() => {
+    setTimeout(() => {
+      const modSection = document.querySelector('.modal .form-section-title:last-of-type')
+      if (modSection) modSection.scrollIntoView({ behavior: 'smooth' })
+      // Auto-add one empty module if none exist
+      if (editForm.value.modules.length === 0) {
+        editAddModule()
+      }
+    }, 200)
+  })
 }
 
 function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
