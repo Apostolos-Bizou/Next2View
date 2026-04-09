@@ -75,7 +75,36 @@
         </div>
       </div>
     </div>
-  </div>
+  
+
+    <!-- MOBILE CARDS -->
+    <div class="projects-cards">
+      <div v-if="!filtered.length" class="empty-state">
+        Δεν υπάρχουν projects.
+      </div>
+      <div v-for="p in filtered" :key="p.id"
+        class="project-card-mobile"
+        @click="$router.push('/projects/' + p.id)">
+        <div class="pcm-header">
+          <div class="pcm-dot" :style="'background:var(--' + p.category + ')'"></div>
+          <div class="pcm-title">{{ p.title }}</div>
+          <div class="pcm-pct" :style="'color:var(--' + p.category + ')'">{{ p.completion }}%</div>
+        </div>
+        <div class="pcm-co">{{ p.companyName }}</div>
+        <div class="pcm-bar-track">
+          <div class="pcm-bar-fill"
+            :style="'width:' + p.completion + '%;background:var(--' + p.category + ')'"></div>
+        </div>
+        <div class="pcm-footer">
+          <span class="pcm-status"
+            :style="'background:var(--' + p.category + '-dim,rgba(0,0,0,0.05));color:var(--' + p.category + ')'">
+            {{ p.status?.replace('_',' ') }}
+          </span>
+          <span class="pcm-deadline" v-if="p.deadline">📅 {{ formatDate(p.deadline) }}</span>
+        </div>
+      </div>
+    </div>
+</div>
 </template>
 
 <script setup>
