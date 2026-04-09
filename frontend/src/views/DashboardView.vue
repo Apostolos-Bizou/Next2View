@@ -264,7 +264,6 @@ function dashBarStyle(p) {
   if (right <= 0 || left >= 100) return { show: false }
   return { show: true, left, width }
 }
-  return { show: true, left, width }
 }
 
 function coShort(name) {
