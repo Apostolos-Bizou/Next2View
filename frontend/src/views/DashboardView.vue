@@ -222,8 +222,9 @@ const ganttWeeks = computed(() => {
   for (let i = 0; i < GANTT_WEEKS; i++) {
     const d = new Date(ganttStart.value)
     d.setDate(d.getDate() + i * 7)
-    const isToday = i === 0
-    weeks.push({ label: `${d.getDate()} ${months[d.getMonth()]}`, isToday })
+    const weekEnd = new Date(d); weekEnd.setDate(weekEnd.getDate() + 7)
+    const now2 = new Date(); const isCurrentWeek = now2 >= d && now2 < weekEnd
+    weeks.push({ num: i + 1, dateLabel: d.getDate() + ' ' + ['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'][d.getMonth()], isCurrentWeek })
   }
   return weeks
 })
