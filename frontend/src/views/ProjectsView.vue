@@ -180,4 +180,29 @@ function formatAgo(mins) {
 .tasks-done { font-size: 12px; font-weight: 700; color: var(--green); }
 .tasks-pend { font-size: 12px; font-weight: 700; color: var(--text-mid); }
 .empty-state { text-align: center; padding: 36px 20px; color: var(--text-dim); font-size: 12px; }
+
+@media (max-width: 768px) {
+  .projects-content { padding: 14px 12px; }
+  .projects-table { display: none; }
+  .projects-cards { display: flex !important; flex-direction: column; gap: 12px; }
+  .project-card-mobile {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    cursor: pointer; transition: box-shadow 0.2s;
+  }
+  .project-card-mobile:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+  .pcm-header { display: flex; align-items: center; gap: 10px; }
+  .pcm-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .pcm-title { font-size: 14px; font-weight: 700; color: var(--text); flex: 1; }
+  .pcm-pct { font-size: 13px; font-weight: 800; }
+  .pcm-co { font-size: 11px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; }
+  .pcm-bar-track { height: 4px; background: var(--border); border-radius: 2px; }
+  .pcm-bar-fill { height: 100%; border-radius: 2px; transition: width 0.3s; }
+  .pcm-footer { display: flex; justify-content: space-between; align-items: center; }
+  .pcm-status { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 10px; }
+  .pcm-deadline { font-size: 10px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; }
+  .filter-bar { flex-wrap: wrap; gap: 6px; }
+}
+.projects-cards { display: none; }
 </style>

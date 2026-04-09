@@ -879,4 +879,25 @@ function formatDate(iso) {
 .file-del:hover { color: var(--red); background: var(--red-dim); }
 .files-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
 .files-error { padding: 10px 20px; color: var(--red); font-size: 12px; background: var(--red-dim); }
+
+@media (max-width: 768px) {
+  .project-detail { padding: 12px; }
+  .contract-header { padding: 16px 14px; border-radius: 10px; }
+  .contract-kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-box { padding: 12px 10px; }
+  .kpi-val { font-size: 18px; }
+  .gantt-panel { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .gantt-lbl-col { width: 130px; font-size: 10px; }
+  .gantt-mod-lbl { width: 130px; }
+  .gantt-task-lbl { width: 130px; }
+  .gantt-weeks-col { min-width: 500px; }
+  .gantt-track { min-width: 500px; }
+  .edit-project-btn { font-size: 10px; padding: 4px 10px; }
+  .modules-title { font-size: 11px; }
+  .mg-header { padding: 10px 12px; }
+  .financial-grid { grid-template-columns: repeat(2, 1fr); }
+  .fin-box { padding: 12px 10px; }
+  .fin-val { font-size: 18px; }
+  .notes-panel { padding: 14px 12px; }
+}
 </style>

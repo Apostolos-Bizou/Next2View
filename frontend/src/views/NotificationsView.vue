@@ -214,4 +214,11 @@ const catLabel = (c) => ({ finance:'Finance', legal:'Legal', dev:'Developing', m
 .notif-days.urgent  { background: var(--red-dim); color: var(--red); }
 .notif-days.overdue { background: var(--red-dim); color: var(--red); }
 .notif-arrow { color: var(--text-dim); font-size: 20px; flex-shrink: 0; margin-top: 4px; }
+
+@media (max-width: 768px) {
+  .notif-content { padding: 14px 12px; }
+  .notif-tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .notif-tab { white-space: nowrap; font-size: 11px; padding: 6px 12px; }
+  .notif-card { padding: 12px 14px; }
+}
 </style>

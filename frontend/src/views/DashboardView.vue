@@ -393,4 +393,18 @@ function formatAgo(mins) {
 .gantt-task-bar { position: absolute; height: 28px; border-radius: 5px; display: flex; align-items: center; overflow: hidden; min-width: 3px; z-index: 1; }
 .gantt-task-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px 0 0 5px; }
 .gantt-task-label { font-size: 10px; font-weight: 700; color: #fff; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
+
+@media (max-width: 768px) {
+  .content { padding: 16px 12px; }
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 14px; }
+  .kpi { padding: 14px 12px; }
+  .kpi-val { font-size: 20px; }
+  .dash-grid { flex-direction: column; }
+  .dash-col-left, .dash-col-right { width: 100%; }
+  .gantt-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .gantt-proj-lbl { width: 160px; }
+  .gantt-track { min-width: 400px; }
+  .gantt-ph { flex-wrap: wrap; gap: 8px; }
+  .ph-badge { display: none; }
+}
 </style>

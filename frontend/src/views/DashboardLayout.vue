@@ -1,6 +1,20 @@
 <template>
   <div class="shell">
-    <aside class="sidebar">
+    <!-- MOBILE HEADER -->
+    <div class="mobile-header">
+      <button class="hamburger-btn" @click="sidebarOpen = !sidebarOpen">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="mobile-logo">Next2<span>View</span></div>
+      <router-link to="/notifications" class="mobile-notif-btn">
+        🔔<span v-if="store.unreadCount > 0" class="mobile-notif-badge">{{ store.unreadCount }}</span>
+      </router-link>
+    </div>
+
+    <!-- MOBILE OVERLAY -->
+    <div class="sidebar-overlay" v-if="sidebarOpen" @click="sidebarOpen = false"></div>
+
+    <aside class="sidebar" :class="{ 'sidebar-open': sidebarOpen }">
       <div class="logo">
         <div class="logo-mark">Next2me Group</div>
         <div class="logo-name">Next<span>2</span>View</div>
@@ -326,6 +340,10 @@ const auth = useAuthStore()
 const store = useProjectStore()
 const router = useRouter()
 const route = useRoute()
+const sidebarOpen = ref(false)
+
+// Close sidebar on route change
+watch(route, () => { sidebarOpen.value = false })
 
 const showNewProject = ref(false)
 const submitting = ref(false)
@@ -562,4 +580,87 @@ textarea.form-input { resize: vertical; min-height: 60px; }
 .ai-report :deep(strong) { color: var(--text); font-weight: 700; }
 .ai-report :deep(p) { margin-bottom: 10px; }
 .ai-error { padding: 40px; text-align: center; color: var(--red); font-size: 14px; }
+
+/* ════ MOBILE RESPONSIVE ════ */
+.mobile-header { display: none; }
+
+@media (max-width: 768px) {
+  .app-shell { flex-direction: column; }
+
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 56px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid var(--sidebar-border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    flex-shrink: 0;
+  }
+
+  .hamburger-btn {
+    width: 36px; height: 36px;
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 5px;
+    padding: 6px; border-radius: 8px;
+    transition: background 0.2s;
+  }
+  .hamburger-btn:hover { background: rgba(255,255,255,0.08); }
+  .hamburger-btn span {
+    display: block; width: 20px; height: 2px;
+    background: var(--sidebar-text); border-radius: 2px;
+    transition: all 0.3s;
+  }
+
+  .mobile-logo {
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px; font-weight: 900;
+    color: #fff; letter-spacing: -0.5px;
+  }
+  .mobile-logo span { color: var(--sidebar-active-border); }
+
+  .mobile-notif-btn {
+    position: relative; font-size: 20px;
+    text-decoration: none; padding: 6px;
+    border-radius: 8px; transition: background 0.2s;
+  }
+  .mobile-notif-btn:hover { background: rgba(255,255,255,0.08); }
+  .mobile-notif-badge {
+    position: absolute; top: 0; right: 0;
+    background: var(--red); color: #fff;
+    font-size: 9px; font-weight: 700;
+    width: 16px; height: 16px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .sidebar-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 199;
+    backdrop-filter: blur(2px);
+  }
+
+  .sidebar {
+    position: fixed !important;
+    top: 0; left: 0; bottom: 0;
+    width: 260px !important;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100vh !important;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+  }
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  .main {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
 </style>
