@@ -213,8 +213,13 @@ function formatAgo(mins) {
 .empty-state { text-align: center; padding: 36px 20px; color: var(--text-dim); font-size: 12px; }
 
 @media (max-width: 768px) {
-  .projects-content { padding: 14px 12px; }
-  .projects-table { display: none; }
+  .content { padding: 14px 10px !important; }
+  .panel { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .pb { padding: 0 10px !important; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .proj-tbl { min-width: 700px; }
+  .ph { flex-wrap: wrap; gap: 8px; padding: 12px 10px !important; }
+  .ph-title { font-size: 14px !important; width: 100%; }
+  .ph-select { font-size: 11px !important; }
   .projects-cards { display: flex !important; flex-direction: column; gap: 12px; }
   .project-card-mobile {
     background: var(--surface); border: 1px solid var(--border);
