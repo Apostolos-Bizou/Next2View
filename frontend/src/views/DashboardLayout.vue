@@ -27,33 +27,37 @@
         </router-link>
 
         <div class="nav-section" style="margin-top:6px;">Κατηγορία</div>
-        <router-link to="/projects?category=finance" class="nav-item" active-class="active">
+        <div :class="['nav-item', route.query.category==='finance' ? 'active' : '']"
+          @click="router.push('/projects?category=finance')">
           <span class="nav-ico" style="color:var(--finance);">$</span>Finance
           <span class="nav-count">{{ store.byCategory('finance').length }}</span>
-        </router-link>
-        <router-link to="/projects?category=legal" class="nav-item" active-class="active">
+        </div>
+        <div :class="['nav-item', route.query.category==='legal' ? 'active' : '']"
+          @click="router.push('/projects?category=legal')">
           <span class="nav-ico" style="color:var(--legal);">⚖</span>Legal
           <span class="nav-count">{{ store.byCategory('legal').length }}</span>
-        </router-link>
-        <router-link to="/projects?category=dev" class="nav-item" active-class="active">
+        </div>
+        <div :class="['nav-item', route.query.category==='dev' ? 'active' : '']"
+          @click="router.push('/projects?category=dev')">
           <span class="nav-ico" style="color:var(--dev);">⌨</span>Developing
           <span class="nav-count">{{ store.byCategory('dev').length }}</span>
-        </router-link>
-        <router-link to="/projects?category=marketing" class="nav-item" active-class="active">
+        </div>
+        <div :class="['nav-item', route.query.category==='marketing' ? 'active' : '']"
+          @click="router.push('/projects?category=marketing')">
           <span class="nav-ico" style="color:var(--marketing);">◈</span>Marketing
           <span class="nav-count">{{ store.byCategory('marketing').length }}</span>
-        </router-link>
+        </div>
 
         <div class="nav-section" style="margin-top:6px;">Εταιρείες</div>
-        <router-link
+        <div
           v-for="co in store.companies" :key="co.id"
-          :to="`/projects?companyId=${co.id}`"
-          class="nav-item" active-class="active"
+          :class="['nav-item', route.query.companyId===co.id ? 'active' : '']"
+          @click="router.push(`/projects?companyId=${co.id}`)"
         >
           <span class="nav-ico" :style="`color:${co.color};`">{{ coIcon(co.code) }}</span>
           {{ coShortName(co.name) }}
           <span class="nav-count">{{ co.projectCount || 0 }}</span>
-        </router-link>
+        </div>
       </nav>
 
       <div class="notif-row" @click="router.push('/notifications')" style="cursor:pointer;">
