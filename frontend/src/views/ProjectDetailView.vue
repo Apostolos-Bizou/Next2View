@@ -128,7 +128,7 @@
                     :style="`
                       left:${taskBarStyle(t).left}%;
                       width:${taskBarStyle(t).width}%;
-                      background:var(--${t.isDone ? 'green' : t.isBlocked ? 'red' : (m.color || project.category)});
+                      background:${t.isDone ? '#a0a0b8' : t.isBlocked ? 'var(--red)' : 'var(--' + (m.color || project.category) + ')'};
                       opacity:${t.isDone ? 0.9 : 0.75};
                     `">
                     <div class="gantt-task-fill"
