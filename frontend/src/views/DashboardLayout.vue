@@ -25,7 +25,7 @@
         <router-link to="/" class="nav-item" exact-active-class="active">
           <span class="nav-ico">◈</span>Dashboard
         </router-link>
-        <router-link to="/projects" class="nav-item" active-class="active">
+        <router-link to="/projects" class="nav-item" :class="route.path==='/projects' && !route.query.category && !route.query.companyId ? 'active' : ''">
           <span class="nav-ico">⬡</span>All Projects
           <span class="nav-count">{{ store.projects.length }}</span>
         </router-link>
