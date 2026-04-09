@@ -189,12 +189,13 @@
                 <input v-model="s.endDate" type="date" class="form-input spec-date-input" />
               </div>
             </div>
+            <textarea v-model="s.notes" class="form-input" rows="2" placeholder="Σύντομη περιγραφή / σημειώσεις για αυτό το spec..." style="font-size:12px;margin-top:4px;resize:vertical;"></textarea>
           </div>
 
           <!-- MODULES & TASKS -->
           <div class="form-section-title" style="margin-top:16px;">
             Modules & Tasks
-            <button class="add-btn" @click="addModule">+ Module</button>
+            <button class="add-btn" @click="addModule" title="Προσθήκη νέου module με tasks">+ Module</button>
           </div>
           <div v-for="(m, mi) in form.modules" :key="mi" class="module-builder">
             <div class="mb-head">
@@ -207,6 +208,7 @@
               </select>
               <button class="del-btn" @click="form.modules.splice(mi, 1)">✕</button>
             </div>
+            <textarea v-model="m.notes" class="form-input" rows="2" placeholder="Σύντομη περιγραφή module..." style="font-size:12px;resize:vertical;margin:4px 0 8px 0;"></textarea>
             <div class="task-builder">
               <div v-for="(t, ti) in m.tasks" :key="ti" class="task-row">
                 <input v-model="t.name" placeholder="Task..." class="form-input task-name-input" />
@@ -517,10 +519,10 @@ function closeModal() {
   formError.value = ''
 }
 function addSpec() {
-  form.value.specs.push({ description: '', isDone: false, sortOrder: form.value.specs.length, startDate: null, endDate: null })
+  form.value.specs.push({ description: '', notes: '', isDone: false, sortOrder: form.value.specs.length, startDate: null, endDate: null })
 }
 function addModule() {
-  form.value.modules.push({ name: '', color: form.value.category || 'dev', sortOrder: form.value.modules.length, tasks: [] })
+  form.value.modules.push({ name: '', notes: '', color: form.value.category || 'dev', sortOrder: form.value.modules.length, tasks: [] })
 }
 function addTask(m) {
   m.tasks.push({ name: '', assignee: '', progress: 0, isDone: false, isBlocked: false, blockNote: '', comment: '', deadline: null, startWeek: null, durationWeeks: 1, sortOrder: m.tasks.length })
