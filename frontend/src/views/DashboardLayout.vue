@@ -41,22 +41,22 @@
         </router-link>
 
         <div class="nav-section" style="margin-top:6px;">Κατηγορία</div>
-        <div :class="['nav-item', route.query.category==='finance' ? 'active' : '']"
+        <div v-if="permStore.canViewCategory('finance')" :class="['nav-item', route.query.category==='finance' ? 'active' : '']"
           @click="router.push('/projects?category=finance')">
           <span class="nav-ico" style="color:var(--finance);">$</span>Finance
           <span class="nav-count">{{ store.byCategory('finance').length }}</span>
         </div>
-        <div :class="['nav-item', route.query.category==='legal' ? 'active' : '']"
+        <div v-if="permStore.canViewCategory('legal')" :class="['nav-item', route.query.category==='legal' ? 'active' : '']"
           @click="router.push('/projects?category=legal')">
           <span class="nav-ico" style="color:var(--legal);">⚖</span>Legal
           <span class="nav-count">{{ store.byCategory('legal').length }}</span>
         </div>
-        <div :class="['nav-item', route.query.category==='dev' ? 'active' : '']"
+        <div v-if="permStore.canViewCategory('dev')" :class="['nav-item', route.query.category==='dev' ? 'active' : '']"
           @click="router.push('/projects?category=dev')">
           <span class="nav-ico" style="color:var(--dev);">⌨</span>Developing
           <span class="nav-count">{{ store.byCategory('dev').length }}</span>
         </div>
-        <div :class="['nav-item', route.query.category==='marketing' ? 'active' : '']"
+        <div v-if="permStore.canViewCategory('marketing')" :class="['nav-item', route.query.category==='marketing' ? 'active' : '']"
           @click="router.push('/projects?category=marketing')">
           <span class="nav-ico" style="color:var(--marketing);">◈</span>Marketing
           <span class="nav-count">{{ store.byCategory('marketing').length }}</span>
@@ -64,7 +64,7 @@
 
         <div class="nav-section" style="margin-top:6px;">Εταιρείες</div>
         <div
-          v-for="co in store.companies" :key="co.id"
+          v-for="co in store.companies.filter(co => store.projects.some(p => p.companyId === co.id && permStore.canViewCategory(p.category)))" :key="co.id"
           :class="['nav-item', route.query.companyId===co.id ? 'active' : '']"
           @click="router.push(`/projects?companyId=${co.id}`)"
         >
@@ -417,10 +417,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
+import { usePermissionStore } from '@/stores/permissions'
 import api from '@/services/api'
 
 const auth = useAuthStore()
 const store = useProjectStore()
+const permStore = usePermissionStore()
 const router = useRouter()
 const route = useRoute()
 
