@@ -116,9 +116,9 @@
     </div>
 
     <!-- ════ GANTT TIMELINE ════ -->
-    <div class="panel" style="margin-top:14px;">
-      <div class="ph">
-        <div class="ph-title">📊 Project Timeline — All Active</div>
+    <div class="gantt-panel" style="margin-top:14px;">
+      <div class="gantt-ph">
+        <div class="gantt-ph-title">📊 Project Timeline — All Active</div>
         <div style="display:flex;gap:8px;align-items:center;">
           <select v-model="ganttFilter" class="gantt-select">
             <option value="">Όλες κατηγορίες</option>
@@ -130,40 +130,36 @@
           <div class="ph-badge badge blue">{{ ganttProjects.length }} projects</div>
         </div>
       </div>
-      <div class="gantt-outer">
+      <div class="gantt-scroll">
         <!-- WEEK HEADERS -->
         <div class="gantt-header">
-          <div class="gantt-label-col"></div>
-          <div class="gantt-weeks">
-            <div v-for="w in ganttWeeks" :key="w.label"
-              :class="['gantt-week-hd', { today: w.isToday }]">
-              {{ w.label }}
+          <div class="gantt-lbl-col">PROJECT</div>
+          <div class="gantt-weeks-row">
+            <div v-for="w in ganttWeeks" :key="w.num"
+              :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]">
+              <div class="gantt-wk-num">W{{ w.num }}</div>
+              <div class="gantt-wk-date">{{ w.dateLabel }}</div>
             </div>
           </div>
         </div>
         <!-- PROJECT ROWS -->
-        <div v-if="!ganttProjects.length" class="gantt-empty">
-          Δεν υπάρχουν projects με deadline.
-        </div>
-        <div v-for="p in ganttProjects" :key="p.id" class="gantt-row"
+        <div v-if="!ganttProjects.length" class="gantt-empty">Δεν υπάρχουν projects με deadline.</div>
+        <div v-for="p in ganttProjects" :key="p.id" class="gantt-proj-row gantt-proj-row-click"
           @click="router.push(`/projects/${p.id}`)">
-          <div class="gantt-label">
-            <div class="gantt-proj-name">{{ p.title }}</div>
-            <div class="gantt-proj-co" :style="`color:var(--${p.category});`">
-              {{ p.companyName }}
+          <div class="gantt-proj-lbl">
+            <span :class="`cat-dot ${p.category}`"></span>
+            <div>
+              <div class="gantt-p-name">{{ p.title }}</div>
+              <div class="gantt-p-co" :style="`color:var(--${p.category});`">{{ p.companyName }}</div>
             </div>
+            <span class="gantt-p-pct" :style="`color:var(--${p.category});`">{{ p.completion }}%</span>
           </div>
           <div class="gantt-track">
-            <!-- Today line -->
             <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-            <!-- Bar -->
-            <div class="gantt-bar-wrap" :style="barStyle(p)">
-              <div class="gantt-bar" :style="`background:var(--${p.category});`">
-                <div class="gantt-bar-fill"
-                  :style="`width:${p.completion}%;background:${p.completion>80?'var(--green)':'rgba(255,255,255,0.35)'};`">
-                </div>
-                <span class="gantt-bar-label">{{ p.title }} · {{ p.completion }}%</span>
-              </div>
+            <div v-if="dashBarStyle(p).show" class="gantt-task-bar"
+              :style="`left:${dashBarStyle(p).left}%;width:${dashBarStyle(p).width}%;background:var(--${p.category});opacity:0.85;`">
+              <div class="gantt-task-fill" :style="`width:${p.completion}%;background:rgba(255,255,255,0.3);`"></div>
+              <span class="gantt-task-label">{{ p.title }} · {{ p.completion }}%</span>
             </div>
           </div>
         </div>
@@ -244,20 +240,31 @@ const ganttProjects = computed(() => {
 })
 
 function barStyle(p) {
-  // Χρησιμοποιούμε deadline ως end, start = 4 εβδομάδες πριν το deadline
   const end = new Date(p.deadline)
   const start = new Date(end)
-  start.setDate(start.getDate() - 28) // default 4 weeks duration
-
+  start.setDate(start.getDate() - 28)
   const gs = ganttStart.value.getTime()
   const ge = ganttEnd.value.getTime()
   const range = ge - gs
-
   const left = Math.max(0, (start.getTime() - gs) / range * 100)
   const right = Math.min(100, (end.getTime() - gs) / range * 100)
   const width = Math.max(2, right - left)
-
   return `left:${left}%;width:${width}%;`
+}
+
+function dashBarStyle(p) {
+  if (!p.deadline) return { show: false }
+  const end = new Date(p.deadline)
+  const start = new Date(end)
+  start.setDate(start.getDate() - 28)
+  const gs = ganttStart.value.getTime()
+  const ge = ganttEnd.value.getTime()
+  const range = ge - gs
+  const left = Math.max(0, (start.getTime() - gs) / range * 100)
+  const right = Math.min(100, (end.getTime() - gs) / range * 100)
+  const width = Math.max(2, right - left)
+  if (right <= 0 || left >= 100) return { show: false }
+  return { show: true, left, width }
 }
 
 function coShort(name) {
@@ -356,23 +363,36 @@ function formatAgo(mins) {
 
 /* ════ GANTT ════ */
 .gantt-select { background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 6px; padding: 5px 10px; color: var(--text-mid); font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
-.gantt-outer { overflow-x: auto; }
+.gantt-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.gantt-ph { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
+.gantt-ph-title { font-size: 14px; font-weight: 800; }
+.gantt-scroll { overflow-x: auto; }
 .gantt-header { display: flex; border-bottom: 2px solid var(--border); background: var(--surface2); }
-.gantt-label-col { width: 200px; flex-shrink: 0; padding: 10px 16px; font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-.gantt-weeks { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); }
-.gantt-week-hd { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 700; color: var(--text-dim); padding: 10px 4px; text-align: center; border-left: 1px solid var(--border); }
-.gantt-week-hd.today { color: var(--accent); background: var(--accent-dim); }
+.gantt-lbl-col { width: 260px; flex-shrink: 0; padding: 10px 16px; font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: flex; align-items: flex-end; }
+.gantt-weeks-row { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); min-width: 600px; }
+.gantt-wk-hd { padding: 8px 4px; text-align: center; border-left: 1px solid var(--border); }
+.gantt-wk-num { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; color: var(--text-dim); }
+.gantt-wk-date { font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); margin-top: 2px; }
+.gantt-wk-today { background: var(--accent-dim); }
+.gantt-wk-today .gantt-wk-num { color: var(--accent); }
+.gantt-wk-today .gantt-wk-date { color: var(--accent); }
 .gantt-empty { padding: 32px; text-align: center; color: var(--text-dim); font-size: 13px; }
-.gantt-row { display: flex; align-items: center; border-bottom: 1px solid var(--border); min-height: 52px; cursor: pointer; transition: background 0.12s; }
-.gantt-row:last-child { border-bottom: none; }
-.gantt-row:hover { background: var(--accent-dim); }
-.gantt-label { width: 200px; flex-shrink: 0; padding: 10px 16px; }
-.gantt-proj-name { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gantt-proj-co { font-size: 10px; font-family: "Nunito Sans", sans-serif; margin-top: 2px; }
-.gantt-track { flex: 1; position: relative; height: 52px; display: flex; align-items: center; }
-.gantt-today-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); opacity: 0.6; z-index: 2; }
-.gantt-bar-wrap { position: absolute; height: 28px; }
-.gantt-bar { height: 100%; border-radius: 5px; position: relative; overflow: hidden; min-width: 4px; display: flex; align-items: center; opacity: 0.9; }
-.gantt-bar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px 0 0 5px; }
-.gantt-bar-label { font-size: 10px; font-weight: 700; color: #fff; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
+.gantt-proj-row { display: flex; align-items: center; border-bottom: 1px solid var(--border); min-height: 52px; }
+.gantt-proj-row:last-child { border-bottom: none; }
+.gantt-proj-row-click { cursor: pointer; transition: background 0.12s; }
+.gantt-proj-row-click:hover { background: var(--accent-dim); }
+.gantt-proj-lbl { width: 260px; flex-shrink: 0; padding: 10px 16px; display: flex; align-items: center; gap: 10px; }
+.cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cat-dot.finance   { background: var(--finance); }
+.cat-dot.legal     { background: var(--legal); }
+.cat-dot.dev       { background: var(--dev); }
+.cat-dot.marketing { background: var(--marketing); }
+.gantt-p-name { font-size: 12px; font-weight: 700; color: var(--text); }
+.gantt-p-co { font-size: 10px; font-family: "Nunito Sans", sans-serif; margin-top: 2px; }
+.gantt-p-pct { font-family: "Nunito Sans", sans-serif; font-size: 12px; font-weight: 800; margin-left: auto; }
+.gantt-track { flex: 1; position: relative; height: 52px; display: flex; align-items: center; min-width: 600px; }
+.gantt-today-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); opacity: 0.5; z-index: 2; pointer-events: none; }
+.gantt-task-bar { position: absolute; height: 28px; border-radius: 5px; display: flex; align-items: center; overflow: hidden; min-width: 3px; z-index: 1; }
+.gantt-task-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 5px 0 0 5px; }
+.gantt-task-label { font-size: 10px; font-weight: 700; color: #fff; padding: 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; z-index: 1; }
 </style>
