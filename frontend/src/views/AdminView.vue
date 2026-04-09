@@ -485,4 +485,13 @@ function coShort(name) {
 .perm-shortcuts { display: flex; gap: 8px; margin-top: 12px; }
 .perm-shortcut { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; border: 1px solid var(--border-bright); border-radius: 6px; background: var(--surface2); color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
 .perm-shortcut:hover { background: var(--surface3); }
+@media (max-width: 768px) {
+  .admin-content { padding: 14px 12px; overflow-x: hidden; }
+  .admin-table { display: none !important; }
+  .users-table { width: 100%; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .panel { overflow-x: hidden; }
+  .form-row { grid-template-columns: 1fr !important; }
+  .modal { width: 95vw !important; max-width: 95vw !important; }
+  .modal-body { padding: 14px !important; }
+}
 </style>

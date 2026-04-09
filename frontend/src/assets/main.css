@@ -107,9 +107,7 @@ body {
   overflow-x: hidden;
   max-width: 100vw;
 }
-* {
-  max-width: 100%;
-}
+/* max-width removed - breaks tables */
 img, table, video, iframe {
   max-width: 100%;
 }

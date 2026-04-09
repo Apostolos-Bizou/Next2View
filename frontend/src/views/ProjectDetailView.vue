@@ -883,7 +883,13 @@ function formatDate(iso) {
 .files-error { padding: 10px 20px; color: var(--red); font-size: 12px; background: var(--red-dim); }
 
 @media (max-width: 768px) {
+  .content { padding: 12px !important; overflow-x: hidden !important; }
   .project-detail { padding: 12px; }
+  .contract-stats { grid-template-columns: 1fr 1fr !important; }
+  .fin-grid { grid-template-columns: 1fr 1fr !important; }
+  .modal { width: 95vw !important; max-width: 95vw !important; }
+  .modal-body { padding: 14px !important; }
+  .form-row { grid-template-columns: 1fr !important; }
   .contract-header { padding: 16px 14px; border-radius: 10px; }
   .contract-kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .kpi-box { padding: 12px 10px; }
