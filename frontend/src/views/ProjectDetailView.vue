@@ -15,6 +15,7 @@
       <!-- CONTRACT HEADER -->
       <div :class="`contract-header ${project.category}`" style="position:relative;">
         <button class="edit-project-btn" @click="openEditModal" title="Επεξεργασία">✎ Επεξεργασία</button>
+        <button class="delete-project-btn" @click="confirmDeleteProject" title="Διαγραφή project">🗑 Διαγραφή</button>
         <div class="ch-top">
           <div>
             <div class="ch-title">{{ project.title }}</div>
@@ -150,6 +151,7 @@
           <div class="mg-header" @click="toggleAcc(m.id)">
             <span class="mg-expand">{{ openAcc.has(m.id) ? '▼' : '▶' }}</span>
             <span class="mg-name">{{ m.name }}</span>
+            <button class="delete-mod-btn" @click.stop="confirmDeleteModule(m)" title="Διαγραφή module">🗑</button>
             <div class="mg-right">
               <div class="mg-bar-wrap"><div class="mg-bar"><div class="mg-bar-fill" :style="`width:${m.completion}%;background:var(--${m.color||project.category});`"></div></div></div>
               <span class="mg-pct" :style="`color:var(--${m.color||project.category});`">{{ m.completion }}%</span>
@@ -564,6 +566,54 @@ async function toggleSpec(s) {
   }
 }
 
+async function confirmDeleteProject() {
+  if (!confirm('Διαγραφή του project "' + project.value.title + '"; Δεν μπορεί να αναιρεθεί.')) return
+  try {
+    await api.delete('/projects/' + project.value.id)
+    router.push('/projects')
+  } catch(e) { alert('Σφάλμα διαγραφής project.') }
+}
+
+async function confirmDeleteModule(m) {
+  if (!confirm('Διαγραφή του module "' + m.name + '" και όλων των tasks του;')) return
+  const idx = project.value.modules.findIndex(x => x.id === m.id)
+  if (idx === -1) return
+  project.value.modules.splice(idx, 1)
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title, companyId: project.value.companyId,
+      category: project.value.category, budget: project.value.budget || 0,
+      startDate: project.value.startDate || null, deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '', status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
+      modules: (project.value.modules || []).map(m2 => ({
+        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
+        tasks: (m2.tasks || []).map(t => ({ name: t.name, assignee: t.assignee, progress: t.progress, isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote, comment: t.comment, deadline: t.deadline, startWeek: t.startWeek, durationWeeks: t.durationWeeks, startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0 }))
+      }))
+    })
+  } catch(e) { await loadProject() }
+}
+
+async function confirmDeleteTask(t, m) {
+  if (!confirm('Διαγραφή του task "' + t.name + '";')) return
+  const tidx = m.tasks.findIndex(x => x.id === t.id)
+  if (tidx === -1) return
+  m.tasks.splice(tidx, 1)
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title, companyId: project.value.companyId,
+      category: project.value.category, budget: project.value.budget || 0,
+      startDate: project.value.startDate || null, deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '', status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
+      modules: (project.value.modules || []).map(m2 => ({
+        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
+        tasks: (m2.tasks || []).map(t2 => ({ name: t2.name, assignee: t2.assignee, progress: t2.progress, isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote, comment: t2.comment, deadline: t2.deadline, startWeek: t2.startWeek, durationWeeks: t2.durationWeeks, startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0 }))
+      }))
+    })
+  } catch(e) { await loadProject() }
+}
+
 function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
 function specTxtClass(s) { return s.isDone ? 'spec-txt done' : 'spec-txt' }
 
@@ -956,6 +1006,13 @@ function formatDate(iso) {
 .note-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
 .note-del:hover { color: var(--red); background: var(--red-dim); }
 .notes-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
+.delete-project-btn { position: absolute; top: 14px; right: 130px; font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.4); border-radius: 6px; color: #fca5a5; cursor: pointer; transition: background 0.2s; }
+.delete-project-btn:hover { background: rgba(220,38,38,0.35); }
+.delete-mod-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 4px; opacity: 0.5; transition: opacity 0.2s; margin-left: auto; }
+.delete-mod-btn:hover { opacity: 1; color: var(--red); }
+.delete-task-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 4px; opacity: 0; transition: opacity 0.2s; margin-left: 4px; }
+.task-row:hover .delete-task-btn { opacity: 0.6; }
+.delete-task-btn:hover { opacity: 1 !important; color: var(--red); }
 .edit-project-btn { position: absolute; top: 14px; right: 16px; font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: #fff; cursor: pointer; transition: background 0.2s; }
 .edit-project-btn:hover { background: rgba(255,255,255,0.25); }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
