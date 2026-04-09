@@ -211,11 +211,21 @@
             <textarea v-model="m.notes" class="form-input" rows="2" placeholder="Σύντομη περιγραφή module..." style="font-size:12px;resize:vertical;margin:4px 0 8px 0;"></textarea>
             <div class="task-builder">
               <div v-for="(t, ti) in m.tasks" :key="ti" class="task-row">
-                <input v-model="t.name" placeholder="Task..." class="form-input task-name-input" />
-                <input v-model="t.assignee" placeholder="Assignee" class="form-input task-assign-input" />
-                <input v-model.number="t.progress" type="number" min="0" max="100" class="form-input task-pct-input" />
-                <span class="task-pct-lbl">%</span>
-                <button class="del-btn" @click="m.tasks.splice(ti, 1)">✕</button>
+                <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <input v-model="t.name" placeholder="Task..." class="form-input task-name-input" />
+                    <input v-model="t.assignee" placeholder="Assignee" class="form-input task-assign-input" />
+                    <input v-model.number="t.progress" type="number" min="0" max="100" class="form-input task-pct-input" />
+                    <span class="task-pct-lbl">%</span>
+                    <button class="del-btn" @click="m.tasks.splice(ti, 1)">✕</button>
+                  </div>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <label style="font-size:10px;color:var(--text-dim);min-width:50px;">Έναρξη</label>
+                    <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
+                    <label style="font-size:10px;color:var(--text-dim);min-width:30px;">Λήξη</label>
+                    <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
+                  </div>
+                </div>
               </div>
               <button class="add-task-btn" @click="addTask(m)">+ Task</button>
             </div>
@@ -525,7 +535,7 @@ function addModule() {
   form.value.modules.push({ name: '', notes: '', color: form.value.category || 'dev', sortOrder: form.value.modules.length, tasks: [] })
 }
 function addTask(m) {
-  m.tasks.push({ name: '', assignee: '', progress: 0, isDone: false, isBlocked: false, blockNote: '', comment: '', deadline: null, startWeek: null, durationWeeks: 1, sortOrder: m.tasks.length })
+  m.tasks.push({ name: '', assignee: '', progress: 0, isDone: false, isBlocked: false, blockNote: '', comment: '', deadline: null, startDate: null, endDate: null, startWeek: null, durationWeeks: 1, sortOrder: m.tasks.length })
 }
 
 async function submitProject() {
@@ -552,7 +562,7 @@ async function submitProject() {
       })),
       modules: form.value.modules.filter(m => m.name.trim()).map((m, mi) => ({
         name: m.name, color: m.color, sortOrder: mi,
-        tasks: m.tasks.filter(t => t.name.trim()).map((t, ti) => ({
+        tasks: m.tasks.filter(t => t.name.trim()).map((t, ti) => ({ startDate: t.startDate || null, endDate: t.endDate || null,
           ...t, sortOrder: ti, isDone: t.progress === 100,
           startWeek: t.startWeek || (mi + 1),
           durationWeeks: t.durationWeeks || 1
