@@ -367,6 +367,19 @@ const openAcc = ref(new Set())
 
 const GANTT_WEEKS = 3
 
+const ganttStart = computed(() => {
+  if (project.value?.startDate) return new Date(project.value.startDate)
+  const d = new Date()
+  d.setDate(d.getDate() - d.getDay())
+  return d
+})
+
+const ganttEnd = computed(() => {
+  const d = new Date(ganttStart.value)
+  d.setDate(d.getDate() + GANTT_WEEKS * 7)
+  return d
+})
+
 onMounted(async () => {
   project.value = await store.fetchProject(route.params.id)
   loading.value = false
@@ -564,18 +577,13 @@ function toggleAcc(id) {
 // ════ GANTT LOGIC ════
 const ganttWeeks = computed(() => {
   const weeks = []
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  const start = new Date()
-  start.setDate(start.getDate() - start.getDay())
+  const months = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"]
   for (let i = 0; i < GANTT_WEEKS; i++) {
-    const d = new Date(start)
+    const d = new Date(ganttStart.value)
     d.setDate(d.getDate() + i * 7)
-    weeks.push({
-      num: i + 1,
-      dateLabel: `${d.getDate()} ${months[d.getMonth()]}`,
-      isCurrentWeek: i === 0,
-      weekIndex: i
-    })
+    const weekEnd = new Date(d); weekEnd.setDate(weekEnd.getDate() + 7)
+    const now = new Date(); const isCurrentWeek = now >= d && now < weekEnd
+    weeks.push({ num: i + 1, dateLabel: d.getDate() + ' ' + months[d.getMonth()], isCurrentWeek })
   }
   return weeks
 })
@@ -584,7 +592,7 @@ const todayPct = computed(() => {
   const start = new Date()
   start.setDate(start.getDate() - start.getDay())
   const end = new Date(start)
-  end.setDate(end.getDate() + GANTT_WEEKS * 7)
+
   const now = new Date()
   return Math.min(100, Math.max(0, (now - start) / (end - start) * 100))
 })
