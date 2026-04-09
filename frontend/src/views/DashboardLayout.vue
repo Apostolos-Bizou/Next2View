@@ -78,7 +78,7 @@
         <div class="notif-label">Notifications</div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span v-if="store.atRisk.length" class="notif-badge">{{ store.atRisk.length }}</span>
-          <span class="notif-bell">🔔</span>
+          <span class="notif-bell" title="Ειδοποιήσεις — deadlines, blocked tasks, καθυστερήσεις">🔔</span>
         </div>
       </div>
 
@@ -88,8 +88,8 @@
         </button>
         <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject">+ New Project</button>
         <div v-if="permStore.isCEO()" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <button class="btn-sidebar" style="font-size:9px;" @click="openNewCompany">+ Company</button>
-          <button class="btn-sidebar" style="font-size:9px;" @click="openNewUser">+ User</button>
+          <button class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" title="Πρόσθεσε νέα εταιρεία στον Όμιλο. Βάλε όνομα, κωδικό (π.χ. PFS) και χρώμα κατηγορίας.">+ Company</button>
+          <button class="btn-sidebar" style="font-size:9px;" @click="openNewUser" title="Πρόσθεσε νέο χρήστη. Βάλε email, κωδικό και ρόλο (CEO / Manager / Member).">+ User</button>
         </div>
       </div>
 
