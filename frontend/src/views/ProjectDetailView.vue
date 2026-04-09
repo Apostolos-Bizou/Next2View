@@ -114,10 +114,10 @@
               </div>
               <div class="gantt-track">
                 <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-                <div v-if="specBarStyle(s).show" class="gantt-bar"
-                <div v-if="specBarStyle(s).show" class="gantt-bar"
-                  :title="s.description">
-                  <span style="font-size:10px;color:#fff;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;width:100%;display:block;">{{ s.description }}</span>
+                <div v-if="specBarStyle(s).show"
+                  :style="specBarStyle(s).css"
+                  :title="s.description" class="gantt-spec-bar">
+                  <span class="gantt-spec-bar-txt">{{ s.description }}</span>
                 </div>
               </div>
             </div>
@@ -989,7 +989,9 @@ function specBarStyle(s) {
   const left = (specStart - projStart) / 86400000 / totalDays * 100
   const width = Math.max(1, (specEnd - specStart) / 86400000 / totalDays * 100)
   if (left >= 100 || left + width < 0) return { show: false }
-  return { show: true, left: Math.max(0, left), width: Math.min(width, 100 - Math.max(0, left)) }
+  const l = Math.max(0, left)
+  const w = Math.min(width, 100 - l)
+  return { show: true, left: l, width: w, css: 'position:absolute;top:50%;transform:translateY(-50%);left:' + l + '%;width:' + w + '%;background:' + (s.isDone ? '#a0a0b8' : 'var(--legal)') + ';opacity:0.9;border-radius:4px;height:20px;display:flex;align-items:center;overflow:hidden;min-width:20px;' }
 }
 
 function moduleBarStyle(m) {
@@ -1098,6 +1100,8 @@ function formatDate(iso) {
 .mod-name { font-size: 12px; font-weight: 700; flex: 1; }
 .mod-pct { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; }
 
+.gantt-spec-bar { position:absolute; }
+.gantt-spec-bar-txt { font-size:10px; color:#fff; padding:0 6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600; width:100%; display:block; }
 .gantt-task-row { display: flex; align-items: center; min-height: 34px; border-bottom: 1px solid var(--border); }
 .gantt-task-row:last-child { border-bottom: 1px solid var(--border); }
 .gantt-task-lbl { width: 260px; flex-shrink: 0; padding: 6px 16px 6px 32px; display: flex; align-items: center; gap: 8px; }
