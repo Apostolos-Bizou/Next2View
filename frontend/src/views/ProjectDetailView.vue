@@ -176,6 +176,64 @@
         <div class="cd-text">{{ project.contractDesc }}</div>
       </div>
 
+      <!-- FINANCIAL OVERVIEW -->
+      <div v-if="project.budget" class="fin-panel" style="margin-top:14px;">
+        <div class="fin-title">💰 Financial Overview</div>
+        <div class="fin-grid">
+          <div class="fin-item">
+            <div class="fin-lbl">Budget</div>
+            <div class="fin-val">€{{ Number(project.budget).toLocaleString() }}</div>
+          </div>
+          <div class="fin-item">
+            <div class="fin-lbl">Invoiced</div>
+            <div class="fin-val invoiced">€{{ Number(project.invoiced || 0).toLocaleString() }}</div>
+            <div class="fin-pct">{{ budgetPct(project.invoiced, project.budget) }}%</div>
+          </div>
+          <div class="fin-item">
+            <div class="fin-lbl">Paid</div>
+            <div class="fin-val paid">€{{ Number(project.paid || 0).toLocaleString() }}</div>
+            <div class="fin-pct">{{ budgetPct(project.paid, project.budget) }}%</div>
+          </div>
+          <div class="fin-item">
+            <div class="fin-lbl">Remaining</div>
+            <div class="fin-val remaining">€{{ Number((project.budget || 0) - (project.paid || 0)).toLocaleString() }}</div>
+          </div>
+        </div>
+        <div class="fin-bar-wrap">
+          <div class="fin-bar-track">
+            <div class="fin-bar-paid" :style="`width:${budgetPct(project.paid, project.budget)}%`"></div>
+            <div class="fin-bar-invoiced" :style="`width:${Math.max(0, budgetPct(project.invoiced, project.budget) - budgetPct(project.paid, project.budget))}%`"></div>
+          </div>
+          <span class="fin-bar-lbl">{{ budgetPct(project.paid, project.budget) }}% paid</span>
+        </div>
+      </div>
+
+      <!-- CEO NOTES -->
+      <div class="notes-panel" style="margin-top:14px;">
+        <div class="notes-header">
+          <div class="notes-title">🔒 CEO Notes <span class="notes-private">Private</span></div>
+          <button class="notes-add-btn" @click="showNoteInput=!showNoteInput">+ Νέα Σημείωση</button>
+        </div>
+        <div v-if="showNoteInput" class="note-input-wrap">
+          <textarea v-model="newNote" placeholder="Γράψε σημείωση..." class="note-textarea" rows="3"></textarea>
+          <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+            <button class="note-cancel" @click="showNoteInput=false;newNote='">Ακύρωση</button>
+            <button class="note-save" @click="saveNote" :disabled="!newNote.trim()">Αποθήκευση</button>
+          </div>
+        </div>
+        <div v-if="notes.length" class="notes-list">
+          <div v-for="n in notes" :key="n.id" class="note-item">
+            <div class="note-content">{{ n.content }}</div>
+            <div class="note-meta">
+              <span>{{ n.createdBy }}</span>
+              <span>{{ formatInstant(n.createdAt) }}</span>
+              <button class="note-del" @click="deleteNote(n.id)">✕</button>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="!showNoteInput" class="notes-empty">Δεν υπάρχουν σημειώσεις.</div>
+      </div>
+
     </div>
     <div v-else class="loading">Project not found.</div>
   </div>
@@ -183,6 +241,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 
@@ -200,11 +259,54 @@ const GANTT_WEEKS = 12
 onMounted(async () => {
   project.value = await store.fetchProject(route.params.id)
   loading.value = false
-  // First module open in accordion
   if (project.value?.modules?.length) {
     openAcc.value.add(project.value.modules[0].id)
   }
+  await loadNotes()
 })
+
+// ════ CEO NOTES ════
+const notes = ref([])
+const newNote = ref("")
+const showNoteInput = ref(false)
+
+async function loadNotes() {
+  if (!project.value) return
+  try {
+    const res = await api.get(`/projects/${project.value.id}/notes`)
+    notes.value = res.data
+  } catch { notes.value = [] }
+}
+
+async function saveNote() {
+  if (!newNote.value.trim()) return
+  try {
+    await api.post(`/projects/${project.value.id}/notes`, { content: newNote.value })
+    newNote.value = ""
+    showNoteInput.value = false
+    await loadNotes()
+  } catch (e) { console.error(e) }
+}
+
+async function deleteNote(noteId) {
+  try {
+    await api.delete(`/projects/${project.value.id}/notes/${noteId}`)
+    await loadNotes()
+  } catch (e) { console.error(e) }
+}
+
+// ════ FINANCIAL ════
+function budgetPct(amount, budget) {
+  if (!budget || !amount) return 0
+  return Math.round((Number(amount) / Number(budget)) * 100)
+}
+
+function formatInstant(instant) {
+  if (!instant) return ""
+  const d = new Date(instant)
+  const m = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"]
+  return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}, ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`
+}
 
 function toggleMod(id) {
   const s = new Set(collapsedMods.value)
@@ -405,4 +507,42 @@ function formatDate(iso) {
 .contract-desc-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
 .cd-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; }
 .cd-text { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+
+/* ════ FINANCIAL ════ */
+.fin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
+.fin-title { font-size: 13px; font-weight: 800; margin-bottom: 14px; }
+.fin-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+.fin-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; text-align: center; }
+.fin-lbl { font-family: "Nunito Sans", sans-serif; font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px; font-weight: 700; }
+.fin-val { font-size: 18px; font-weight: 900; color: var(--text); }
+.fin-val.invoiced { color: var(--yellow); }
+.fin-val.paid { color: var(--green); }
+.fin-val.remaining { color: var(--text-mid); }
+.fin-pct { font-family: "Nunito Sans", sans-serif; font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+.fin-bar-wrap { display: flex; align-items: center; gap: 12px; }
+.fin-bar-track { flex: 1; height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; display: flex; }
+.fin-bar-paid { height: 100%; background: var(--green); border-radius: 4px 0 0 4px; transition: width 0.5s; }
+.fin-bar-invoiced { height: 100%; background: var(--yellow); opacity: 0.6; transition: width 0.5s; }
+.fin-bar-lbl { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; color: var(--green); white-space: nowrap; }
+
+/* ════ CEO NOTES ════ */
+.notes-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.notes-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
+.notes-title { font-size: 13px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+.notes-private { font-size: 9px; font-weight: 700; background: rgba(124,58,237,0.1); color: #7c3aed; padding: 2px 8px; border-radius: 5px; letter-spacing: 0.5px; }
+.notes-add-btn { font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: var(--accent); border: none; border-radius: 6px; color: #fff; cursor: pointer; }
+.note-input-wrap { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.note-textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border-bright); border-radius: 7px; background: var(--surface); color: var(--text); font-family: "Nunito", sans-serif; font-size: 13px; resize: vertical; box-sizing: border-box; }
+.note-textarea:focus { outline: none; border-color: var(--accent); }
+.note-cancel { padding: 7px 14px; background: var(--surface3); border: 1px solid var(--border-bright); border-radius: 6px; font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; color: var(--text-mid); }
+.note-save { padding: 7px 16px; background: var(--accent); border: none; border-radius: 6px; font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; color: #fff; }
+.note-save:disabled { opacity: 0.4; cursor: not-allowed; }
+.notes-list { padding: 0 20px; }
+.note-item { padding: 14px 0; border-bottom: 1px solid var(--border); }
+.note-item:last-child { border-bottom: none; }
+.note-content { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 8px; white-space: pre-wrap; }
+.note-meta { display: flex; align-items: center; gap: 12px; font-size: 10px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; }
+.note-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
+.note-del:hover { color: var(--red); background: var(--red-dim); }
+.notes-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
 </style>
