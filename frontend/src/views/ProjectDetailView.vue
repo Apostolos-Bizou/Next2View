@@ -165,8 +165,15 @@
         <div class="specs-title">📋 Specifications</div>
         <div class="specs-list">
           <div v-for="s in project.specs" :key="s.id" class="spec-item">
-            <div :class="`spec-check ${s.isDone?'done':''}`">{{ s.isDone?'✓':' }}</div>
-            <div style="flex:1;"><div :class="`spec-txt ${s.isDone?'done':''}`">{{ s.description }}</div><div v-if="s.startDate || s.endDate" class="spec-dates-display"><span v-if="s.startDate">📅 {{ formatDate(s.startDate) }}</span><span v-if="s.startDate && s.endDate"> → </span><span v-if="s.endDate">{{ formatDate(s.endDate) }}</span></div></div>
+            <div :class="specCheckClass(s)">{{ s.isDone ? '✓' : '' }}</div>
+            <div style="flex:1;">
+              <div :class="specTxtClass(s)">{{ s.description }}</div>
+              <div v-if="s.startDate || s.endDate" class="spec-dates-display">
+                <span v-if="s.startDate">📅 {{ formatDate(s.startDate) }}</span>
+                <span v-if="s.startDate && s.endDate"> → </span>
+                <span v-if="s.endDate">{{ formatDate(s.endDate) }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -277,6 +284,9 @@ async function loadNotes() {
     notes.value = res.data
   } catch { notes.value = [] }
 }
+
+function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
+function specTxtClass(s) { return s.isDone ? 'spec-txt done' : 'spec-txt' }
 
 function cancelNote() {
   showNoteInput.value = false
