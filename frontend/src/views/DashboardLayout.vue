@@ -719,7 +719,7 @@ textarea.form-input { resize: vertical; min-height: 60px; }
 .mb-name { flex: 1; }
 .mb-color { width: 130px; flex-shrink: 0; }
 .task-builder { display: flex; flex-direction: column; gap: 6px; padding-left: 8px; border-left: 2px solid var(--border-bright); }
-.task-row { display: flex; gap: 6px; align-items: center; }
+.task-row { display: flex; gap: 6px; align-items: flex-start; flex-direction: column; }
 .task-name-input { flex: 1; }
 .task-assign-input { width: 100px; flex-shrink: 0; }
 .task-pct-input { width: 52px; flex-shrink: 0; text-align: center; }
