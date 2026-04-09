@@ -29,6 +29,7 @@
             <td><span :class="`status-dot ${u.active ? 'active' : 'inactive'}`">{{ u.active ? 'Active' : 'Inactive' }}</span></td>
             <td>
               <button class="icon-btn" @click="openUserModal(u)" title="Edit">✎</button>
+              <button class="icon-btn blue" @click="openPermModal(u)" title="Permissions" v-if="u.role !== 'CEO'">🔑</button>
               <button class="icon-btn red" @click="toggleUser(u)" :title="u.active ? 'Deactivate' : 'Activate'">{{ u.active ? '⏸' : '▶' }}</button>
               <button class="icon-btn red" @click="confirmDelete(u)" title="Delete">🗑</button>
             </td>
@@ -147,6 +148,69 @@
         </div>
       </div>
     </div>
+
+  <!-- ════ PERMISSIONS MODAL ════ -->
+  <div v-if="showPermModal" class="modal-overlay" @click.self="showPermModal=false">
+    <div class="modal modal-perm">
+      <div class="modal-header">
+        <div class="modal-title">🔑 Permissions — {{ permUser?.fullName }}</div>
+        <button class="modal-close" @click="showPermModal=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="perm-section">
+          <div class="perm-section-title">📊 Ορατότητα Κατηγοριών</div>
+          <div class="perm-grid">
+            <label class="perm-item" v-for="p in visibilityPerms" :key="p.key">
+              <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
+              <span class="perm-icon">{{ p.icon }}</span>
+              <span class="perm-label">{{ p.label }}</span>
+            </label>
+          </div>
+        </div>
+        <div class="perm-section">
+          <div class="perm-section-title">✏️ Ενέργειες</div>
+          <div class="perm-grid">
+            <label class="perm-item" v-for="p in actionPerms" :key="p.key">
+              <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
+              <span class="perm-icon">{{ p.icon }}</span>
+              <span class="perm-label">{{ p.label }}</span>
+            </label>
+          </div>
+        </div>
+        <div class="perm-section">
+          <div class="perm-section-title">👥 Διαχείριση</div>
+          <div class="perm-grid">
+            <label class="perm-item" v-for="p in managementPerms" :key="p.key">
+              <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
+              <span class="perm-icon">{{ p.icon }}</span>
+              <span class="perm-label">{{ p.label }}</span>
+            </label>
+          </div>
+        </div>
+        <div class="perm-section">
+          <div class="perm-section-title">🤖 AI Features</div>
+          <div class="perm-grid">
+            <label class="perm-item" v-for="p in aiPerms" :key="p.key">
+              <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
+              <span class="perm-icon">{{ p.icon }}</span>
+              <span class="perm-label">{{ p.label }}</span>
+            </label>
+          </div>
+        </div>
+        <div class="perm-shortcuts">
+          <button class="perm-shortcut" @click="setAll(true)">✅ Ενεργοποίηση Όλων</button>
+          <button class="perm-shortcut" @click="setAll(false)">❌ Απενεργοποίηση Όλων</button>
+        </div>
+        <div v-if="permError" class="form-error">{{ permError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showPermModal=false">Ακύρωση</button>
+        <button class="btn-submit" @click="savePermissions" :disabled="permSaving">
+          {{ permSaving ? "Αποθήκευση..." : "Αποθήκευση" }}
+        </button>
+      </div>
+    </div>
+  </div>
 
   </div>
 </template>
@@ -290,6 +354,69 @@ async function saveCompany() {
   } finally { modalSaving.value = false }
 }
 
+// ════ PERMISSIONS ════
+const showPermModal = ref(false)
+const permUser = ref(null)
+const permForm = ref({})
+const permError = ref('')
+const permSaving = ref(false)
+
+const visibilityPerms = [
+  { key: 'viewFinance',    icon: '$', label: 'Βλέπει Finance' },
+  { key: 'viewLegal',      icon: '⚖', label: 'Βλέπει Legal' },
+  { key: 'viewDev',        icon: '⌨', label: 'Βλέπει Developing' },
+  { key: 'viewMarketing',  icon: '◈', label: 'Βλέπει Marketing' },
+  { key: 'viewFinancials', icon: '💰', label: 'Βλέπει Financial data' },
+  { key: 'viewCeoNotes',   icon: '🔒', label: 'Βλέπει CEO Notes' },
+]
+const actionPerms = [
+  { key: 'updateTasks',   icon: '✏️', label: 'Update Tasks' },
+  { key: 'uploadFiles',   icon: '📎', label: 'Upload Files' },
+  { key: 'createProject', icon: '➕', label: 'Δημιουργία Project' },
+  { key: 'editProject',   icon: '📝', label: 'Επεξεργασία Project' },
+]
+const managementPerms = [
+  { key: 'manageUsers',     icon: '👤', label: 'Manage Users' },
+  { key: 'manageCompanies', icon: '🏢', label: 'Manage Companies' },
+]
+const aiPerms = [
+  { key: 'aiCeoReport', icon: '✦', label: 'AI CEO Report' },
+  { key: 'aiContract',  icon: '📄', label: 'AI Contract Analysis' },
+]
+
+async function openPermModal(u) {
+  permUser.value = u
+  permError.value = ''
+  permSaving.value = false
+  try {
+    const res = await api.get(/permissions/users/)
+    permForm.value = { ...res.data }
+  } catch {
+    permForm.value = {
+      viewFinance: false, viewLegal: false, viewDev: false, viewMarketing: false,
+      viewFinancials: false, viewCeoNotes: false, updateTasks: false,
+      uploadFiles: false, createProject: false, editProject: false,
+      manageUsers: false, manageCompanies: false, aiCeoReport: false, aiContract: false
+    }
+  }
+  showPermModal.value = true
+}
+
+function setAll(val) {
+  Object.keys(permForm.value).forEach(k => permForm.value[k] = val)
+}
+
+async function savePermissions() {
+  permSaving.value = true
+  permError.value = ''
+  try {
+    await api.put(/permissions/users/, permForm.value)
+    showPermModal.value = false
+  } catch (e) {
+    permError.value = e.response?.data?.message || 'Σφάλμα αποθήκευσης.'
+  } finally { permSaving.value = false }
+}
+
 function coShort(name) {
   if (!name) return '—'
   const m = { 'Polaris Financial Services':'Polaris Financial', 'Crossworld Marine Services':'Crossworld Marine', 'WiMAS Training Center':'WiMAS', 'Varship Management':'Varship' }
@@ -344,4 +471,18 @@ function coShort(name) {
 .btn-cancel { padding: 9px 20px; background: var(--surface3); border: 1px solid var(--border-bright); border-radius: 7px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-mid); }
 .btn-submit { padding: 9px 24px; background: var(--accent); border: none; border-radius: 7px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.icon-btn.blue { border-color: var(--accent); color: var(--accent); }
+.icon-btn.blue:hover { background: var(--accent-dim); }
+.modal-perm { width: 600px; max-height: 85vh; }
+.perm-section { margin-bottom: 16px; }
+.perm-section-title { font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.perm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.perm-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; cursor: pointer; transition: all 0.15s; }
+.perm-item:hover { border-color: var(--accent); background: var(--accent-dim); }
+.perm-check { width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; }
+.perm-icon { font-size: 14px; }
+.perm-label { font-size: 12px; font-weight: 600; color: var(--text-mid); }
+.perm-shortcuts { display: flex; gap: 8px; margin-top: 12px; }
+.perm-shortcut { font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; border: 1px solid var(--border-bright); border-radius: 6px; background: var(--surface2); color: var(--text-mid); cursor: pointer; transition: all 0.15s; }
+.perm-shortcut:hover { background: var(--surface3); }
 </style>
