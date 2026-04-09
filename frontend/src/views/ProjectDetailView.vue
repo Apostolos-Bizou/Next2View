@@ -125,8 +125,144 @@
                   </div>
                 </div>
               </div>
-            </template>
-          </template>
+              <!-- EDIT PROJECT MODAL -->
+  <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal=false">
+    <div class="modal modal-edit">
+      <div class="modal-header">
+        <div class="modal-title">✎ Επεξεργασία Project</div>
+        <button class="modal-close" @click="showEditModal=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-section-title">ΒΑΣΙΚΑ ΣΤΟΙΧΕΙΑ</div>
+        <div class="form-group">
+          <label>Τίτλος *</label>
+          <input v-model="editForm.title" type="text" class="form-input" placeholder="Τίτλος project" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Εταιρεία *</label>
+            <select v-model="editForm.companyId" class="form-input">
+              <option v-for="co in companies" :key="co.id" :value="co.id">{{ co.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Κατηγορία *</label>
+            <select v-model="editForm.category" class="form-input">
+              <option value="finance">Finance</option>
+              <option value="legal">Legal</option>
+              <option value="dev">Developing</option>
+              <option value="marketing">Marketing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Budget (€)</label>
+            <input v-model="editForm.budget" type="number" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Ημ. Εναρξης</label>
+            <input v-model="editForm.startDate" type="date" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Deadline</label>
+            <input v-model="editForm.deadline" type="date" class="form-input" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Περιγραφή Σύμβασης</label>
+          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" placeholder="Σύντομη περιγραφή..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select v-model="editForm.status" class="form-input">
+            <option value="on_track">On Track</option>
+            <option value="at_risk">At Risk</option>
+            <option value="delayed">Delayed</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div v-if="editError" class="form-error">{{ editError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showEditModal=false">Ακύρωση</button>
+        <button class="btn-submit" @click="saveEdit" :disabled="editSaving">
+          {{ editSaving ? "Αποθήκευση..." : "Αποθήκευση" }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</template>
+            <!-- EDIT PROJECT MODAL -->
+  <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal=false">
+    <div class="modal modal-edit">
+      <div class="modal-header">
+        <div class="modal-title">✎ Επεξεργασία Project</div>
+        <button class="modal-close" @click="showEditModal=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-section-title">ΒΑΣΙΚΑ ΣΤΟΙΧΕΙΑ</div>
+        <div class="form-group">
+          <label>Τίτλος *</label>
+          <input v-model="editForm.title" type="text" class="form-input" placeholder="Τίτλος project" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Εταιρεία *</label>
+            <select v-model="editForm.companyId" class="form-input">
+              <option v-for="co in companies" :key="co.id" :value="co.id">{{ co.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Κατηγορία *</label>
+            <select v-model="editForm.category" class="form-input">
+              <option value="finance">Finance</option>
+              <option value="legal">Legal</option>
+              <option value="dev">Developing</option>
+              <option value="marketing">Marketing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Budget (€)</label>
+            <input v-model="editForm.budget" type="number" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Ημ. Εναρξης</label>
+            <input v-model="editForm.startDate" type="date" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Deadline</label>
+            <input v-model="editForm.deadline" type="date" class="form-input" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Περιγραφή Σύμβασης</label>
+          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" placeholder="Σύντομη περιγραφή..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select v-model="editForm.status" class="form-input">
+            <option value="on_track">On Track</option>
+            <option value="at_risk">At Risk</option>
+            <option value="delayed">Delayed</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div v-if="editError" class="form-error">{{ editError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showEditModal=false">Ακύρωση</button>
+        <button class="btn-submit" @click="saveEdit" :disabled="editSaving">
+          {{ editSaving ? "Αποθήκευση..." : "Αποθήκευση" }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+</template>
         </div>
       </div>
 
@@ -267,6 +403,74 @@
     </div>
     <div v-else class="loading">Project not found.</div>
   </div>
+  <!-- EDIT PROJECT MODAL -->
+  <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal=false">
+    <div class="modal modal-edit">
+      <div class="modal-header">
+        <div class="modal-title">✎ Επεξεργασία Project</div>
+        <button class="modal-close" @click="showEditModal=false">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-section-title">ΒΑΣΙΚΑ ΣΤΟΙΧΕΙΑ</div>
+        <div class="form-group">
+          <label>Τίτλος *</label>
+          <input v-model="editForm.title" type="text" class="form-input" placeholder="Τίτλος project" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Εταιρεία *</label>
+            <select v-model="editForm.companyId" class="form-input">
+              <option v-for="co in companies" :key="co.id" :value="co.id">{{ co.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Κατηγορία *</label>
+            <select v-model="editForm.category" class="form-input">
+              <option value="finance">Finance</option>
+              <option value="legal">Legal</option>
+              <option value="dev">Developing</option>
+              <option value="marketing">Marketing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Budget (€)</label>
+            <input v-model="editForm.budget" type="number" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Ημ. Εναρξης</label>
+            <input v-model="editForm.startDate" type="date" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Deadline</label>
+            <input v-model="editForm.deadline" type="date" class="form-input" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Περιγραφή Σύμβασης</label>
+          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" placeholder="Σύντομη περιγραφή..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select v-model="editForm.status" class="form-input">
+            <option value="on_track">On Track</option>
+            <option value="at_risk">At Risk</option>
+            <option value="delayed">Delayed</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+        <div v-if="editError" class="form-error">{{ editError }}</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" @click="showEditModal=false">Ακύρωση</button>
+        <button class="btn-submit" @click="saveEdit" :disabled="editSaving">
+          {{ editSaving ? "Αποθήκευση..." : "Αποθήκευση" }}
+        </button>
+      </div>
+    </div>
+  </div>
+
 </template>
 
 <script setup>
@@ -368,6 +572,71 @@ function formatSize(bytes) {
 
 function specCheckClass(s) { return s.isDone ? 'spec-check done' : 'spec-check' }
 function specTxtClass(s) { return s.isDone ? 'spec-txt done' : 'spec-txt' }
+
+// ════ EDIT PROJECT ════
+const showEditModal = ref(false)
+const editForm = ref({})
+const editError = ref("")
+const editSaving = ref(false)
+const companies = ref([])
+
+async function openEditModal() {
+  editError.value = ""
+  editForm.value = {
+    title: project.value.title || "",
+    companyId: project.value.companyId || "",
+    category: project.value.category || "dev",
+    budget: project.value.budget || 0,
+    startDate: project.value.startDate || "",
+    deadline: project.value.deadline || "",
+    contractDesc: project.value.contractDesc || "",
+    status: project.value.status || "on_track",
+    modules: project.value.modules || [],
+    specs: project.value.specs || [],
+  }
+  if (!companies.value.length) {
+    try {
+      const res = await api.get("/companies")
+      companies.value = res.data
+    } catch {}
+  }
+  showEditModal.value = true
+}
+
+async function saveEdit() {
+  if (!editForm.value.title.trim()) { editError.value = "Ο τίτλος είναι υποχρεωτικός."; return }
+  editSaving.value = true
+  editError.value = ""
+  try {
+    await api.put(`/projects/${project.value.id}`, {
+      title: editForm.value.title,
+      companyId: editForm.value.companyId,
+      category: editForm.value.category,
+      budget: editForm.value.budget || 0,
+      startDate: editForm.value.startDate || null,
+      deadline: editForm.value.deadline || null,
+      contractDesc: editForm.value.contractDesc || "",
+      status: editForm.value.status,
+      modules: editForm.value.modules.map(m => ({
+        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+        tasks: (m.tasks || []).map(t => ({
+          name: t.name, assignee: t.assignee, progress: t.progress,
+          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+          comment: t.comment, deadline: t.deadline,
+          startWeek: t.startWeek, durationWeeks: t.durationWeeks, sortOrder: t.sortOrder || 0
+        }))
+      })),
+      specs: editForm.value.specs.map(s => ({
+        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
+        startDate: s.startDate || null, endDate: s.endDate || null
+      }))
+    })
+    showEditModal.value = false
+    await loadProject()
+  } catch (e) {
+    editError.value = e.response?.data?.message || "Σφάλμα αποθήκευσης."
+  } finally { editSaving.value = false }
+}
 
 function cancelNote() {
   showNoteInput.value = false
@@ -643,6 +912,10 @@ function formatDate(iso) {
 .note-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
 .note-del:hover { color: var(--red); background: var(--red-dim); }
 .notes-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
+.edit-project-btn { position: absolute; top: 14px; right: 16px; font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: #fff; cursor: pointer; transition: background 0.2s; }
+.edit-project-btn:hover { background: rgba(255,255,255,0.25); }
+.modal-edit { width: 620px; max-height: 85vh; }
+.form-section-title { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
 .files-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .files-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
 .files-title { font-size: 13px; font-weight: 800; }
