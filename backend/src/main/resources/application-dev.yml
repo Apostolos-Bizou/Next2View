@@ -56,3 +56,11 @@ logging:
   level:
     root: WARN
     com.next2me.next2view: INFO
+azure:
+  storage:
+    account: ${AZURE_STORAGE_ACCOUNT:}
+    key: ${AZURE_STORAGE_KEY:}
+
+anthropic:
+  api:
+    key: ${ANTHROPIC_API_KEY:}
