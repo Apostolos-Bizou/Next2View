@@ -62,9 +62,9 @@
           <span class="nav-count">{{ store.byCategory('marketing').length }}</span>
         </div>
 
-        <div v-if="store.companies.some(co => store.projects.some(p => p.companyId === co.id && permStore.canViewCategory(p.category)))" class="nav-section" style="margin-top:6px;">Εταιρείες</div>
+        <div class="nav-section" style="margin-top:6px;">Εταιρείες</div>
         <div
-          v-for="co in store.companies.filter(co => store.projects.some(p => p.companyId === co.id && permStore.canViewCategory(p.category)))" :key="co.id"
+          v-for="co in store.companies" :key="co.id"
           :class="['nav-item', route.query.companyId===co.id ? 'active' : '']"
           @click="router.push(`/projects?companyId=${co.id}`)"
         >
