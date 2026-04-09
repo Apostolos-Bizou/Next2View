@@ -97,7 +97,7 @@
         <div class="avatar">{{ initials }}</div>
         <div>
           <div class="user-name">{{ auth.user?.fullName?.split(' ')[0] || 'CEO' }}</div>
-          <div class="user-role">CEO · Full Access</div>
+          <div class="user-role">{{ auth.user?.role === 'CEO' ? 'CEO · Full Access' : auth.user?.role || 'Viewer' }}</div>
         </div>
         <button class="mfa-btn" @click="openMfaModal" title="MFA">🔐</button>
         <button class="logout-btn" @click="handleLogout" title="Logout">↩</button>
