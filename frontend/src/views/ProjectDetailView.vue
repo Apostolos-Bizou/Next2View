@@ -251,7 +251,7 @@
           </label>
         </div>
         <div v-if="files.length" class="files-list">
-          <div v-for="f in files" :key="f.id" class="file-item">
+          <div v-for="f in files" :key="f.id" class="file-item" @click="openFile(f)" style="cursor:pointer;" title="Κλικ για άνοιγμα αρχείου">
             <span class="file-icon">{{ fileIcon(f.contentType) }}</span>
             <div class="file-info">
               <div class="file-name">{{ f.fileName }}</div>
@@ -487,6 +487,19 @@ async function loadNotes() {
 const files = ref([])
 const uploading = ref(false)
 const uploadError = ref("")
+
+async function openFile(f) {
+  try {
+    const res = await api.get('/projects/' + project.value.id + '/files/' + f.id + '/download')
+    if (res.data.url) {
+      window.open(res.data.url, '_blank')
+    } else {
+      alert('Δεν ήταν δυνατή η φόρτωση του αρχείου.')
+    }
+  } catch(e) {
+    alert('Σφάλμα κατά το άνοιγμα του αρχείου.')
+  }
+}
 
 async function loadFiles() {
   if (!project.value) return
@@ -1163,7 +1176,8 @@ function formatDate(iso) {
 .files-upload-btn:hover { background: #2563eb; }
 .files-upload-btn.uploading { opacity: 0.6; cursor: not-allowed; }
 .files-list { padding: 0 20px; }
-.file-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+.file-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); transition: background 0.15s; border-radius: 6px; padding-left: 8px; }
+.file-item:hover { background: var(--accent-dim); }
 .file-item:last-child { border-bottom: none; }
 .file-icon { font-size: 22px; flex-shrink: 0; }
 .file-info { flex: 1; }

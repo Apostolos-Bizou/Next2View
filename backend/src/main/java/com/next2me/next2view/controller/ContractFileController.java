@@ -1,6 +1,15 @@
 package com.next2me.next2view.controller;
 
 import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import java.time.OffsetDateTime;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import java.time.OffsetDateTime;
+import com.azure.storage.blob.sas.BlobSasPermission;
+import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import java.time.OffsetDateTime;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
@@ -131,7 +140,11 @@ public class ContractFileController {
         if (containerClient != null) {
             try {
                 BlobClient blobClient = containerClient.getBlobClient(cf.getBlobPath());
-                String sasUrl = blobClient.getBlobUrl();
+                BlobSasPermission permission = new BlobSasPermission().setReadPermission(true);
+                BlobServiceSasSignatureValues values = new BlobServiceSasSignatureValues(
+                    OffsetDateTime.now().plusHours(1), permission);
+                String sasToken = blobClient.generateSas(values);
+                String sasUrl = blobClient.getBlobUrl() + "?" + sasToken;
                 return ResponseEntity.ok(Map.of("url", sasUrl, "fileName", cf.getFileName()));
             } catch (Exception e) {
                 log.error("Download error: {}", e.getMessage());
