@@ -122,10 +122,10 @@
         <div style="display:flex;gap:8px;align-items:center;">
           <select v-model="ganttFilter" class="gantt-select">
             <option value="">Όλες κατηγορίες</option>
-            <option value="finance">$ Finance</option>
-            <option value="legal">⚖ Legal</option>
-            <option value="dev">⌨ Developing</option>
-            <option value="marketing">◈ Marketing</option>
+            <option value="finance">Finance</option>
+            <option value="legal">Legal</option>
+            <option value="dev">Developing</option>
+            <option value="marketing">Marketing</option>
           </select>
           <div class="ph-badge badge blue">{{ ganttProjects.length }} projects</div>
         </div>
