@@ -34,10 +34,10 @@
       <div class="panel">
         <div class="ph">
           <div class="ph-title">Εταιρείες</div>
-          <div class="ph-badge badge blue">{{ store.companies.length }} entities</div>
+          <div class="ph-badge badge blue">{{ store.companies.filter(co => visibleProjects.some(p => p.companyId === co.id)).length }} entities</div>
         </div>
         <div class="pb">
-          <div v-for="co in store.companies" :key="co.id" class="co-row"
+          <div v-for="co in store.companies.filter(co => visibleProjects.some(p => p.companyId === co.id))" :key="co.id" class="co-row"
             @click="router.push(`/projects?companyId=${co.id}`)">
             <div class="co-av" :style="`color:${co.color};background:${co.color}15;`">{{ co.code }}</div>
             <div class="co-info">

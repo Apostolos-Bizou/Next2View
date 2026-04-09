@@ -40,7 +40,7 @@
           <span class="nav-ico" style="color:var(--text-dim);">⚙</span>Admin
         </router-link>
 
-        <div class="nav-section" style="margin-top:6px;">Κατηγορία</div>
+        <div v-if="['finance','legal','dev','marketing'].some(cat => permStore.canViewCategory(cat))" class="nav-section" style="margin-top:6px;">Κατηγορία</div>
         <div v-if="permStore.canViewCategory('finance')" :class="['nav-item', route.query.category==='finance' ? 'active' : '']"
           @click="router.push('/projects?category=finance')">
           <span class="nav-ico" style="color:var(--finance);">$</span>Finance
@@ -62,7 +62,7 @@
           <span class="nav-count">{{ store.byCategory('marketing').length }}</span>
         </div>
 
-        <div class="nav-section" style="margin-top:6px;">Εταιρείες</div>
+        <div v-if="store.companies.some(co => store.projects.some(p => p.companyId === co.id && permStore.canViewCategory(p.category)))" class="nav-section" style="margin-top:6px;">Εταιρείες</div>
         <div
           v-for="co in store.companies.filter(co => store.projects.some(p => p.companyId === co.id && permStore.canViewCategory(p.category)))" :key="co.id"
           :class="['nav-item', route.query.companyId===co.id ? 'active' : '']"
