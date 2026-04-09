@@ -2,12 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
 const routes = [
-  {
-    path: "/login",
-    name: "Login",
-    component: () => import("@/views/LoginView.vue"),
-    meta: { public: true },
-  },
+  { path: "/login", name: "Login", component: () => import("@/views/LoginView.vue"), meta: { public: true } },
   {
     path: "/",
     component: () => import("@/views/DashboardLayout.vue"),
@@ -18,6 +13,7 @@ const routes = [
       { path: "projects/:id", name: "ProjectDetail", component: () => import("@/views/ProjectDetailView.vue") },
       { path: "guide", name: "Guide", component: () => import("@/views/GuideView.vue") },
       { path: "admin", name: "Admin", component: () => import("@/views/AdminView.vue"), meta: { requiresCEO: true } },
+      { path: "notifications", name: "Notifications", component: () => import("@/views/NotificationsView.vue") },
     ],
   },
 ];

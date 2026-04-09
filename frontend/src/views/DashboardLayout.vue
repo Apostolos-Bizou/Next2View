@@ -18,6 +18,10 @@
         <router-link to="/guide" class="nav-item" active-class="active">
           <span class="nav-ico" style="color:#f6ad55;">?</span>Guide
         </router-link>
+        <router-link to="/notifications" class="nav-item" active-class="active">
+          <span class="nav-ico" style="color:var(--yellow);">🔔</span>Notifications
+          <span v-if="store.atRisk.length" class="nav-count" style="background:var(--red);color:#fff;">{{ store.atRisk.length }}</span>
+        </router-link>
         <router-link to="/admin" class="nav-item" active-class="active">
           <span class="nav-ico" style="color:var(--text-dim);">⚙</span>Admin
         </router-link>
@@ -52,9 +56,12 @@
         </router-link>
       </nav>
 
-      <div class="notif-row">
+      <div class="notif-row" @click="router.push('/notifications')" style="cursor:pointer;">
         <div class="notif-label">Notifications</div>
-        <span class="notif-bell">🔔</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span v-if="store.atRisk.length" class="notif-badge">{{ store.atRisk.length }}</span>
+          <span class="notif-bell">🔔</span>
+        </div>
       </div>
 
       <div class="sidebar-actions">
@@ -379,6 +386,7 @@ function renderMarkdown(text) {
 .notif-row { padding: 10px 14px 0; border-top: 1px solid var(--sidebar-border); display: flex; align-items: center; justify-content: space-between; }
 .notif-label { font-size: 9px; letter-spacing: 1.5px; color: var(--sidebar-text-dim); text-transform: uppercase; font-family: 'Nunito Sans', sans-serif; font-weight: 700; }
 .notif-bell { font-size: 18px; color: var(--sidebar-text); cursor: pointer; }
+.notif-badge { background: var(--red); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 10px; font-family: "Nunito Sans", sans-serif; }
 .sidebar-actions { padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
 .btn-sidebar { width: 100%; padding: 8px 12px; background: rgba(99,179,237,0.12); border: 1px solid rgba(99,179,237,0.25); border-radius: 6px; color: var(--sidebar-active-border); font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; text-align: center; }
 .btn-sidebar:hover { background: rgba(99,179,237,0.22); }
