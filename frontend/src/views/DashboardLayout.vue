@@ -638,6 +638,8 @@ function renderMarkdown(text) {
 
 <style scoped>
 .shell { display: flex; min-height: 100vh; }
+.mobile-header { display: none; }
+.main { flex: 1; min-width: 0; overflow-y: auto; }
 .sidebar { width: 228px; background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border); display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
 .logo { padding: 20px 18px 16px; border-bottom: 1px solid var(--sidebar-border); }
 .logo-mark { font-family: 'Nunito Sans', sans-serif; font-size: 8px; color: var(--sidebar-active-border); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 3px; }
@@ -733,7 +735,8 @@ textarea.form-input { resize: vertical; min-height: 60px; }
 .mobile-header { display: none; }
 
 @media (max-width: 768px) {
-  .app-shell { flex-direction: column; }
+  .shell { flex-direction: column; }
+  .mobile-header { display: flex !important; }
 
   .mobile-header {
     display: flex;
