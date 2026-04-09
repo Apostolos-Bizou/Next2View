@@ -617,7 +617,9 @@ async function toggleTask(t) {
           isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote,
           comment: t2.comment, deadline: t2.deadline,
           startWeek: t2.startWeek, durationWeeks: t2.durationWeeks,
-          startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0, manualProgress: t2.manualProgress || false
+          startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0, manualProgress: t2.manualProgress || false,
+          startDate: t2.startDate || null, endDate: t2.endDate || null,
+          startDate: t2.startDate || null, endDate: t2.endDate || null
         }))
       }))
     })
@@ -682,7 +684,7 @@ async function confirmDeleteModule(m) {
       specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
       modules: (project.value.modules || []).map(m2 => ({
         name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
-        tasks: (m2.tasks || []).map(t => ({ name: t.name, assignee: t.assignee, progress: t.progress, isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote, comment: t.comment, deadline: t.deadline, startWeek: t.startWeek, durationWeeks: t.durationWeeks, startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0 }))
+        tasks: (m2.tasks || []).map(t => ({ name: t.name, assignee: t.assignee, progress: t.progress, isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote, comment: t.comment, deadline: t.deadline, startWeek: t.startWeek, durationWeeks: t.durationWeeks, startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0, startDate: t.startDate || null, endDate: t.endDate || null }))
       }))
     })
   } catch(e) { await loadProject() }
