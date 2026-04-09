@@ -58,7 +58,7 @@
       </div>
 
       <div class="sidebar-actions">
-        <button class="btn-sidebar btn-ai">
+        <button class="btn-sidebar btn-ai" @click="openAiReport">
           <span style="font-size:16px;">✦</span> AI Report
         </button>
         <button class="btn-sidebar" @click="openNewProject">+ New Project</button>
@@ -188,6 +188,28 @@
         </div>
       </div>
     </div>
+  <!-- ════ AI REPORT MODAL ════ -->
+  <div v-if="showAiReport" class="modal-overlay" @click.self="showAiReport=false">
+    <div class="modal modal-ai">
+      <div class="modal-header">
+        <div class="modal-title">✦ AI CEO Report — Next2me Group</div>
+        <button class="modal-close" @click="showAiReport=false">✕</button>
+      </div>
+      <div class="modal-body ai-body">
+        <div v-if="aiLoading" class="ai-loading">
+          <div class="ai-spinner"></div>
+          <div class="ai-loading-txt">Ο AI αναλύει {{ store.projects.length }} projects...</div>
+        </div>
+        <div v-else-if="aiReport" class="ai-report" v-html="renderMarkdown(aiReport)"></div>
+        <div v-else class="ai-error">Δεν ήταν δυνατή η δημιουργία αναφοράς.</div>
+      </div>
+      <div class="modal-footer" v-if="!aiLoading">
+        <button class="btn-cancel" @click="showAiReport=false">Κλείσιμο</button>
+        <button class="btn-submit" @click="loadAiReport">↺ Ανανέωση</button>
+      </div>
+    </div>
+  </div>
+
   </div>
 </template>
 
@@ -196,6 +218,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
+import api from '@/services/api'
 
 const auth = useAuthStore()
 const store = useProjectStore()
@@ -299,6 +322,44 @@ async function handleLogout() {
   await auth.logout()
   router.push('/login')
 }
+
+// ════ AI REPORT ════
+const showAiReport = ref(false)
+const aiLoading = ref(false)
+const aiReport = ref(null)
+
+async function openAiReport() {
+  showAiReport.value = true
+  if (!aiReport.value) await loadAiReport()
+}
+
+async function loadAiReport() {
+  aiLoading.value = true
+  aiReport.value = null
+  try {
+    const res = await api.post('/ai/ceo-report')
+    aiReport.value = res.data.report
+  } catch (e) {
+    aiReport.value = '## ⚠️ Σφάλμα\n\nΔεν ήταν δυνατή η σύνδεση με το AI.'
+  } finally {
+    aiLoading.value = false
+  }
+}
+
+function renderMarkdown(text) {
+  return text
+    .replace(/^## (.*$)/gm, '<h2 class="ai-h2">$1</h2>')
+    .replace(/^### (.*$)/gm, '<h3 class="ai-h3">$1</h3>')
+    .replace(/^\*\*(.*)\*\*$/gm, '<strong>$1</strong>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^- (.*$)/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>)/gs, '<ul>$1</ul>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/^(?!<[hul])/gm, '')
+    .split('\n').map(line =>
+      line.startsWith('<') ? line : (line ? '<p>' + line + '</p>' : '')
+    ).join('')
+}
 </script>
 
 <style scoped>
@@ -372,4 +433,18 @@ textarea.form-input { resize: vertical; min-height: 60px; }
 .btn-cancel { padding: 9px 20px; background: var(--surface3); border: 1px solid var(--border-bright); border-radius: 7px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text-mid); }
 .btn-submit { padding: 9px 24px; background: var(--accent); border: none; border-radius: 7px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; color: #fff; }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.modal-ai { width: 780px; max-height: 85vh; }
+.ai-body { min-height: 300px; }
+.ai-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px; gap: 20px; }
+.ai-spinner { width: 40px; height: 40px; border: 3px solid rgba(139,92,246,0.2); border-top-color: #a78bfa; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-loading-txt { color: var(--text-dim); font-size: 14px; font-family: "Nunito Sans", sans-serif; }
+.ai-report { font-size: 14px; line-height: 1.8; color: var(--text-mid); }
+.ai-report :deep(.ai-h2) { font-size: 16px; font-weight: 800; color: var(--text); margin: 20px 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.ai-report :deep(.ai-h3) { font-size: 14px; font-weight: 700; color: var(--text); margin: 14px 0 6px; }
+.ai-report :deep(ul) { padding-left: 20px; margin: 8px 0; }
+.ai-report :deep(li) { margin-bottom: 6px; }
+.ai-report :deep(strong) { color: var(--text); font-weight: 700; }
+.ai-report :deep(p) { margin-bottom: 10px; }
+.ai-error { padding: 40px; text-align: center; color: var(--red); font-size: 14px; }
 </style>
