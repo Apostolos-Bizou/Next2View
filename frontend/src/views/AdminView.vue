@@ -168,7 +168,7 @@
           </div>
         </div>
         <div class="perm-section">
-          <div class="perm-section-title">✏️ Ενέργειες</div>
+          <div class="perm-section-title">✏ Ενέργειες</div>
           <div class="perm-grid">
             <label class="perm-item" v-for="p in actionPerms" :key="p.key">
               <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
@@ -370,10 +370,10 @@ const visibilityPerms = [
   { key: 'viewCeoNotes',   icon: '🔒', label: 'Βλέπει CEO Notes' },
 ]
 const actionPerms = [
-  { key: 'updateTasks',   icon: '✏️', label: 'Update Tasks' },
+  { key: 'updateTasks',   icon: '✏', label: 'Update Tasks' },
   { key: 'uploadFiles',   icon: '📎', label: 'Upload Files' },
-  { key: 'createProject', icon: '➕', label: 'Δημιουργία Project' },
-  { key: 'editProject',   icon: '📝', label: 'Επεξεργασία Project' },
+  { key: 'createProject', icon: '+', label: 'Δημιουργία Project' },
+  { key: 'editProject',   icon: '✎', label: 'Επεξεργασία Project' },
 ]
 const managementPerms = [
   { key: 'manageUsers',     icon: '👤', label: 'Manage Users' },
@@ -389,7 +389,7 @@ async function openPermModal(u) {
   permError.value = ''
   permSaving.value = false
   try {
-    const res = await api.get(/permissions/users/)
+    const res = await api.get(`/permissions/users/${u.id}`)
     permForm.value = { ...res.data }
   } catch {
     permForm.value = {
@@ -410,7 +410,7 @@ async function savePermissions() {
   permSaving.value = true
   permError.value = ''
   try {
-    await api.put(/permissions/users/, permForm.value)
+    await api.put(`/permissions/users/${permUser.value.id}`, permForm.value)
     showPermModal.value = false
   } catch (e) {
     permError.value = e.response?.data?.message || 'Σφάλμα αποθήκευσης.'
