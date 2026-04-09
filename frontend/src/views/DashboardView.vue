@@ -184,12 +184,16 @@ const visibleProjects = computed(() =>
   store.projects.filter(p => permStore.canViewCategory(p.category))
 );
 
-const categories = [
+const allCategories = [
   { key: "finance",   label: "Finance",    icon: "$" },
-  { key: "legal",     label: "Legal",      icon: "⚖" },
+  { key: "legal",     label: "Legal",      icon: "▪" },
   { key: "dev",       label: "Developing", icon: "⌨" },
   { key: "marketing", label: "Marketing",  icon: "◈" },
 ];
+
+const visibleCategories = computed(() =>
+  allCategories.filter(cat => permStore.canViewCategory(cat.key))
+);
 
 const catCompletion = (cat) => {
   const ps = visibleProjects.value.filter(p => p.category === cat);
