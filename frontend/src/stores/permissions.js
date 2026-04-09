@@ -23,5 +23,19 @@ export const usePermissionStore = defineStore("permissions", () => {
     return myPerms.value && Object.values(myPerms.value).every(v => v === true)
   }
 
-  return { myPerms, loadMyPermissions, can, isCEO }
+  // Maps project category -> permission flag
+  function canViewCategory(category) {
+    if (isCEO()) return true
+    const map = {
+      finance:   "viewFinance",
+      legal:     "viewLegal",
+      dev:       "viewDev",
+      marketing: "viewMarketing",
+    }
+    const flag = map[category]
+    if (!flag) return true // unknown category: show by default
+    return can(flag)
+  }
+
+  return { myPerms, loadMyPermissions, can, isCEO, canViewCategory }
 })

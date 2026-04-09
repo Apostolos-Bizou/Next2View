@@ -15,12 +15,12 @@
       <div class="kpi total">
         <div class="kpi-lbl">Overall</div>
         <div class="kpi-val">{{ store.overallCompletion }}%</div>
-        <div class="kpi-sub">{{ store.projects.length }} projects</div>
+        <div class="kpi-sub">{{ visibleProjects.length }} projects</div>
       </div>
-      <div v-for="cat in categories" :key="cat.key" :class="`kpi ${cat.key}`">
+      <div v-for="cat in visibleCategories" :key="cat.key" :class="`kpi ${cat.key}`">
         <div class="kpi-lbl">{{ cat.label }}</div>
         <div class="kpi-val">{{ catCompletion(cat.key) }}%</div>
-        <div class="kpi-sub">{{ store.byCategory(cat.key).length }} projects</div>
+        <div class="kpi-sub">{{ visibleProjects.filter(p => p.category === cat.key).length }} projects</div>
       </div>
       <div class="kpi alert">
         <div class="kpi-lbl">At Risk</div>
@@ -61,12 +61,12 @@
           <div class="ph"><div class="ph-title">Ανά Κατηγορία</div></div>
           <div class="pb">
             <div class="g4">
-              <div v-for="cat in categories" :key="cat.key" class="cat-blk">
+              <div v-for="cat in visibleCategories" :key="cat.key" class="cat-blk">
                 <div :class="`cat-blk-lbl ${cat.key}`">{{ cat.icon }} {{ cat.label }}</div>
                 <div :class="`cat-blk-pct ${cat.key}`">{{ catCompletion(cat.key) }}%</div>
                 <div class="cat-blk-sub">
-                  {{ store.byCategory(cat.key).reduce((a,p)=>a+p.tasksDone,0) }}/
-                  {{ store.byCategory(cat.key).reduce((a,p)=>a+p.tasksTotal,0) }} tasks
+                  {{ visibleProjects.filter(p => p.category === cat.key).reduce((a,p)=>a+p.tasksDone,0) }}/
+                  {{ visibleProjects.filter(p => p.category === cat.key).reduce((a,p)=>a+p.tasksTotal,0) }} tasks
                 </div>
                 <div class="cat-big-bar">
                   <div class="cat-big-fill" :style="`width:${catCompletion(cat.key)}%;background:var(--${cat.key});`"></div>
@@ -173,10 +173,16 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
+import { usePermissionStore } from "@/stores/permissions";
 
 const store = useProjectStore();
+const permStore = usePermissionStore();
 const router = useRouter();
 const ganttFilter = ref("");
+
+const visibleProjects = computed(() =>
+  store.projects.filter(p => permStore.canViewCategory(p.category))
+);
 
 const categories = [
   { key: "finance",   label: "Finance",    icon: "$" },
@@ -186,20 +192,20 @@ const categories = [
 ];
 
 const catCompletion = (cat) => {
-  const ps = store.byCategory(cat);
+  const ps = visibleProjects.value.filter(p => p.category === cat);
   if (!ps.length) return 0;
   return Math.round(ps.reduce((s, p) => s + p.completion, 0) / ps.length);
 };
 
 const upcomingDeadlines = computed(() =>
-  [...store.projects].filter(p => p.deadline)
+  [...visibleProjects.value].filter(p => p.deadline)
     .sort((a, b) => new Date(a.deadline) - new Date(b.deadline)).slice(0, 5)
 );
 const urgentCount = computed(() =>
   upcomingDeadlines.value.filter(p => daysLeft(p.deadline) < 7).length
 );
 const recentActivity = computed(() =>
-  [...store.projects].sort((a, b) => a.updatedAgo - b.updatedAgo).slice(0, 5)
+  [...visibleProjects.value].sort((a, b) => a.updatedAgo - b.updatedAgo).slice(0, 5)
 );
 
 // ════ GANTT ════
@@ -234,7 +240,7 @@ const todayPct = computed(() => {
 })
 
 const ganttProjects = computed(() => {
-  let ps = store.projects.filter(p => p.deadline)
+  let ps = visibleProjects.value.filter(p => p.deadline)
   if (ganttFilter.value) ps = ps.filter(p => p.category === ganttFilter.value)
   return ps.sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
 })

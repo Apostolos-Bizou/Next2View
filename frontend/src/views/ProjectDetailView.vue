@@ -220,7 +220,7 @@
       </div>
 
       <!-- FINANCIAL OVERVIEW -->
-      <div v-if="project.budget" class="fin-panel" style="margin-top:14px;">
+      <div v-if="project.budget && permStore.can('viewFinancials')" class="fin-panel" style="margin-top:14px;">
         <div class="fin-title">💰 Financial Overview</div>
         <div class="fin-grid">
           <div class="fin-item">
@@ -252,7 +252,7 @@
       </div>
 
       <!-- CEO NOTES -->
-      <div class="notes-panel" style="margin-top:14px;">
+      <div v-if="permStore.isCEO() || permStore.can('viewCeoNotes')" class="notes-panel" style="margin-top:14px;">
         <div class="notes-header">
           <div class="notes-title">🔒 CEO Notes <span class="notes-private">Private</span></div>
           <button class="notes-add-btn" @click="showNoteInput=!showNoteInput">+ Νέα Σημείωση</button>
@@ -355,10 +355,12 @@ import { ref, computed, onMounted } from 'vue'
 import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
+import { usePermissionStore } from '@/stores/permissions'
 
 const route = useRoute()
 const router = useRouter()
 const store = useProjectStore()
+const permStore = usePermissionStore()
 
 const project = ref(null)
 const loading = ref(true)

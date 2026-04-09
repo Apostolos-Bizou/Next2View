@@ -111,8 +111,10 @@
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
+import { usePermissionStore } from "@/stores/permissions";
 
 const store = useProjectStore();
+const permStore = usePermissionStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -141,7 +143,7 @@ function applyFilters() {
 }
 
 const filtered = computed(() => {
-  let ps = store.projects;
+  let ps = store.projects.filter(p => permStore.canViewCategory(p.category));
   if (filterCat.value) ps = ps.filter(p => p.category === filterCat.value);
   if (filterCo.value)  ps = ps.filter(p => p.companyId === filterCo.value);
   return ps;
