@@ -589,12 +589,10 @@ const ganttWeeks = computed(() => {
 })
 
 const todayPct = computed(() => {
-  const start = new Date()
-  start.setDate(start.getDate() - start.getDay())
-  const end = new Date(start)
-
   const now = new Date()
-  return Math.min(100, Math.max(0, (now - start) / (end - start) * 100))
+  const gs = ganttStart.value.getTime()
+  const total = GANTT_WEEKS * 7 * 86400000
+  return Math.min(100, Math.max(0, (now.getTime() - gs) / total * 100))
 })
 
 const ganttDays = computed(() => {
