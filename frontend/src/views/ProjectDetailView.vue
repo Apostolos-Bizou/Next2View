@@ -496,6 +496,8 @@ function formatSize(bytes) {
 }
 
 async function toggleTask(t) {
+  const prev = t.isDone
+  const prevPct = t.progress
   t.isDone = !t.isDone
   t.progress = t.isDone ? 100 : 0
   try {
@@ -523,14 +525,14 @@ async function toggleTask(t) {
         }))
       }))
     })
-    await loadProject()
   } catch(e) {
-    t.isDone = !t.isDone
-    t.progress = t.isDone ? 100 : 0
+    t.isDone = prev
+    t.progress = prevPct
   }
 }
 
 async function toggleSpec(s) {
+  const prev = s.isDone
   s.isDone = !s.isDone
   try {
     await api.put('/projects/' + project.value.id, {
@@ -557,9 +559,8 @@ async function toggleSpec(s) {
         }))
       }))
     })
-    await loadProject()
   } catch(e) {
-    s.isDone = !s.isDone
+    s.isDone = prev
   }
 }
 
