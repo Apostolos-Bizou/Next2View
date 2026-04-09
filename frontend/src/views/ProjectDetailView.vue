@@ -165,8 +165,8 @@
         <div class="specs-title">📋 Specifications</div>
         <div class="specs-list">
           <div v-for="s in project.specs" :key="s.id" class="spec-item">
-            <div :class="`spec-check ${s.isDone?'done':''}`">{{ s.isDone?'✓':'' }}</div>
-            <div :class="`spec-txt ${s.isDone?'done':''}`">{{ s.description }}</div>
+            <div :class="`spec-check ${s.isDone?'done':''}`">{{ s.isDone?'✓':' }}</div>
+            <div style="flex:1;"><div :class="`spec-txt ${s.isDone?'done':''}`">{{ s.description }}</div><div v-if="s.startDate || s.endDate" class="spec-dates-display"><span v-if="s.startDate">📅 {{ formatDate(s.startDate) }}</span><span v-if="s.startDate && s.endDate"> → </span><span v-if="s.endDate">{{ formatDate(s.endDate) }}</span></div></div>
           </div>
         </div>
       </div>
@@ -509,6 +509,7 @@ function formatDate(iso) {
 .spec-check.done { background: var(--green); border-color: var(--green); color: #fff; }
 .spec-txt { font-size: 13px; color: var(--text-mid); }
 .spec-txt.done { color: var(--text-dim); text-decoration: line-through; }
+.spec-dates-display { font-size: 10px; color: var(--text-dim); font-family: 'Nunito Sans', sans-serif; margin-top: 3px; display: flex; gap: 6px; align-items: center; }
 .spec-dates-display { font-size: 10px; color: var(--text-dim); font-family: 'Nunito Sans', sans-serif; margin-top: 3px; display: flex; gap: 6px; align-items: center; }
 .contract-desc-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 20px; }
 .cd-title { font-size: 13px; font-weight: 800; margin-bottom: 8px; }
