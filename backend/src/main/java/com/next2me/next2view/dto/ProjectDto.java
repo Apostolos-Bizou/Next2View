@@ -39,4 +39,4 @@ public record ProjectDto(
         Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress, java.time.LocalDate startDate, java.time.LocalDate endDate
     ) {}
     public record SpecDto(UUID id, String description, boolean isDone, int sortOrder, java.time.LocalDate startDate, java.time.LocalDate endDate) {}
-}
+} 
