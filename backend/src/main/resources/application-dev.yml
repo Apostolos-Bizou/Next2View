@@ -18,7 +18,11 @@
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: false
+    repair-on-migrate: true
+    out-of-order: true
 
   autoconfigure:
     exclude:
