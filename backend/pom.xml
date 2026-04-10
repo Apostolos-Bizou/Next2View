@@ -14,6 +14,10 @@
 
     <groupId>com.next2me</groupId>
     <artifactId>next2view</artifactId>
+<<<<<<< HEAD
+=======
+	<version>1.0.1</version>
+>>>>>>> develop
     <version>1.0.1</version>
     <name>Next2View</name>
     <description>CEO Command Center — Next2me Group</description>
