@@ -619,7 +619,7 @@ async function toggleTask(t) {
           startWeek: t2.startWeek, durationWeeks: t2.durationWeeks,
           startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0, manualProgress: t2.manualProgress || false,
           startDate: t2.startDate || null, endDate: t2.endDate || null,
-          startDate: t2.startDate || null, endDate: t2.endDate || null
+
         }))
       }))
     })
@@ -653,7 +653,7 @@ async function toggleSpec(s) {
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
           comment: t.comment, deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks,
-          startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0
+          startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0, startDate: t.startDate || null, endDate: t.endDate || null
         }))
       }))
     })
