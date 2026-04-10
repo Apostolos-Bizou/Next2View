@@ -752,7 +752,8 @@ async function saveSpecDetail() {
           comment: t.comment, deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks,
           startDay: t.startDay, durationDays: t.durationDays,
-          sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false
+          sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false,
+          startDate: t.startDate || null, endDate: t.endDate || null
         }))
       }))
     })
