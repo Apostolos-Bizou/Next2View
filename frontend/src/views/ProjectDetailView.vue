@@ -799,8 +799,8 @@ async function openEditModal() {
     deadline: project.value.deadline || "",
     contractDesc: project.value.contractDesc || "",
     status: project.value.status || "on_track",
-    modules: project.value.modules || [],
-    specs: project.value.specs || [],
+    modules: (project.value.modules || []).map(m => ({ ...m, tasks: (m.tasks || []).map(t => ({ ...t })) })),
+    specs: (project.value.specs || []).map(s => ({ ...s })),
   }
   if (!companies.value.length) {
     try {
