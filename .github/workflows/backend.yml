@@ -1,4 +1,4 @@
-name: Backend CI/CD
+﻿name: Backend CI/CD
 
 on:
   push:
@@ -38,7 +38,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: maven
 
       - name: Build & Test
         working-directory: backend

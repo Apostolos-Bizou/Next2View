@@ -1,4 +1,4 @@
-# Next2View — Spring Boot Configuration
+﻿# Next2View β€” Spring Boot Configuration
 spring:
   application:
     name: next2view
@@ -25,10 +25,12 @@ spring:
         jdbc:
           time_zone: UTC
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: false
-    validate-on-migrate: true
+    validate-on-migrate: false
+    out-of-order: true
+    repair-on-migrate: true
   servlet:
     multipart:
       max-file-size: 20MB
