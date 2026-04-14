@@ -128,7 +128,17 @@ public class AuthService {
             return false;
         }
     }
+    
     @Transactional
+    public void unlockAccount(String email) {
+        userRepository.findAll().forEach(user -> {
+            user.setFailedAttempts(0);
+            user.setLockedUntil(null);
+            userRepository.save(user);
+        });
+    }
+
+@Transactional
     public void forgotPassword(String email) {
         userRepository.findByEmailAndActiveTrue(email).ifPresent(user -> {
             passwordResetTokenRepository.deleteAllByUserId(user.getId());
