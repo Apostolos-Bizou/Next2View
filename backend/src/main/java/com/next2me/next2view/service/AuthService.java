@@ -128,7 +128,22 @@ public class AuthService {
             return false;
         }
     }
+    
     @Transactional
+    public void changePassword(UUID userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new BadCredentialsException("User not found"));
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash()))
+            throw new BadCredentialsException("Current password is incorrect");
+        if (newPassword == null || newPassword.length() < 8)
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        refreshTokenRepository.revokeAllByUserId(userId);
+        log.info("Password changed for user {}", userId);
+    }
+
+@Transactional
     public void forgotPassword(String email) {
         userRepository.findByEmailAndActiveTrue(email).ifPresent(user -> {
             passwordResetTokenRepository.deleteAllByUserId(user.getId());
