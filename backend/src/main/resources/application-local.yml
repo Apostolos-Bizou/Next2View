@@ -1,0 +1,34 @@
+﻿# LOCAL DEVELOPMENT PROFILE
+# Αυτό το αρχείο ΔΕΝ μπαίνει στο git — προσθέστε στο .gitignore
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/next2view_dev
+    username: next2view
+    password: localdev123
+
+  jpa:
+    show-sql: true
+
+  flyway:
+    enabled: true
+
+security:
+  jwt:
+    private-key: classpath:keys/private.pem
+    public-key: classpath:keys/public.pem
+
+azure:
+  storage:
+    blob:
+      account-name: devstoreaccount1
+      container-name: next2view-contracts
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173
+
+logging:
+  level:
+    com.next2me.next2view: DEBUG
+    org.springframework.security: DEBUG

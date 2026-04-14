@@ -1,4 +1,7 @@
-package com.next2me.next2view.service;
+﻿const fs = require('fs');
+const file = 'C:\\Users\\akage\\Next2View\\backend\\src\\main\\java\\com\\next2me\\next2view\\service\\AuthService.java';
+
+const content = `package com.next2me.next2view.service;
 import com.next2me.next2view.dto.AuthResponse;
 import com.next2me.next2view.dto.LoginRequest;
 import com.next2me.next2view.model.RefreshToken;
@@ -20,8 +23,6 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
-import com.next2me.next2view.model.PasswordResetToken;
-import com.next2me.next2view.repository.PasswordResetTokenRepository;
 import dev.samstevens.totp.code.*;
 import dev.samstevens.totp.time.SystemTimeProvider;
 @Service
@@ -33,12 +34,7 @@ public class AuthService {
     private final AuditLogRepository auditLogRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
-    private final EmailService emailService;
-
-    @Value("${app.frontend-url:https://www.next2view.com}")
-    private String frontendUrl;
-    @Value("${security.jwt.refresh-token-expiry-days:7}")
+    @Value("\${security.jwt.refresh-token-expiry-days:7}")
     private int refreshTokenExpiryDays;
     private static final int MAX_ATTEMPTS = 5;
     private static final int LOCKOUT_MINUTES = 15;
@@ -128,39 +124,6 @@ public class AuthService {
             return false;
         }
     }
-    @Transactional
-    public void forgotPassword(String email) {
-        userRepository.findByEmailAndActiveTrue(email).ifPresent(user -> {
-            passwordResetTokenRepository.deleteAllByUserId(user.getId());
-            String rawToken = UUID.randomUUID().toString();
-            String tokenHash = hashToken(rawToken);
-            passwordResetTokenRepository.save(PasswordResetToken.builder()
-                .user(user)
-                .tokenHash(tokenHash)
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build());
-            String resetLink = frontendUrl + "/reset-password?token=" + rawToken;
-            emailService.sendPasswordReset(email, resetLink, user.getFullName().split(" ")[0]);
-            log.info("Password reset requested for {}", email);
-        });
-    }
-
-    @Transactional
-    public void resetPassword(String rawToken, String newPassword) {
-        String tokenHash = hashToken(rawToken);
-        PasswordResetToken prt = passwordResetTokenRepository.findByTokenHash(tokenHash)
-            .orElseThrow(() -> new BadCredentialsException("Invalid or expired token"));
-        if (!prt.isValid())
-            throw new BadCredentialsException("Invalid or expired token");
-        User user = prt.getUser();
-        user.setPasswordHash(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
-        prt.setUsed(true);
-        passwordResetTokenRepository.save(prt);
-        refreshTokenRepository.revokeAllByUserId(user.getId());
-        log.info("Password reset successful for {}", user.getEmail());
-    }
-
     private AuthResponse.UserInfo buildUserInfo(User user) {
         return new AuthResponse.UserInfo(
                 user.getId().toString(),
@@ -170,4 +133,7 @@ public class AuthService {
                 user.getDepartment() != null ? user.getDepartment().name() : null
         );
     }
-}
+}`;
+
+fs.writeFileSync(file, content, 'utf8');
+console.log('OK');
