@@ -22,6 +22,8 @@ import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.UUID;
+import dev.samstevens.totp.code.*;
+import dev.samstevens.totp.time.SystemTimeProvider;
 
 @Service
 @RequiredArgsConstructor
@@ -54,10 +56,15 @@ public class AuthService {
             throw new BadCredentialsException("Invalid credentials");
         }
 
-        if (user.getMfaEnabled() && user.getRole() == User.Role.CEO) {
+        if (user.getMfaEnabled()) {
             if (request.mfaCode() == null || request.mfaCode().isBlank()) {
                 return new AuthResponse(null, null, 0, buildUserInfo(user), true);
             }
+            boolean validCode = verifyTotp(user.getMfaSecret(), request.mfaCode());
+            if (!validCode) {
+                throw new BadCredentialsException("Invalid MFA code");
+            }
+        }
         }
 
         user.setFailedAttempts(0);
@@ -127,6 +134,16 @@ public class AuthService {
             return Base64.getEncoder().encodeToString(hash);
         } catch (Exception e) {
             throw new RuntimeException("Token hashing failed", e);
+        }
+    }
+
+    private boolean verifyTotp(String secret, String code) {
+        try {
+            CodeVerifier verifier = new DefaultCodeVerifier(
+                new DefaultCodeGenerator(), new SystemTimeProvider());
+            return verifier.isValidCode(secret, code);
+        } catch (Exception e) {
+            return false;
         }
     }
 
