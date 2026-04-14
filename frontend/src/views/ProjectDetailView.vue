@@ -14,8 +14,8 @@
 
       <!-- CONTRACT HEADER -->
       <div :class="`contract-header ${project.category}`" style="position:relative;">
-        <button class="edit-project-btn" @click="openEditModal" title="Επεξεργασία">✎ Επεξεργασία</button>
-        <button class="delete-project-btn" @click="confirmDeleteProject" title="Διαγραφή project">🗑 Διαγραφή</button>
+        <button v-if="permStore.isCEO() || permStore.can('editProject')" class="edit-project-btn" @click="openEditModal" title="Επεξεργασία">✎ Επεξεργασία</button>
+        <button v-if="permStore.isCEO()" class="delete-project-btn" @click="confirmDeleteProject" title="Διαγραφή project">🗑 Διαγραφή</button>
         <div class="ch-top">
           <div>
             <div class="ch-title">{{ project.title }}</div>
@@ -272,7 +272,7 @@
       <div class="files-panel" style="margin-top:14px;">
         <div class="files-header">
           <div class="files-title">📎 Συμβόλαια & Αρχεία</div>
-          <label class="files-upload-btn" :class="{uploading: uploading}">
+          <label v-if="permStore.isCEO() || permStore.can('uploadFiles')" class="files-upload-btn" :class="{uploading: uploading}">
             <input type="file" @change="uploadFile" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="uploading" />
             {{ uploading ? "Ανέβασμα..." : "+ Ανέβασμα" }}
           </label>
