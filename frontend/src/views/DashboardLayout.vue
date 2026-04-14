@@ -93,7 +93,7 @@
         </div>
       </div>
 
-      <div class="sidebar-user">
+      <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" title="Προφίλ & Ρυθμίσεις">
         <div class="avatar">{{ initials }}</div>
         <div>
           <div class="user-name">{{ auth.user?.fullName?.split(' ')[0] || 'CEO' }}</div>

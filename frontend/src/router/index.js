@@ -16,6 +16,7 @@ const routes = [
       { path: "guide", name: "Guide", component: () => import("@/views/GuideView.vue") },
       { path: "admin", name: "Admin", component: () => import("@/views/AdminView.vue"), meta: { requiresCEO: true } },
       { path: "notifications", name: "Notifications", component: () => import("@/views/NotificationsView.vue") },
+      { path: "profile", name: "Profile", component: () => import("@/views/ProfileView.vue") },
     ],
   },
 ];

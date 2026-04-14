@@ -88,6 +88,20 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/change-password")
+    public ResponseEntity<Map<String, String>> changePassword(
+            @AuthenticationPrincipal String userId,
+            @RequestBody Map<String, String> body) {
+        if (userId == null || userId.equals("anonymousUser"))
+            return ResponseEntity.status(401).body(Map.of("message", "Unauthorized"));
+        try {
+            authService.changePassword(UUID.fromString(userId), body.get("currentPassword"), body.get("newPassword"));
+            return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
         String email = body.get("email");
