@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 @RestController
@@ -84,6 +85,30 @@ public class AuthController {
             return ResponseEntity.ok(info);
         } catch (Exception e) {
             return ResponseEntity.status(401).build();
+        }
+    }
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        if (email == null || email.isBlank())
+            return ResponseEntity.badRequest().body(Map.of("message", "Email is required"));
+        try {
+            authService.forgotPassword(email.trim().toLowerCase());
+        } catch (Exception ignored) {}
+        return ResponseEntity.ok(Map.of("message", "If this email exists, a reset link has been sent."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String newPassword = body.get("newPassword");
+        if (token == null || newPassword == null || newPassword.length() < 8)
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid request"));
+        try {
+            authService.resetPassword(token, newPassword);
+            return ResponseEntity.ok(Map.of("message", "Password reset successful"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired token"));
         }
     }
 }

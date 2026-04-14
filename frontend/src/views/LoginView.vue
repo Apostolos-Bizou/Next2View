@@ -47,6 +47,7 @@
         </button>
       </form>
 
+      <div class="forgot-link" @click="router.push('/forgot-password')">Ξέχασες τον κωδικό;</div>
       <div class="login-footer">
         Next2View v1.0 · Next2me Group · Private
       </div>
@@ -58,6 +59,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -196,6 +198,8 @@ async function handleLogin() {
   animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+.forgot-link { text-align:center; margin-top:12px; font-size:12px; color:var(--accent); cursor:pointer; font-weight:600; }
+.forgot-link:hover { text-decoration:underline; }
 .login-footer {
   text-align: center;
   margin-top: 24px;
