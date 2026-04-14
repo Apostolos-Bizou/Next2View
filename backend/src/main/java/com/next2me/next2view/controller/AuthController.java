@@ -87,16 +87,6 @@ public class AuthController {
             return ResponseEntity.status(401).build();
         }
     }
-    @PostMapping("/unlock-account")
-    public ResponseEntity<Map<String, String>> unlockAccount(@RequestBody Map<String, String> body) {
-        try {
-            String email = body.get("email");
-            authService.unlockAccount(email);
-            return ResponseEntity.ok(Map.of("message", "Account unlocked"));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
-        }
-    }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<Map<String, String>> forgotPassword(@RequestBody Map<String, String> body) {
