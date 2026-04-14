@@ -1,33 +1,26 @@
-﻿# ════ SECURITY — NEVER COMMIT ════
-*.pem
-*.key
-*.p12
-*.jks
-application-local.yml
-application-secrets.yml
-.env
-.env.*
+# Node
+node_modules/
+package.json
+package-lock.json
 
-# ════ BUILD ════
-backend/target/
-frontend/node_modules/
-frontend/dist/
-frontend/.vite/
-__pycache__/
-*.pyc
-ai-functions/.python_packages/
+# Temp scripts
+fix*.js
+fix*.py
+inspect*.js
+genhash.js
 
-# ════ IDE ════
-.idea/
-*.iml
-.vscode/
-*.suo
-*.user
+# Backups
+backups/
 
-# ════ OS ════
+# OS
 .DS_Store
 Thumbs.db
 
-# ════ LOGS ════
-*.log
-logs/
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Build outputs
+target/
+dist/
