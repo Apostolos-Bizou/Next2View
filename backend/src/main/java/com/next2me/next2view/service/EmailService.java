@@ -1,4 +1,4 @@
-﻿package com.next2me.next2view.service;
+package com.next2me.next2view.service;
 
 import com.azure.communication.email.EmailClient;
 import com.azure.communication.email.EmailClientBuilder;
