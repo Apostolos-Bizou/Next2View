@@ -29,8 +29,6 @@
       </div>
     </div>
 
-
-
     <!-- ════ GANTT TIMELINE ════ -->
     <div class="gantt-panel" style="margin-top:14px;">
       <div class="gantt-ph">
@@ -45,6 +43,45 @@
           </select>
           <div class="ph-badge badge blue">{{ ganttProjects.length }} projects</div>
         </div>
+      </div>
+      <div class="gantt-scroll">
+        <!-- WEEK HEADERS -->
+        <div class="gantt-header">
+          <div class="gantt-lbl-col">PROJECT</div>
+          <div class="gantt-weeks-row">
+            <div v-for="w in ganttWeeks" :key="w.num"
+              :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]">
+              <div class="gantt-wk-num">W{{ w.num }}</div>
+              <div class="gantt-wk-date">{{ w.dateLabel }}</div>
+            </div>
+          </div>
+        </div>
+        <!-- PROJECT ROWS -->
+        <div v-if="!ganttProjects.length" class="gantt-empty">Δεν υπάρχουν projects με deadline.</div>
+        <div v-for="p in ganttProjects" :key="p.id" class="gantt-proj-row gantt-proj-row-click"
+          @click="router.push(`/projects/${p.id}`)">
+          <div class="gantt-proj-lbl">
+            <span :class="`cat-dot ${p.category}`"></span>
+            <div>
+              <div class="gantt-p-name">{{ p.title }}</div>
+              <div class="gantt-p-co" :style="`color:var(--${p.category});`">{{ p.companyName }}</div>
+            </div>
+            <span class="gantt-p-pct" :style="`color:var(--${p.category});`">{{ p.completion }}%</span>
+          </div>
+          <div class="gantt-track">
+            <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
+            <div v-if="dashBarStyle(p).show" class="gantt-task-bar"
+              :style="`left:${dashBarStyle(p).left}%;width:${dashBarStyle(p).width}%;background:var(--${p.category});opacity:0.85;`">
+              <div class="gantt-task-fill" :style="`width:${p.completion}%;background:rgba(255,255,255,0.3);`"></div>
+              <span class="gantt-task-label">{{ p.title }} · {{ p.completion }}%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
     <div class="g2">
       <!-- COMPANIES -->
       <div class="panel">
@@ -130,43 +167,6 @@
         </div>
       </div>
     </div>
-      </div>
-      <div class="gantt-scroll">
-        <!-- WEEK HEADERS -->
-        <div class="gantt-header">
-          <div class="gantt-lbl-col">PROJECT</div>
-          <div class="gantt-weeks-row">
-            <div v-for="w in ganttWeeks" :key="w.num"
-              :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]">
-              <div class="gantt-wk-num">W{{ w.num }}</div>
-              <div class="gantt-wk-date">{{ w.dateLabel }}</div>
-            </div>
-          </div>
-        </div>
-        <!-- PROJECT ROWS -->
-        <div v-if="!ganttProjects.length" class="gantt-empty">Δεν υπάρχουν projects με deadline.</div>
-        <div v-for="p in ganttProjects" :key="p.id" class="gantt-proj-row gantt-proj-row-click"
-          @click="router.push(`/projects/${p.id}`)">
-          <div class="gantt-proj-lbl">
-            <span :class="`cat-dot ${p.category}`"></span>
-            <div>
-              <div class="gantt-p-name">{{ p.title }}</div>
-              <div class="gantt-p-co" :style="`color:var(--${p.category});`">{{ p.companyName }}</div>
-            </div>
-            <span class="gantt-p-pct" :style="`color:var(--${p.category});`">{{ p.completion }}%</span>
-          </div>
-          <div class="gantt-track">
-            <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-            <div v-if="dashBarStyle(p).show" class="gantt-task-bar"
-              :style="`left:${dashBarStyle(p).left}%;width:${dashBarStyle(p).width}%;background:var(--${p.category});opacity:0.85;`">
-              <div class="gantt-task-fill" :style="`width:${p.completion}%;background:rgba(255,255,255,0.3);`"></div>
-              <span class="gantt-task-label">{{ p.title }} · {{ p.completion }}%</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </template>
 
