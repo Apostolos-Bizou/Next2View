@@ -55,7 +55,7 @@ public class AuthService {
         }
         if (user.getMfaEnabled()) {
             if (request.mfaCode() == null || request.mfaCode().isBlank()) {
-                return new AuthResponse(null, null, 0, buildUserInfo(user), true);
+                return new AuthResponse(null, null, null, 0, buildUserInfo(user), true);
             }
             boolean validCode = verifyTotp(user.getMfaSecret(), request.mfaCode());
             if (!validCode) {
@@ -75,7 +75,7 @@ public class AuthService {
                 .expiresAt(Instant.now().plusSeconds(refreshTokenExpiryDays * 86400L))
                 .build());
         log.info("Login success: {} from {}", user.getEmail(), ipAddress);
-        return new AuthResponse(accessToken, "Bearer", 15 * 60, buildUserInfo(user), false);
+        return new AuthResponse(accessToken, rawRefresh, "Bearer", 15 * 60, buildUserInfo(user), false);
     }
     @Transactional
     public AuthResponse refresh(String rawRefreshToken) {
@@ -88,7 +88,7 @@ public class AuthService {
         User user = token.getUser();
         String newAccess = jwtService.generateAccessToken(
                 user.getId(), user.getEmail(), user.getRole().name());
-        return new AuthResponse(newAccess, "Bearer", 15 * 60, buildUserInfo(user), false);
+        return new AuthResponse(newAccess, null, "Bearer", 15 * 60, buildUserInfo(user), false);
     }
     @Transactional
     public void logout(UUID userId) {
