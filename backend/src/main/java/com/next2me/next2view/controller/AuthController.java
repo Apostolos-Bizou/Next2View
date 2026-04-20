@@ -126,4 +126,23 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired token"));
         }
     }
+    @PostMapping("/register")
+    public ResponseEntity<Map<String, String>> register(
+            @AuthenticationPrincipal String userId,
+            @RequestBody Map<String, String> body) {
+        if (userId == null || userId.equals("anonymousUser"))
+            return ResponseEntity.status(401).body(Map.of("message", "Unauthorized"));
+        try {
+            authService.registerUser(
+                body.get("firstName"),
+                body.get("lastName"),
+                body.get("email"),
+                body.get("password"),
+                body.get("role")
+            );
+            return ResponseEntity.ok(Map.of("message", "User created successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

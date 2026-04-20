@@ -176,6 +176,38 @@ public class AuthService {
         log.info("Password reset successful for {}", user.getEmail());
     }
 
+
+    @Transactional
+    public void registerUser(String firstName, String lastName, String email, String password, String roleName) {
+        if (firstName == null || firstName.isBlank()) throw new IllegalArgumentException("First name is required");
+        if (email == null || email.isBlank()) throw new IllegalArgumentException("Email is required");
+        if (password == null || password.length() < 8) throw new IllegalArgumentException("Password must be at least 8 characters");
+        if (userRepository.findByEmailAndActiveTrue(email.trim().toLowerCase()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        String fullName = firstName.trim() + (lastName != null && !lastName.isBlank() ? " " + lastName.trim() : "");
+        User.Role role;
+        try {
+            role = roleName != null ? User.Role.valueOf(roleName.toUpperCase()) : User.Role.VIEWER;
+        } catch (Exception e) {
+            // Map frontend role names to backend enum
+            if ("Member".equalsIgnoreCase(roleName)) role = User.Role.VIEWER;
+            else if ("Department Head".equalsIgnoreCase(roleName)) role = User.Role.DEPT_HEAD;
+            else role = User.Role.VIEWER;
+        }
+        User user = User.builder()
+            .fullName(fullName)
+            .email(email.trim().toLowerCase())
+            .passwordHash(passwordEncoder.encode(password))
+            .role(role)
+            .active(true)
+            .mfaEnabled(false)
+            .failedAttempts(0)
+            .build();
+        userRepository.save(user);
+        log.info("New user registered: {} with role {}", email, role);
+    }
+
     private AuthResponse.UserInfo buildUserInfo(User user) {
         return new AuthResponse.UserInfo(
                 user.getId().toString(),
