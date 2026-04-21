@@ -453,11 +453,124 @@
     <!-- ── ΓΛΩΣΣΑΡΙΟ ── -->
     <div v-if="activeTab === 'security'" class="guide-panel">
       <div class="g-section-title">🔒 Security Documentation</div>
-      <p style="color:var(--text-mid);font-size:14px;line-height:1.7;">
-        This section describes the security posture of Next2View. Full content coming soon (Phase 2C).
+      <p style="color:var(--text-mid);font-size:14px;line-height:1.7;margin-bottom:24px;">
+        This document describes the security posture of Next2View as of the current deployment. All items marked ✅ are live in production.
       </p>
-      <div style="margin-top:16px;padding:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;">
-        ⚠️ <strong>Access control:</strong> This tab is visible only to the CEO and explicitly granted users.
+
+      <!-- OVERVIEW CARDS -->
+      <div class="sec-section-h">1. Security Posture Overview</div>
+      <div class="sec-overview-grid">
+        <div class="sec-card sec-card-green">
+          <div class="sec-card-label">Authentication</div>
+          <div class="sec-card-value">JWT RS256</div>
+          <div class="sec-card-note">15-min access token</div>
+        </div>
+        <div class="sec-card sec-card-green">
+          <div class="sec-card-label">Password Hashing</div>
+          <div class="sec-card-value">BCrypt wf=12</div>
+          <div class="sec-card-note">Industry standard</div>
+        </div>
+        <div class="sec-card sec-card-green">
+          <div class="sec-card-label">Transport</div>
+          <div class="sec-card-value">TLS 1.2+</div>
+          <div class="sec-card-note">HTTPS end-to-end</div>
+        </div>
+        <div class="sec-card sec-card-green">
+          <div class="sec-card-label">Secrets</div>
+          <div class="sec-card-value">Azure Key Vault</div>
+          <div class="sec-card-note">No hardcoded creds</div>
+        </div>
+      </div>
+
+      <!-- AUTHENTICATION & AUTHORIZATION -->
+      <div class="sec-section-h">2. Authentication &amp; Authorization</div>
+      <table class="sec-table">
+        <thead><tr><th>Control</th><th>Implementation</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Login flow</td><td>JWT RS256 (asymmetric), 15-minute access token</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Password storage</td><td>BCrypt with work factor 12, unique per-user salt</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Token validation</td><td>JwtAuthFilter on every request, signature + expiry checks</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Role-based access</td><td>@PreAuthorize on controllers (CEO / DEPT_HEAD / VIEWER)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Fine-grained permissions</td><td>15 per-user flags (viewFinance, viewLegal, aiContract, etc.)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Central authorization</td><td>PermissionEvaluator component, re-checked in service layer</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Cross-company scoping</td><td>Department-based project visibility across all group companies</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>MFA (Multi-Factor Auth)</td><td>TOTP infrastructure in place (mfa_enabled flag)</td><td><span class="sec-badge sec-badge-progress">🟡 Infrastructure ready</span></td></tr>
+        </tbody>
+      </table>
+
+      <!-- DATA PROTECTION -->
+      <div class="sec-section-h">3. Data Protection</div>
+      <table class="sec-table">
+        <thead><tr><th>Control</th><th>Implementation</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Transport encryption</td><td>TLS 1.2+ enforced via Azure Static Web Apps &amp; Container Apps</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>CORS policy</td><td>Explicit allowed origins list; wildcard disabled</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>CSRF protection</td><td>Stateless JWT sessions (no session cookies), SameSite=Strict on auth cookies</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Secrets management</td><td>Azure Key Vault for JWT keys, DB credentials, storage keys</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Credentials in code</td><td>Zero hardcoded secrets; all via environment variables</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Password reset</td><td>Time-limited token flow (V16 migration), single-use tokens</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+        </tbody>
+      </table>
+
+      <!-- FILE SECURITY -->
+      <div class="sec-section-h">4. File Security</div>
+      <table class="sec-table">
+        <thead><tr><th>Control</th><th>Implementation</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Upload size limit</td><td>10 MB per file, enforced server-side</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>File type whitelist</td><td>pdf, doc, docx, jpg, jpeg, png only</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>MIME validation</td><td>Magic-byte content inspection (defense against MIME spoofing)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Filename sanitization</td><td>UUID-based internal names; originals stored only as metadata</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Path traversal defense</td><td>UUID folder structure in Azure Blob, no user-controlled paths</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Download authorization</td><td>Permission re-check at service layer; SAS tokens, 1-hour TTL</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Audit logging</td><td>Every upload, download, and delete recorded with user + timestamp</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+        </tbody>
+      </table>
+
+      <!-- DATABASE SECURITY -->
+      <div class="sec-section-h">5. Database Security</div>
+      <table class="sec-table">
+        <thead><tr><th>Control</th><th>Implementation</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Hosting</td><td>Azure PostgreSQL Flexible Server (managed, patched)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Automatic backups</td><td>Daily snapshots, 7-day retention, point-in-time restore</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Network access</td><td>Private endpoints + firewall rules; no public exposure</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Connection encryption</td><td>TLS enforced between app and database</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>SQL injection defense</td><td>JPA/Hibernate with parameterized queries throughout</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Schema migrations</td><td>Flyway with version control (V1 through V17)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+        </tbody>
+      </table>
+
+      <!-- INFRASTRUCTURE & OPERATIONS -->
+      <div class="sec-section-h">6. Infrastructure &amp; Operations</div>
+      <table class="sec-table">
+        <thead><tr><th>Control</th><th>Implementation</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Backend hosting</td><td>Azure Container Apps (auto-scaling, managed)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Frontend hosting</td><td>Azure Static Web Apps with built-in CDN + TLS</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Container registry</td><td>Azure Container Registry (private, RBAC-controlled)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>CI/CD pipeline</td><td>GitHub Actions with branch protection on main</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Versioned deployments</td><td>Git tags for every stable release (rollback in &lt;1 min)</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Health monitoring</td><td>Azure Container Apps health probes, auto-rollback on failure</td><td><span class="sec-badge sec-badge-ok">✅ Implemented</span></td></tr>
+          <tr><td>Rate limiting</td><td>On auth endpoints to prevent brute-force attacks</td><td><span class="sec-badge sec-badge-planned">📋 Planned</span></td></tr>
+        </tbody>
+      </table>
+
+      <!-- ROADMAP -->
+      <div class="sec-section-h">7. Security Roadmap</div>
+      <table class="sec-table">
+        <thead><tr><th>Item</th><th>Description</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>MFA enforcement</td><td>TOTP-based second factor for CEO and Department Heads</td><td><span class="sec-badge sec-badge-progress">🟡 In Progress</span></td></tr>
+          <tr><td>Auth rate limiting</td><td>Throttle failed login attempts per IP / account</td><td><span class="sec-badge sec-badge-planned">📋 Planned</span></td></tr>
+          <tr><td>Security audit log UI</td><td>Admin view of all authentication and privileged actions</td><td><span class="sec-badge sec-badge-planned">📋 Planned</span></td></tr>
+          <tr><td>Penetration testing</td><td>External security audit before wider rollout</td><td><span class="sec-badge sec-badge-planned">📋 Planned</span></td></tr>
+        </tbody>
+      </table>
+
+      <!-- ACCESS NOTE -->
+      <div class="sec-access-note">
+        <strong>⚠️ Access control for this page:</strong> This documentation is visible only to the CEO and to users explicitly granted the <em>Security Documentation</em> permission. Principle of least privilege applies.
       </div>
     </div>
 
@@ -527,6 +640,32 @@ const glossary = [
 .guide-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
 .guide-tab { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border-bright); background: var(--surface2); font-size: 12px; font-weight: 700; cursor: pointer; transition: all 0.15s; color: var(--text-mid); font-family: 'Nunito Sans', sans-serif; }
 .guide-tab:hover { background: var(--surface3); }
+
+  /* === Security Documentation styles === */
+  .sec-section-h { font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); margin: 28px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .sec-section-h:first-of-type { margin-top: 0; }
+
+  .sec-overview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .sec-card { padding: 14px 16px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); }
+  .sec-card-green { border-left: 3px solid #10b981; }
+  .sec-card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+  .sec-card-value { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .sec-card-note { font-size: 11px; color: var(--text-mid); }
+
+  .sec-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 13px; }
+  .sec-table thead th { text-align: left; padding: 10px 12px; background: var(--surface2); font-weight: 700; color: var(--text-mid); font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+  .sec-table tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text); }
+  .sec-table tbody td:first-child { font-weight: 700; width: 28%; }
+  .sec-table tbody td:nth-child(2) { color: var(--text-mid); }
+  .sec-table tbody tr:hover { background: var(--surface2); }
+  .sec-table tbody tr:last-child td { border-bottom: none; }
+
+  .sec-badge { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .sec-badge-ok { background: rgba(16,185,129,0.12); color: #047857; border: 1px solid rgba(16,185,129,0.3); }
+  .sec-badge-progress { background: rgba(245,158,11,0.12); color: #b45309; border: 1px solid rgba(245,158,11,0.3); }
+  .sec-badge-planned { background: rgba(107,114,128,0.1); color: #4b5563; border: 1px solid rgba(107,114,128,0.25); }
+
+  .sec-access-note { margin-top: 28px; padding: 14px 18px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; font-size: 13px; color: #92400e; line-height: 1.6; }
 .guide-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 .guide-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; }
 .g-section-title { font-size: 18px; font-weight: 900; color: var(--text); margin-bottom: 14px; }
