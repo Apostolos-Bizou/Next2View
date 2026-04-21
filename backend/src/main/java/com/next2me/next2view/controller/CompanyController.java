@@ -23,8 +23,20 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping
-    public ResponseEntity<List<CompanyDto>> getAll() {
-        return ResponseEntity.ok(companyService.findAll());
+    public ResponseEntity<List<CompanyDto>> getAll(
+            @AuthenticationPrincipal String userId
+    ) {
+        if (userId == null || userId.isBlank() || "anonymousUser".equals(userId)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+        UUID actorId;
+        try { actorId = UUID.fromString(userId); }
+        catch (IllegalArgumentException e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid authentication");
+        }
+        return ResponseEntity.ok(companyService.findAll(actorId));
     }
 
     @GetMapping("/{id}")
