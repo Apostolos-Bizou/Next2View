@@ -284,7 +284,7 @@
               <div class="file-name">{{ f.fileName }}</div>
               <div class="file-meta">{{ formatSize(f.fileSizeBytes) }} · {{ f.uploadedBy }} · {{ formatInstant(f.uploadedAt) }}</div>
             </div>
-            <button class="file-del" @click="deleteFile(f.id)" title="Διαγραφή">✕</button>
+            <button class="file-del" @click.stop="deleteFile(f.id)" title="Διαγραφή">✕</button>
           </div>
         </div>
         <div v-else-if="!uploading" class="files-empty">Δεν υπάρχουν αρχεία. Ανέβασε συμβόλαιο ή έγγραφο.</div>
