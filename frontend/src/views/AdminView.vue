@@ -489,7 +489,8 @@ function coShort(name) {
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 .icon-btn.blue { border-color: var(--accent); color: var(--accent); }
 .icon-btn.blue:hover { background: var(--accent-dim); }
-.modal-perm { width: 600px; max-height: 85vh; }
+.modal-perm { width: 600px; max-height: 85vh; display: flex; flex-direction: column; }
+  .modal-perm .modal-body { overflow-y: auto; flex: 1; min-height: 0; }
 .perm-section { margin-bottom: 16px; }
 .perm-section-title { font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
 .perm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
