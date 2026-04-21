@@ -5,8 +5,13 @@ import com.next2me.next2view.dto.CompanyRequest;
 import com.next2me.next2view.model.AuditLog;
 import com.next2me.next2view.model.Company;
 import com.next2me.next2view.repository.AuditLogRepository;
+import com.next2me.next2view.model.Project;
+import com.next2me.next2view.model.User;
 import com.next2me.next2view.repository.CompanyRepository;
 import com.next2me.next2view.repository.ProjectRepository;
+import com.next2me.next2view.security.PermissionEvaluator;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,12 +27,28 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
     private final AuditLogRepository auditLogRepository;
+    private final PermissionEvaluator permissions;
 
     @Transactional(readOnly = true)
-    public List<CompanyDto> findAll() {
-        return companyRepository.findAllByActiveTrueOrderByName()
-                .stream()
-                .map(this::toDto)
+    public List<CompanyDto> findAll(UUID actorId) {
+        User actor = permissions.requireUser(actorId);
+        var companies = companyRepository.findAllByActiveTrueOrderByName();
+
+        if (permissions.isCeo(actor)) {
+            // CEO sees all companies with full project counts
+            return companies.stream()
+                    .map(c -> toDto(c, null))
+                    .toList();
+        }
+
+        // Non-CEO: filter companies to user.company only, and count only allowed-category projects
+        java.util.UUID userCoId = permissions.scopedCompanyId(actor);
+        java.util.Set<Project.Category> allowedCats = permissions.allowedCategories(actor);
+
+        return companies.stream()
+                .filter(c -> c.getId().equals(userCoId))
+                .map(c -> toDto(c, allowedCats))
+                .filter(dto -> dto.projectCount() > 0)
                 .toList();
     }
 
@@ -104,7 +125,14 @@ public class CompanyService {
     }
 
     private CompanyDto toDto(Company c) {
-        var projects = projectRepository.findAllByCompanyIdAndActiveTrue(c.getId());
+        return toDto(c, null);
+    }
+
+    private CompanyDto toDto(Company c, java.util.Set<Project.Category> categoryFilter) {
+        var allProjects = projectRepository.findAllByCompanyIdAndActiveTrue(c.getId());
+        var projects = (categoryFilter == null)
+                ? allProjects
+                : allProjects.stream().filter(p -> categoryFilter.contains(p.getCategory())).toList();
         int avg = projects.isEmpty() ? 0 :
                 (int) projects.stream()
                         .mapToInt(p -> {
