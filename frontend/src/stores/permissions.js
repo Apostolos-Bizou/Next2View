@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import api from "@/services/api";
+import { useAuthStore } from "@/stores/auth";
 
 export const usePermissionStore = defineStore("permissions", () => {
   const myPerms = ref(null)
@@ -20,12 +21,34 @@ export const usePermissionStore = defineStore("permissions", () => {
   }
 
   function isCEO() {
+    // Primary check: role from auth store
+    const authStore = useAuthStore()
+    if (authStore.user?.role === "CEO") return true
+    // Legacy fallback: all perms = true
     return myPerms.value && Object.values(myPerms.value).every(v => v === true)
   }
 
-  // Maps project category -> permission flag
+  // Maps user.department -> project category (their base access)
+  function departmentCategory() {
+    const authStore = useAuthStore()
+    const dept = authStore.user?.department
+    if (!dept) return null
+    const map = {
+      finance:   "finance",
+      legal:     "legal",
+      dev:       "dev",
+      marketing: "marketing",
+      management: null, // management is not a project category
+    }
+    return map[dept] ?? null
+  }
+
+  // Maps project category -> permission flag (extension grants)
   function canViewCategory(category) {
     if (isCEO()) return true
+    // Base access: department matches category
+    if (departmentCategory() === category) return true
+    // Extension access: explicit permission flag
     const map = {
       finance:   "viewFinance",
       legal:     "viewLegal",
@@ -37,5 +60,5 @@ export const usePermissionStore = defineStore("permissions", () => {
     return can(flag)
   }
 
-  return { myPerms, loadMyPermissions, can, isCEO, canViewCategory }
+  return { myPerms, loadMyPermissions, can, isCEO, canViewCategory, departmentCategory }
 })
