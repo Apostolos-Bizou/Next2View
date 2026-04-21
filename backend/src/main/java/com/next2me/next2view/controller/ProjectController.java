@@ -27,14 +27,20 @@ public class ProjectController {
     @GetMapping
     public ResponseEntity<List<ProjectDto>> getAll(
             @RequestParam(required = false) UUID companyId,
-            @RequestParam(required = false) Project.Category category
+            @RequestParam(required = false) Project.Category category,
+            @AuthenticationPrincipal String userId
     ) {
-        return ResponseEntity.ok(projectService.findAll(companyId, category));
+        UUID actorId = parseUserId(userId);
+        return ResponseEntity.ok(projectService.findAll(actorId, companyId, category));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectDto> getOne(@PathVariable UUID id) {
-        return ResponseEntity.ok(projectService.findById(id));
+    public ResponseEntity<ProjectDto> getOne(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal String userId
+    ) {
+        UUID actorId = parseUserId(userId);
+        return ResponseEntity.ok(projectService.findById(id, actorId));
     }
 
     @PostMapping
@@ -43,7 +49,7 @@ public class ProjectController {
             @Valid @RequestBody ProjectRequest req,
             @AuthenticationPrincipal String userId
     ) {
-        UUID actorId = UUID.fromString(userId);
+        UUID actorId = parseUserId(userId);
         String actorEmail = userRepository.findById(actorId)
                 .map(u -> u.getEmail()).orElse(userId);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -57,7 +63,7 @@ public class ProjectController {
             @Valid @RequestBody ProjectRequest req,
             @AuthenticationPrincipal String userId
     ) {
-        UUID actorId = UUID.fromString(userId);
+        UUID actorId = parseUserId(userId);
         String actorEmail = userRepository.findById(actorId)
                 .map(u -> u.getEmail()).orElse(userId);
         return ResponseEntity.ok(projectService.update(id, req, actorId, actorEmail));
@@ -69,10 +75,26 @@ public class ProjectController {
             @PathVariable UUID id,
             @AuthenticationPrincipal String userId
     ) {
-        UUID actorId = UUID.fromString(userId);
+        UUID actorId = parseUserId(userId);
         String actorEmail = userRepository.findById(actorId)
                 .map(u -> u.getEmail()).orElse(userId);
-        projectService.delete(id, actorEmail);
+        projectService.delete(id, actorId, actorEmail);
         return ResponseEntity.noContent().build();
+    }
+    /**
+     * Parse the authentication principal into a UUID.
+     * Throws 401 if the principal is missing or invalid.
+     */
+    private UUID parseUserId(String userId) {
+        if (userId == null || userId.isBlank() || "anonymousUser".equals(userId)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "Not authenticated");
+        }
+        try {
+            return UUID.fromString(userId);
+        } catch (IllegalArgumentException e) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.UNAUTHORIZED, "Invalid authentication");
+        }
     }
 }

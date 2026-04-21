@@ -7,11 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/ai")
@@ -26,8 +28,12 @@ public class AiController {
 
     @PostMapping("/ceo-report")
     @PreAuthorize("hasRole('CEO')")
-    public ResponseEntity<Map<String, String>> generateCeoReport() {
-        List<ProjectDto> projects = projectService.findAll(null, null);
+    public ResponseEntity<Map<String, String>> generateCeoReport(
+            @AuthenticationPrincipal String userId
+    ) {
+        UUID actorId = UUID.fromString(userId);
+        // CEO sees all projects (PermissionEvaluator bypasses filters for CEO)
+        List<ProjectDto> projects = projectService.findAll(actorId, null, null);
 
         StringBuilder prompt = new StringBuilder();
         prompt.append("Είσαι ο AI σύμβουλος του CEO του Ομίλου Next2me. ");

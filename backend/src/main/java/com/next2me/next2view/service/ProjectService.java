@@ -4,6 +4,9 @@ import com.next2me.next2view.dto.ProjectDto;
 import com.next2me.next2view.dto.ProjectRequest;
 import com.next2me.next2view.model.*;
 import com.next2me.next2view.repository.*;
+import com.next2me.next2view.security.PermissionEvaluator;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,32 +23,62 @@ public class ProjectService {
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
+    private final PermissionEvaluator permissions;
 
     @Transactional(readOnly = true)
-    public List<ProjectDto> findAll(UUID companyId, Project.Category category) {
-        List<Project> projects;
-        if (companyId != null) {
-            projects = projectRepository.findAllByCompanyIdAndActiveTrue(companyId);
-        } else if (category != null) {
-            projects = projectRepository.findAllByCategoryAndActiveTrue(category);
+    public List<ProjectDto> findAll(UUID actorId, UUID requestedCompanyId, Project.Category requestedCategory) {
+        User actor = permissions.requireUser(actorId);
+        UUID scopedCompany;
+        java.util.Set<Project.Category> allowedCats;
+
+        if (permissions.isCeo(actor)) {
+            // CEO: honor optional filters as-is
+            scopedCompany = requestedCompanyId;
+            allowedCats = (requestedCategory != null)
+                    ? java.util.EnumSet.of(requestedCategory)
+                    : java.util.EnumSet.allOf(Project.Category.class);
         } else {
-            projects = projectRepository.findAllByActiveTrueOrderByUpdatedAtDesc();
+            // DEPT_HEAD / VIEWER: force scope to user.company, intersect categories
+            scopedCompany = permissions.scopedCompanyId(actor);
+            java.util.Set<Project.Category> userAllowed = permissions.allowedCategories(actor);
+            if (requestedCategory != null) {
+                if (!userAllowed.contains(requestedCategory)) {
+                    return java.util.List.of();
+                }
+                allowedCats = java.util.EnumSet.of(requestedCategory);
+            } else {
+                allowedCats = userAllowed;
+            }
+            // If user tried to filter by a different company, ignore and return empty
+            if (requestedCompanyId != null && !requestedCompanyId.equals(scopedCompany)) {
+                return java.util.List.of();
+            }
         }
+
+        if (allowedCats.isEmpty()) {
+            return java.util.List.of();
+        }
+
+        boolean useCatFilter = !permissions.isCeo(actor) || requestedCategory != null;
+        List<Project> projects = projectRepository.findForScope(scopedCompany, useCatFilter, allowedCats);
         return projects.stream().map(this::toDto).toList();
     }
 
     @Transactional(readOnly = true)
-    public ProjectDto findById(UUID id) {
+    public ProjectDto findById(UUID id, UUID actorId) {
+        User actor = permissions.requireUser(actorId);
         Project p = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+        permissions.requireCanRead(actor, p);
         return toDto(p);
     }
 
     @Transactional
     public ProjectDto create(ProjectRequest req, UUID actorId, String actorEmail) {
+        User actor = permissions.requireUser(actorId);
+        permissions.requireCanCreate(actor, req.companyId(), req.category());
         Company company = companyRepository.findById(req.companyId())
-                .orElseThrow(() -> new IllegalArgumentException("Company not found"));
-        User actor = userRepository.findById(actorId).orElse(null);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company not found"));
 
         Project p = Project.builder()
                 .title(req.title())
@@ -78,14 +111,18 @@ public class ProjectService {
 
     @Transactional
     public ProjectDto update(UUID id, ProjectRequest req, UUID actorId, String actorEmail) {
+        User actor = permissions.requireUser(actorId);
         Project p = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + id));
-        User actor = userRepository.findById(actorId).orElse(null);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+        // Must have write access to the existing project
+        permissions.requireCanWrite(actor, p);
+        // And must be allowed to put it into the requested (possibly new) scope
+        permissions.requireCanCreate(actor, req.companyId(), req.category());
 
         Map<String, Object> oldVal = Map.of("title", p.getTitle());
 
         Company company = companyRepository.findById(req.companyId())
-                .orElseThrow(() -> new IllegalArgumentException("Company not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company not found"));
 
         p.setTitle(req.title());
         p.setCompany(company);
@@ -117,9 +154,14 @@ public class ProjectService {
     }
 
     @Transactional
-    public void delete(UUID id, String actorEmail) {
+    public void delete(UUID id, UUID actorId, String actorEmail) {
+        User actor = permissions.requireUser(actorId);
         Project p = projectRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Project not found: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
+        // Defense in depth: controller has @PreAuthorize hasRole(CEO), we re-check here
+        if (!permissions.isCeo(actor)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only CEO can delete projects");
+        }
         p.setActive(false);
         projectRepository.save(p);
 
