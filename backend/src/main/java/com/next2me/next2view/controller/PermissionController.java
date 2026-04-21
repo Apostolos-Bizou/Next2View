@@ -84,6 +84,7 @@ public class PermissionController {
         perm.setManageCompanies(dto.manageCompanies());
         perm.setAiCeoReport(dto.aiCeoReport());
         perm.setAiContract(dto.aiContract());
+        perm.setViewSecurity(dto.viewSecurity());
 
         permRepo.save(perm);
         return ResponseEntity.ok(toDto(perm));
@@ -97,16 +98,17 @@ public class PermissionController {
             b(p.getUpdateTasks()), b(p.getUploadFiles()),
             b(p.getCreateProject()), b(p.getEditProject()),
             b(p.getManageUsers()), b(p.getManageCompanies()),
-            b(p.getAiCeoReport()), b(p.getAiContract())
+            b(p.getAiCeoReport()), b(p.getAiContract()),
+            b(p.getViewSecurity())
         );
     }
 
     private boolean b(Boolean v) { return v != null && v; }
 
     private PermissionDto allTrue() {
-        return new PermissionDto(true,true,true,true,true,true,true,true,true,true,true,true,true,true);
+        return new PermissionDto(true,true,true,true,true,true,true,true,true,true,true,true,true,true,true);
     }
     private PermissionDto allFalse() {
-        return new PermissionDto(false,false,false,false,false,false,false,false,false,false,false,false,false,false);
+        return new PermissionDto(false,false,false,false,false,false,false,false,false,false,false,false,false,false,false);
     }
 }

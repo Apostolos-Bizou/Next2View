@@ -36,4 +36,7 @@ public class UserPermission {
     // AI
     @Builder.Default @Column(name = "ai_ceo_report")   private Boolean aiCeoReport    = false;
     @Builder.Default @Column(name = "ai_contract")      private Boolean aiContract     = false;
+
+    // Documentation access
+    @Builder.Default @Column(name = "view_security") private Boolean viewSecurity  = false;
 }
