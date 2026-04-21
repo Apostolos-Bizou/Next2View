@@ -60,5 +60,12 @@ export const usePermissionStore = defineStore("permissions", () => {
     return can(flag)
   }
 
-  return { myPerms, loadMyPermissions, can, isCEO, canViewCategory, departmentCategory }
+  // Can user view the Security Documentation tab in the Guide?
+  // CEO always yes. Others need explicit viewSecurity grant via UserPermission.
+  function canViewSecurity() {
+    if (isCEO()) return true
+    return can("viewSecurity")
+  }
+
+  return { myPerms, loadMyPermissions, can, isCEO, canViewCategory, departmentCategory, canViewSecurity }
 })

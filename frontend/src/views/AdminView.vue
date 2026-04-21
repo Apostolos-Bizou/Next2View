@@ -197,6 +197,17 @@
             </label>
           </div>
         </div>
+
+        <div class="perm-section">
+          <div class="perm-section-title">📖 Documentation</div>
+          <div class="perm-grid">
+            <label class="perm-item" v-for="p in docPerms" :key="p.key">
+              <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
+              <span class="perm-icon">{{ p.icon }}</span>
+              <span class="perm-label">{{ p.label }}</span>
+            </label>
+          </div>
+        </div>
         <div class="perm-shortcuts">
           <button class="perm-shortcut" @click="setAll(true)">✅ Ενεργοποίηση Όλων</button>
           <button class="perm-shortcut" @click="setAll(false)">❌ Απενεργοποίηση Όλων</button>
@@ -384,6 +395,10 @@ const aiPerms = [
   { key: 'aiContract',  icon: '📄', label: 'AI Contract Analysis' },
 ]
 
+  const docPerms = [
+    { key: 'viewSecurity', icon: '🔒', label: 'Security Documentation' },
+  ]
+
 async function openPermModal(u) {
   permUser.value = u
   permError.value = ''
@@ -396,7 +411,7 @@ async function openPermModal(u) {
       viewFinance: false, viewLegal: false, viewDev: false, viewMarketing: false,
       viewFinancials: false, viewCeoNotes: false, updateTasks: false,
       uploadFiles: false, createProject: false, editProject: false,
-      manageUsers: false, manageCompanies: false, aiCeoReport: false, aiContract: false
+      manageUsers: false, manageCompanies: false, aiCeoReport: false, aiContract: false, viewSecurity: false
     }
   }
   showPermModal.value = true
