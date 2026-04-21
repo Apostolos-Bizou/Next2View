@@ -12,6 +12,15 @@ genhash.js
 # Backups
 backups/
 
+# One-shot migration scripts (run once and discarded)
+patch*.js
+step*.js
+migrate*.js
+temp*.js
+
+# Old GitHub Pages leftover (real PWA is in frontend/public/)
+/public/
+
 # OS
 .DS_Store
 Thumbs.db

@@ -419,7 +419,7 @@
         <div class="g-role dept">
           <div class="g-role-icon">🏢</div>
           <div class="g-role-title">Department Head</div>
-          <div class="g-role-perms">✓ Δικά του projects<br>✓ Update tasks<br>✓ Upload contracts<br>✓ AI Contract Analysis<br>✗ CEO Report<br>✗ CEO notes<br>✗ Manage users</div>
+          <div class="g-role-perms">✓ Projects της κατηγορίας του<br>✓ Cross-company πρόσβαση<br>✓ Update tasks<br>✓ Upload/Delete αρχεία<br>✓ Δημιουργία projects<br>✕ AI Reports<br>✕ CEO notes<br>✕ Διαγραφή projects<br>✕ Manage users</div>
         </div>
         <div class="g-role viewer">
           <div class="g-role-icon">👁</div>
@@ -427,6 +427,18 @@
           <div class="g-role-perms">✓ Δει projects<br>✓ Δει tasks<br>✗ Δεν αλλάζει τίποτα<br>✗ Δεν ανεβάζει files<br>✗ Δεν έχει AI access<br>✗ Δεν βλέπει CEO notes</div>
         </div>
       </div>
+        <div class="g-explainer-box">
+          <div class="g-explainer-title">💡 Πώς λειτουργεί η πρόσβαση Department Head</div>
+          <div class="g-explainer-text">
+            Ο κάθε Department Head "χρεώνεται" <strong>μία κατηγορία</strong> (Legal, Developing, Finance, ή Marketing). Βλέπει <strong>όλα τα projects</strong> αυτής της κατηγορίας σε <strong>όλες τις εταιρείες</strong> του ομίλου.
+          </div>
+          <div class="g-explainer-example">
+            📌 <strong>Παράδειγμα:</strong> Ένας Legal Department Head ανήκει ως υπάλληλος σε μία εταιρεία, αλλά βλέπει νομικά projects από κάθε εταιρεία του ομίλου (Crossworld, Polaris, Creworld, κ.λπ.).
+          </div>
+          <div class="g-explainer-note">
+            Η εταιρεία στην οποία ανήκει ο χρήστης είναι μόνο <em>HR info</em> — δεν περιορίζει τι projects βλέπει.
+          </div>
+        </div>
 
       <div class="g-subsection">➕ Πώς προσθέτω νέο χρήστη</div>
       <div class="g-steps">
@@ -542,6 +554,11 @@ const glossary = [
 .g-role-icon { font-size: 24px; margin-bottom: 8px; }
 .g-role-title { font-size: 14px; font-weight: 800; margin-bottom: 8px; color: var(--text); }
 .g-role-perms { font-size: 12px; color: var(--text-mid); line-height: 1.9; }
+  .g-explainer-box { margin-top: 20px; padding: 18px 20px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; }
+  .g-explainer-title { font-size: 13px; font-weight: 800; color: #92400e; margin-bottom: 10px; }
+  .g-explainer-text { font-size: 13px; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
+  .g-explainer-example { font-size: 12px; color: var(--text-mid); line-height: 1.7; padding: 10px 12px; background: rgba(255,255,255,0.6); border-radius: 6px; margin-bottom: 10px; }
+  .g-explainer-note { font-size: 11px; color: var(--text-dim); font-style: italic; }
 .g-glossary { margin-top: 14px; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
 .g-gloss-row { display: grid; grid-template-columns: 160px 1fr; border-bottom: 1px solid var(--border); }
 .g-gloss-row:last-child { border-bottom: none; }
