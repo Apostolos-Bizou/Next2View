@@ -60,15 +60,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private Optional<String> extractToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return Optional.of(header.substring(7));
+        }
         if (request.getCookies() != null) {
             return Arrays.stream(request.getCookies())
                     .filter(c -> "access_token".equals(c.getName()))
                     .map(Cookie::getValue)
                     .findFirst();
-        }
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            return Optional.of(header.substring(7));
         }
         return Optional.empty();
     }
