@@ -14,5 +14,6 @@ public record PermissionDto(
     boolean manageUsers,
     boolean manageCompanies,
     boolean aiCeoReport,
-    boolean aiContract
+    boolean aiContract,
+    boolean viewSecurity
 ) {}
