@@ -55,10 +55,11 @@ public class PermissionEvaluator {
             return EnumSet.allOf(Project.Category.class);
         }
 
-        // Strict fail for DEPT_HEAD / VIEWER without proper setup
-        if (user.getCompany() == null || user.getDepartment() == null) {
+        // Strict fail: DEPT_HEAD / VIEWER must have a department set.
+        // Company is NOT required anymore (cross-company access by department).
+        if (user.getDepartment() == null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Your account is missing company or department. Contact the CEO.");
+                    "Your account is missing department. Contact the CEO.");
         }
 
         Set<Project.Category> allowed = EnumSet.noneOf(Project.Category.class);
@@ -83,16 +84,13 @@ public class PermissionEvaluator {
     }
 
     /**
-     * For non-CEO users, returns the company they are scoped to (always their own).
-     * CEO returns null (meaning: no company restriction).
+     * Returns the company the user is scoped to. Always null now — DEPT_HEAD and VIEWER
+     * access projects cross-company, scoped only by department/category.
+     * The user.company field is retained as HR metadata (which company employs them)
+     * but does not restrict project visibility.
      */
     public UUID scopedCompanyId(User user) {
-        if (isCeo(user)) return null;
-        if (user.getCompany() == null) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "Your account is missing company. Contact the CEO.");
-        }
-        return user.getCompany().getId();
+        return null;
     }
 
     /**
@@ -100,11 +98,8 @@ public class PermissionEvaluator {
      */
     public boolean canRead(User user, Project project) {
         if (isCeo(user)) return true;
-        if (project == null || project.getCompany() == null) return false;
-
-        UUID scopedCo = scopedCompanyId(user);
-        if (!project.getCompany().getId().equals(scopedCo)) return false;
-
+        if (project == null) return false;
+        // No company restriction: access is determined by department/category only.
         return allowedCategories(user).contains(project.getCategory());
     }
 
@@ -125,10 +120,8 @@ public class PermissionEvaluator {
         if (isCeo(user)) return true;
         if (user.getRole() == User.Role.VIEWER) return false;
         if (targetCompanyId == null || targetCategory == null) return false;
-
-        UUID scopedCo = scopedCompanyId(user);
-        if (!targetCompanyId.equals(scopedCo)) return false;
-
+        // No company restriction: DEPT_HEAD can create projects for any company,
+        // as long as the category falls within their allowed categories.
         return allowedCategories(user).contains(targetCategory);
     }
 
