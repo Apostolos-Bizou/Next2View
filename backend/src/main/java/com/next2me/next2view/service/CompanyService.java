@@ -41,12 +41,11 @@ public class CompanyService {
                     .toList();
         }
 
-        // Non-CEO: filter companies to user.company only, and count only allowed-category projects
-        java.util.UUID userCoId = permissions.scopedCompanyId(actor);
+        // Non-CEO: show all companies that have at least one project in the
+        // user allowed categories. No filtering by user.company.
         java.util.Set<Project.Category> allowedCats = permissions.allowedCategories(actor);
 
         return companies.stream()
-                .filter(c -> c.getId().equals(userCoId))
                 .map(c -> toDto(c, allowedCats))
                 .filter(dto -> dto.projectCount() > 0)
                 .toList();
