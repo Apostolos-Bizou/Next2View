@@ -7,7 +7,7 @@
     </div>
 
     <div class="guide-tabs">
-      <div v-for="tab in tabs" :key="tab.id"
+      <div v-for="tab in visibleTabs" :key="tab.id"
         :class="['guide-tab', { active: activeTab === tab.id }]"
         :style="tab.style || ''"
         @click="activeTab = tab.id">
@@ -451,6 +451,16 @@
     </div>
 
     <!-- ── ΓΛΩΣΣΑΡΙΟ ── -->
+    <div v-if="activeTab === 'security'" class="guide-panel">
+      <div class="g-section-title">🔒 Security Documentation</div>
+      <p style="color:var(--text-mid);font-size:14px;line-height:1.7;">
+        This section describes the security posture of Next2View. Full content coming soon (Phase 2C).
+      </p>
+      <div style="margin-top:16px;padding:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:13px;color:#92400e;">
+        ⚠️ <strong>Access control:</strong> This tab is visible only to the CEO and explicitly granted users.
+      </div>
+    </div>
+
     <div v-if="activeTab === 'glossary'" class="guide-panel">
       <div class="g-section-title">📖 Γλωσσάριο</div>
       <div class="g-desc">Βασικοί όροι που χρησιμοποιούνται στο Next2View.</div>
@@ -466,7 +476,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { usePermissionStore } from '@/stores/permissions'
 
 const activeTab = ref('dashboard')
 
@@ -479,8 +490,13 @@ const tabs = [
   { id: 'ai',            label: 'AI Features',  icon: '✦', style: 'background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#7c3aed;' },
   { id: 'notifications', label: 'Notifications', icon: '🔔', style: 'background:rgba(220,38,38,0.07);border-color:rgba(220,38,38,0.25);color:var(--red);' },
   { id: 'roles',         label: 'Roles',        icon: '👤' },
+  { id: 'security',      label: 'Security',     icon: '🔒', style: 'background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.35);color:#b45309;' },
+
   { id: 'glossary',      label: 'Γλωσσάριο',   icon: '📖' },
 ]
+
+  const permStore = usePermissionStore()
+  const visibleTabs = computed(() => tabs.filter(t => t.id !== 'security' || permStore.canViewSecurity()))
 
 const glossary = [
   { word: 'Project',          def: 'Μία εργασία ή ανάπτυξη που παρακολουθείς (π.χ. "IMO CII Compliance", "Hivebee MVP"). Κάθε project ανήκει σε εταιρεία και κατηγορία.' },
