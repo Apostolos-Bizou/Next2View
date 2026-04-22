@@ -41,21 +41,21 @@ public class CompanyService {
                     .toList();
         }
 
-        // Users with manageCompanies permission see ALL companies
-        // (including those with 0 projects), same as CEO
-        if (permissions.canManageCompanies(actorId.toString())) {
-            return companies.stream()
-                    .map(c -> toDto(c, null))
-                    .toList();
-        }
-
-        // Non-CEO: show all companies that have at least one project in the
-        // user allowed categories. No filtering by user.company.
+        // Non-CEO visibility rules:
+        // 1. Companies with projects in allowed categories -> visible
+        // 2. Empty companies (0 total projects) + manageCompanies -> visible
+        //    (orphan protection: newly-created companies don't disappear)
+        // 3. Companies with projects ONLY in other categories -> hidden
         java.util.Set<Project.Category> allowedCats = permissions.allowedCategories(actor);
-
+        boolean canManage = permissions.canManageCompanies(actorId.toString());
         return companies.stream()
                 .map(c -> toDto(c, allowedCats))
-                .filter(dto -> dto.projectCount() > 0)
+                .filter(dto -> {
+                    if (dto.projectCount() > 0) return true;
+                    if (!canManage) return false;
+                    // Empty in allowed cats + canManage: show only if truly orphan
+                    return projectRepository.findAllByCompanyIdAndActiveTrue(dto.id()).isEmpty();
+                })
                 .toList();
     }
 
