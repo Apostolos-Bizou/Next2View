@@ -463,7 +463,7 @@ async function saveNewCompany() {
       color: companyForm.value.color
     })
     showNewCompany.value = false
-    await store.loadAll()
+    await store.fetchCompanies()
   } catch(e) {
     companyError.value = e.response?.data?.message || 'Error creating company.'
   } finally { companySaving.value = false }
