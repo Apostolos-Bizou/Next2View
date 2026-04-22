@@ -54,164 +54,8 @@
         </div>
       </div>
 
-      <!-- GANTT TIMELINE -->
-      <div v-if="(project.modules && project.modules.length) || (project.specs && project.specs.some(s => s.startDate))" class="gantt-panel">
-        <div class="gantt-ph">
-          <div class="gantt-ph-title">📊 Project Timeline</div>
-          <div class="gantt-ph-sub">{{ project.title }} · {{ ganttWeeks.length }} weeks</div>
-        </div>
-        <div class="gantt-scroll">
-          <!-- HEADER -->
-          <div class="gantt-header">
-            <div class="gantt-lbl-col">MODULE / TASK</div>
-            <div class="gantt-weeks-col">
-              <!-- Week row -->
-              <div class="gantt-week-row">
-                <div v-for="w in ganttWeeks" :key="w.num"
-                  :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]"
-                  :style="'flex: 7'">
-                  <div class="gantt-wk-num">W{{ w.num }}</div>
-                  <div class="gantt-wk-date">{{ w.dateLabel }}</div>
-                </div>
-              </div>
-              <!-- Day row -->
-              <div class="gantt-day-row">
-                <div v-for="d in ganttDays" :key="d.index"
-                  :class="['gantt-day-hd', { 'gantt-day-today': d.isToday, 'gantt-day-weekend': d.isWeekend }]">
-                  <span class="gantt-day-num">{{ d.dayNum }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- PROJECT ROW -->
-          <div class="gantt-proj-row">
-            <div class="gantt-proj-lbl">
-              <span :class="`cat-icon ${project.category}`">{{ catIcon(project.category) }}</span>
-              <strong>{{ project.title }}</strong>
-              <span class="gantt-proj-co">{{ project.companyName }}</span>
-            </div>
-            <div class="gantt-proj-track">
-              <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-            </div>
-          </div>
-
-          <!-- SPECS TIMELINE (when specs have dates) -->
-          <template v-if="project.specs && project.specs.some(s => s.startDate)">
-            <div class="gantt-mod-row" style="cursor:default;">
-              <div class="gantt-mod-lbl">
-                <span class="mod-dot legal"></span>
-                <span class="mod-name">📋 Specifications</span>
-              </div>
-              <div class="gantt-track">
-                <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-              </div>
-            </div>
-            <div v-for="s in project.specs.filter(s => s.startDate)" :key="s.id" class="gantt-task-row">
-              <div class="gantt-lbl-col" style="display:flex;align-items:center;gap:6px;padding-left:24px;">
-                <div :class="s.isDone ? 'task-chk done' : 'task-chk'" @click.stop="toggleSpec(s)" style="cursor:pointer;">{{ s.isDone ? '✓' : '' }}</div>
-                <span :class="`task-name-g ${s.isDone ? 'done' : ''}`" style="font-size:11px;">{{ s.description }}</span>
-              </div>
-              <div class="gantt-track">
-                <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-                <div v-if="specBarStyle(s).show"
-                  :style="specBarStyle(s).css"
-                  :title="s.description" class="gantt-spec-bar">
-                  <span class="gantt-spec-bar-txt">{{ s.description }}</span>
-                </div>
-              </div>
-            </div>
-          </template>
-
-          <!-- MODULES + TASKS -->
-          <template v-for="m in project.modules" :key="m.id">
-            <!-- MODULE ROW -->
-            <div class="gantt-mod-row" @click="toggleMod(m.id)">
-              <div class="gantt-mod-lbl">
-                <span :class="`mod-dot ${m.color || project.category}`"></span>
-                <span class="mod-name">{{ m.name }}</span>
-                <span class="mod-pct" :style="`color:var(--${m.color || project.category});`">{{ m.completion }}%</span>
-              </div>
-              <div class="gantt-track">
-                <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-                <!-- Module span bar -->
-                <div v-if="moduleBarStyle(m).show" class="gantt-mod-bar"
-                  :style="`left:${moduleBarStyle(m).left}%;width:${moduleBarStyle(m).width}%;background:var(--${m.color || project.category});opacity:0.15;`">
-                </div>
-              </div>
-            </div>
-
-            <!-- TASK ROWS -->
-            <template v-if="!collapsedMods.has(m.id)">
-              <div v-for="t in m.tasks" :key="t.id" class="gantt-task-row">
-                <div class="gantt-task-lbl">
-                  <div :class="`task-chk ${t.isDone ? 'done' : t.isBlocked ? 'block' : ''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone ? '✓' : '' }}</div>
-                  <span :class="`task-name-g ${t.isDone ? 'done' : ''}`">{{ t.name }}</span>
-                  <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" title="Διαγραφή task">🗑</button>
-                  <span v-if="t.isBlocked" class="task-blocked-ico">⚠</span>
-                </div>
-                <div class="gantt-track">
-                  <div class="gantt-today-line" :style="`left:${todayPct}%`"></div>
-                  <div v-if="taskBarStyle(t).show"
-                    class="gantt-task-bar"
-                    :style="`
-                      left:${taskBarStyle(t).left}%;
-                      width:${taskBarStyle(t).width}%;
-                      background:${t.isDone ? '#a0a0b8' : t.isBlocked ? 'var(--red)' : 'var(--' + (m.color || project.category) + ')'};
-                      opacity:${t.isDone ? 0.9 : 0.75};
-                    `">
-                    <div class="gantt-task-fill"
-                      :style="`width:${t.progress}%;background:rgba(255,255,255,0.35);`"></div>
-                    <span class="gantt-task-label">{{ t.name }}</span>
-                  </div>
-                </div>
-              </div>
-
-  <!-- SPEC DETAIL MODAL -->
-  <div v-if="showSpecModal" class="modal-overlay" @click.self="showSpecModal=false">
-    <div class="modal" style="width:500px;">
-      <div class="modal-header">
-        <div class="modal-title">📋 Specification</div>
-        <button class="modal-close" @click="showSpecModal=false">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label>Περιγραφή</label>
-          <textarea v-model="selectedSpec.description" class="form-input" rows="4" placeholder="Περιγραφή specification..."></textarea>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Ημ. Έναρξης</label>
-            <input v-model="selectedSpec.startDate" type="date" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label>Ημ. Λήξης</label>
-            <input v-model="selectedSpec.endDate" type="date" class="form-input" />
-          </div>
-        </div>
-        <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
-          <label style="text-transform:none;letter-spacing:0;font-size:13px;">Ολοκληρωμένο</label>
-          <div :class="selectedSpec.isDone ? 'spec-check done' : 'spec-check'"
-            @click="selectedSpec.isDone = !selectedSpec.isDone"
-            style="cursor:pointer;width:20px;height:20px;font-size:11px;">
-            {{ selectedSpec.isDone ? '✓' : '' }}
-          </div>
-        </div>
-        <div v-if="specSaveError" class="form-error">{{ specSaveError }}</div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-cancel" @click="showSpecModal=false">Ακύρωση</button>
-        <button class="btn-submit" @click="saveSpecDetail" :disabled="specSaving">
-          {{ specSaving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
-        </button>
-      </div>
-    </div>
-  </div>
-
-</template>
-          </template>
-        </div>
-      </div>
+      <!-- GANTT TIMELINE v2 -->
+      <GanttV2 :project="project" @task-click="handleGanttTaskClick" />
 
       <!-- MODULES ACCORDION (detail) -->
       <div v-if="project.modules && project.modules.length" style="margin-top:14px;">
@@ -352,7 +196,109 @@
     </div>
     <div v-else class="loading">Project not found.</div>
   </div>
-  <!-- EDIT PROJECT MODAL -->
+  
+    <!-- TASK EDIT MODAL (Gantt v3) -->
+    <div v-if="editingTask" class="modal-overlay" @click.self="closeTaskEdit">
+      <div class="modal task-edit-modal">
+        <div class="modal-header">
+          <div class="modal-title">✏️ Επεξεργασία Task</div>
+          <button class="modal-close" @click="closeTaskEdit" :disabled="editingTaskSaving">✕</button>
+        </div>
+        <div class="modal-body">
+          <div v-if="editingTaskError" class="te-error">{{ editingTaskError }}</div>
+
+          <div class="te-field">
+            <label>Όνομα</label>
+            <input type="text" v-model="editingTask.name" :disabled="editingTaskSaving" />
+          </div>
+
+          <div class="te-row">
+            <div class="te-field">
+              <label>Assignee</label>
+              <input type="text" v-model="editingTask.assignee" placeholder="π.χ. Νίκη" :disabled="editingTaskSaving" />
+            </div>
+            <div class="te-field">
+              <label>Module</label>
+              <input type="text" :value="editingTaskModule ? editingTaskModule.name : ''" disabled />
+            </div>
+          </div>
+
+          <div class="te-field">
+            <label>
+              Πρόοδος: <strong>{{ editingTask.progress || 0 }}%</strong>
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              v-model.number="editingTask.progress"
+              :disabled="editingTaskSaving"
+              class="te-range"
+            />
+            <div class="te-range-ticks">
+              <span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span>
+            </div>
+          </div>
+
+          <div class="te-row">
+            <div class="te-field">
+              <label>Έναρξη</label>
+              <input type="date" v-model="editingTask.startDate" :disabled="editingTaskSaving" />
+            </div>
+            <div class="te-field">
+              <label>Λήξη</label>
+              <input type="date" v-model="editingTask.endDate" :disabled="editingTaskSaving" />
+            </div>
+          </div>
+
+          <div class="te-toggles">
+            <label class="te-toggle">
+              <input type="checkbox" v-model="editingTask.isDone" :disabled="editingTaskSaving" />
+              <span>✓ Ολοκληρώθηκε</span>
+            </label>
+            <label class="te-toggle">
+              <input type="checkbox" v-model="editingTask.isBlocked" :disabled="editingTaskSaving" />
+              <span>⚠ Μπλοκαρισμένο</span>
+            </label>
+          </div>
+
+          <div v-if="editingTask.isBlocked" class="te-field">
+            <label>Σημείωση Blocking</label>
+            <input
+              type="text"
+              v-model="editingTask.blockNote"
+              placeholder="Γιατί είναι μπλοκαρισμένο;"
+              :disabled="editingTaskSaving"
+            />
+          </div>
+
+          <div class="te-field">
+            <label>Σχόλιο</label>
+            <textarea
+              v-model="editingTask.comment"
+              rows="3"
+              placeholder="Προαιρετικό σχόλιο..."
+              :disabled="editingTaskSaving"
+            ></textarea>
+          </div>
+        </div>
+        <div class="modal-footer te-footer">
+          <button class="te-btn te-btn-danger" @click="deleteTaskFromModal" :disabled="editingTaskSaving">
+            🗑 Διαγραφή
+          </button>
+          <div style="flex:1"></div>
+          <button class="te-btn te-btn-ghost" @click="closeTaskEdit" :disabled="editingTaskSaving">
+            Άκυρο
+          </button>
+          <button class="te-btn te-btn-primary" @click="saveTaskEdit" :disabled="editingTaskSaving">
+            {{ editingTaskSaving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT PROJECT MODAL -->
   <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal=false">
     <div class="modal modal-edit">
       <div class="modal-header">
@@ -466,6 +412,149 @@
 </template>
 
 <script setup>
+import GanttV2 from '@/components/GanttV2.vue'
+
+// ─── Gantt v3: Task Edit Modal ───
+const editingTask = ref(null)           // the task being edited (cloned)
+const editingTaskModule = ref(null)     // the module that owns it
+const editingTaskSaving = ref(false)
+const editingTaskError = ref('')
+
+function handleGanttTaskClick(taskId) {
+  if (!taskId) return
+  const mods = project.value?.modules || []
+  for (const m of mods) {
+    const t = (m.tasks || []).find(x => x.id === taskId)
+    if (t) {
+      // Clone the task so edits don't mutate the list until Save
+      editingTask.value = JSON.parse(JSON.stringify(t))
+      editingTaskModule.value = m
+      editingTaskError.value = ''
+      return
+    }
+  }
+}
+
+function closeTaskEdit() {
+  editingTask.value = null
+  editingTaskModule.value = null
+  editingTaskError.value = ''
+  editingTaskSaving.value = false
+}
+
+async function saveTaskEdit() {
+  if (!editingTask.value || !editingTaskModule.value) return
+  editingTaskSaving.value = true
+  editingTaskError.value = ''
+  const edited = editingTask.value
+  const mod = editingTaskModule.value
+  // Clamp progress to 0-100
+  edited.progress = Math.max(0, Math.min(100, parseInt(edited.progress) || 0))
+  // If progress is 100, auto-mark as done; if not done, keep current isDone
+  if (edited.progress === 100) edited.isDone = true
+  // If manually toggled done, set progress accordingly
+  if (edited.isDone && edited.progress < 100) edited.progress = 100
+  if (!edited.isDone && edited.progress === 100) edited.progress = 99
+
+  // Apply the edit back to the project tree locally (optimistic)
+  const modIdx = project.value.modules.findIndex(x => x.id === mod.id)
+  if (modIdx === -1) { editingTaskSaving.value = false; return }
+  const taskIdx = project.value.modules[modIdx].tasks.findIndex(x => x.id === edited.id)
+  if (taskIdx === -1) { editingTaskSaving.value = false; return }
+  // Preserve id + update fields
+  Object.assign(project.value.modules[modIdx].tasks[taskIdx], edited)
+
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title,
+      companyId: project.value.companyId,
+      category: project.value.category,
+      budget: project.value.budget || 0,
+      startDate: project.value.startDate || null,
+      deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '',
+      status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({
+        description: s.description, isDone: s.isDone,
+        sortOrder: s.sortOrder || 0,
+        startDate: s.startDate || null, endDate: s.endDate || null
+      })),
+      modules: (project.value.modules || []).map(m2 => ({
+        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
+        tasks: (m2.tasks || []).map(t => ({
+          name: t.name, assignee: t.assignee, progress: t.progress,
+          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+          comment: t.comment, deadline: t.deadline,
+          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
+          startDay: t.startDay, durationDays: t.durationDays,
+          sortOrder: t.sortOrder || 0,
+          startDate: t.startDate || null, endDate: t.endDate || null
+        }))
+      }))
+    })
+    closeTaskEdit()
+    await loadProject()
+  } catch (e) {
+    editingTaskError.value = 'Σφάλμα αποθήκευσης. Δοκιμάστε ξανά.'
+    // Revert by reloading
+    await loadProject()
+  } finally {
+    editingTaskSaving.value = false
+  }
+}
+
+async function deleteTaskFromModal() {
+  if (!editingTask.value || !editingTaskModule.value) return
+  if (!confirm('Διαγραφή του task "' + editingTask.value.name + '";')) return
+  const modId = editingTaskModule.value.id
+  const taskId = editingTask.value.id
+  editingTaskSaving.value = true
+  const modIdx = project.value.modules.findIndex(x => x.id === modId)
+  if (modIdx === -1) { editingTaskSaving.value = false; return }
+  const taskIdx = project.value.modules[modIdx].tasks.findIndex(x => x.id === taskId)
+  if (taskIdx === -1) { editingTaskSaving.value = false; return }
+  project.value.modules[modIdx].tasks.splice(taskIdx, 1)
+
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title,
+      companyId: project.value.companyId,
+      category: project.value.category,
+      budget: project.value.budget || 0,
+      startDate: project.value.startDate || null,
+      deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '',
+      status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({
+        description: s.description, isDone: s.isDone,
+        sortOrder: s.sortOrder || 0,
+        startDate: s.startDate || null, endDate: s.endDate || null
+      })),
+      modules: (project.value.modules || []).map(m2 => ({
+        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
+        tasks: (m2.tasks || []).map(t => ({
+          name: t.name, assignee: t.assignee, progress: t.progress,
+          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+          comment: t.comment, deadline: t.deadline,
+          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
+          startDay: t.startDay, durationDays: t.durationDays,
+          sortOrder: t.sortOrder || 0,
+          startDate: t.startDate || null, endDate: t.endDate || null
+        }))
+      }))
+    })
+    closeTaskEdit()
+    await loadProject()
+  } catch (e) {
+    editingTaskError.value = 'Σφάλμα διαγραφής.'
+    await loadProject()
+  } finally {
+    editingTaskSaving.value = false
+  }
+}
+
+
+
 import { ref, computed, onMounted, nextTick } from 'vue'
 import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
@@ -1312,4 +1401,139 @@ function formatDate(iso) {
   .fin-val { font-size: 18px; }
   .notes-panel { padding: 14px 12px; }
 }
+
+
+
+
+
+/* ═══ TASK EDIT MODAL (Gantt v3) ═══ */
+.task-edit-modal { width: 560px; max-width: 95vw; max-height: 90vh; display: flex; flex-direction: column; }
+.task-edit-modal .modal-body { overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 14px; }
+
+.te-error {
+  background: var(--red-dim, #fee2e2);
+  color: var(--red, #dc2626);
+  padding: 10px 14px; border-radius: 6px;
+  font-size: 13px; font-weight: 600;
+  border-left: 3px solid var(--red, #dc2626);
+}
+
+.te-field { display: flex; flex-direction: column; gap: 6px; }
+.te-field label {
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 11px; font-weight: 800;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--text-dim);
+}
+.te-field input[type="text"],
+.te-field input[type="date"],
+.te-field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color 0.15s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.te-field input[type="text"]:focus,
+.te-field input[type="date"]:focus,
+.te-field textarea:focus {
+  outline: none;
+  border-color: var(--accent, #3b82f6);
+}
+.te-field input:disabled,
+.te-field textarea:disabled {
+  background: var(--surface2);
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+.te-field textarea { resize: vertical; min-height: 64px; font-family: inherit; }
+
+.te-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.te-row .te-field { min-width: 0; }
+@media (max-width: 520px) { .te-row { grid-template-columns: 1fr; } }
+
+.te-range {
+  width: 100%;
+  -webkit-appearance: none; appearance: none;
+  height: 6px; border-radius: 3px;
+  background: var(--surface3);
+  outline: none;
+}
+.te-range::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent, #3b82f6);
+  cursor: pointer; border: 2px solid #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+.te-range::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent, #3b82f6);
+  cursor: pointer; border: 2px solid #fff;
+}
+.te-range-ticks {
+  display: flex; justify-content: space-between;
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 10px; font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+  padding: 2px 2px 0;
+}
+
+.te-toggles { display: flex; gap: 18px; flex-wrap: wrap; }
+.te-toggle {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer;
+  padding: 8px 14px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text);
+  transition: all 0.12s;
+}
+.te-toggle:hover { background: var(--surface3); }
+.te-toggle input { cursor: pointer; margin: 0; }
+.te-toggle:has(input:checked) {
+  background: var(--accent-dim, #dbeafe);
+  border-color: var(--accent, #3b82f6);
+  color: var(--accent, #3b82f6);
+}
+
+.te-footer {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface2);
+}
+.te-btn {
+  padding: 9px 18px;
+  border: none; border-radius: 6px;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer;
+  transition: all 0.12s;
+  font-family: inherit;
+}
+.te-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.te-btn-primary {
+  background: var(--accent, #3b82f6);
+  color: #fff;
+}
+.te-btn-primary:hover:not(:disabled) { background: var(--accent-dark, #2563eb); }
+.te-btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+}
+.te-btn-ghost:hover:not(:disabled) { background: var(--surface3); color: var(--text); }
+.te-btn-danger {
+  background: var(--red-dim, #fee2e2);
+  color: var(--red, #dc2626);
+}
+.te-btn-danger:hover:not(:disabled) { background: var(--red, #dc2626); color: #fff; }
+
 </style>
