@@ -33,3 +33,8 @@ Thumbs.db
 # Build outputs
 target/
 dist/
+
+# Patch scripts archive
+_patch_archive/
+patch_*.js
+fix_*.js
