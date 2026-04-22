@@ -45,7 +45,7 @@ public class CompanyController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('CEO') or @permissionEvaluator.canManageCompanies(#principal?.name)")
+    @PreAuthorize("hasRole('CEO') or @permissionEvaluator.canManageCompanies(authentication.name)")
     public ResponseEntity<CompanyDto> create(
             @Valid @RequestBody CompanyRequest req,
             Principal principal
@@ -55,7 +55,7 @@ public class CompanyController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('CEO') or @permissionEvaluator.canManageCompanies(#principal?.name)")
+    @PreAuthorize("hasRole('CEO') or @permissionEvaluator.canManageCompanies(authentication.name)")
     public ResponseEntity<CompanyDto> update(
             @PathVariable UUID id,
             @Valid @RequestBody CompanyRequest req,
