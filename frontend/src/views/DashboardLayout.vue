@@ -87,9 +87,9 @@
           <span style="font-size:16px;">✦</span> AI Report
         </button>
         <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject" title="Δημιούργησε νέο project. Βάλε τίτλο, εταιρεία, κατηγορία, budget, ημερομηνίες, modules και tasks.">+ New Project</button>
-        <div v-if="permStore.isCEO()" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <button class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" title="Πρόσθεσε νέα εταιρεία στον Όμιλο. Βάλε όνομα, κωδικό (π.χ. PFS) και χρώμα κατηγορίας.">+ Company</button>
-          <button class="btn-sidebar" style="font-size:9px;" @click="openNewUser" title="Πρόσθεσε νέο χρήστη. Βάλε email, κωδικό και ρόλο (CEO / Manager / Member).">+ User</button>
+        <div v-if="permStore.isCEO() || permStore.can('manageCompanies') || permStore.can('manageUsers')" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+          <button v-if="permStore.isCEO() || permStore.can('manageCompanies')" class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" title="Πρόσθεσε νέα εταιρεία στον Όμιλο. Βάλε όνομα, κωδικό (π.χ. PFS) και χρώμα κατηγορίας.">+ Company</button>
+          <button v-if="permStore.isCEO() || permStore.can('manageUsers')" class="btn-sidebar" style="font-size:9px;" @click="openNewUser" title="Πρόσθεσε νέο χρήστη. Βάλε email, κωδικό και ρόλο (CEO / Manager / Member).">+ User</button>
         </div>
       </div>
 
