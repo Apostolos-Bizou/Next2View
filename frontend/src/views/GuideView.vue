@@ -448,6 +448,109 @@
         <div class="g-step"><span class="g-step-num">4</span><div>Πάτα <strong>"Save User"</strong>. Ο χρήστης εμφανίζεται στο Manage.</div></div>
       </div>
       <div class="g-tip">💡 Το CEO role έχει πρόσβαση στο <strong>CEO Private Notes</strong> — σημειώσεις που μπαίνουν στο Project Detail και δεν τις βλέπουν άλλοι χρήστες.</div>
+
+      <!-- ═══ NEW: Permissions Matrix ═══ -->
+      <div class="g-subsection" style="margin-top: 32px;">🔑 Permissions Matrix — 14 Flags</div>
+      <div class="g-desc">Ο CEO μπορεί να ενεργοποιήσει οποιοδήποτε συνδυασμό από τα παρακάτω permissions για κάθε user (Admin Panel → Χρήστες → 🔑).</div>
+
+      <div class="g-explainer-box" style="margin-top: 16px;">
+        <div class="g-explainer-title">👁️ Ορατότητα Κατηγοριών (6 flags)</div>
+        <div class="g-explainer-text">
+          <strong>viewFinance</strong> — Βλέπει finance projects<br>
+          <strong>viewLegal</strong> — Βλέπει legal projects<br>
+          <strong>viewDev</strong> — Βλέπει developing projects<br>
+          <strong>viewMarketing</strong> — Βλέπει marketing projects<br>
+          <strong>viewFinancials</strong> — Βλέπει budget & financial data των projects<br>
+          <strong>viewCeoNotes</strong> — Βλέπει τις CEO Private Notes
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">⚡ Ενέργειες (4 flags)</div>
+        <div class="g-explainer-text">
+          <strong>updateTasks</strong> — Αλλάζει progress & status των tasks<br>
+          <strong>uploadFiles</strong> — Ανεβάζει & διαγράφει αρχεία σε projects<br>
+          <strong>createProject</strong> — Δημιουργεί νέα projects<br>
+          <strong>editProject</strong> — Επεξεργάζεται υπάρχοντα projects (τίτλο, deadline, κλπ)
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">👥 Διαχείριση (2 flags)</div>
+        <div class="g-explainer-text">
+          <strong>manageUsers</strong> — Δημιουργεί & επεξεργάζεται χρήστες<br>
+          <strong>manageCompanies</strong> — Δημιουργεί & επεξεργάζεται εταιρείες
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">🤖 AI Features (2 flags)</div>
+        <div class="g-explainer-text">
+          <strong>aiCeoReport</strong> — Παράγει AI report για το Group Dashboard<br>
+          <strong>aiContract</strong> — Αναλύει συμβάσεις με AI
+        </div>
+      </div>
+
+      <!-- ═══ NEW: Sidebar Visibility Rules ═══ -->
+      <div class="g-subsection" style="margin-top: 32px;">🏢 Κανόνες εμφάνισης εταιρειών στο Sidebar</div>
+      <div class="g-desc">Το Next2View φιλτράρει έξυπνα ποιες εταιρείες εμφανίζονται στο sidebar κάθε user.</div>
+
+      <div class="g-explainer-box" style="margin-top: 16px; background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.35);">
+        <div class="g-explainer-title" style="color: #15803d;">✅ Εμφανίζεται όταν...</div>
+        <div class="g-explainer-text">
+          <strong>1.</strong> Έχει τουλάχιστον ένα project στις κατηγορίες που βλέπει ο user (π.χ. legal/finance)<br>
+          <strong>2.</strong> Είναι τελείως άδεια (0 projects) ΚΑΙ ο user έχει <em>manageCompanies</em> (orphan protection)
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.35);">
+        <div class="g-explainer-title" style="color: #b91c1c;">❌ ΔΕΝ εμφανίζεται όταν...</div>
+        <div class="g-explainer-text">
+          Έχει projects μόνο σε κατηγορίες που ο user δεν βλέπει. Αυτό είναι <strong>data privacy</strong> — δεν διαρρέουμε πληροφορία για τμήματα εκτός του scope του user.
+        </div>
+      </div>
+
+      <!-- ═══ NEW: Cross-user dynamic example ═══ -->
+      <div class="g-subsection" style="margin-top: 32px;">🔄 Πραγματικό παράδειγμα — Δυναμική εμφάνιση</div>
+      <div class="g-explainer-box">
+        <div class="g-explainer-example">
+          📌 <strong>Σενάριο:</strong> Η Μαριάννα είναι Legal DEPT_HEAD. Μέχρι χθες <strong>δεν έβλεπε</strong> την εταιρεία "Polaris Financial" γιατί είχε μόνο finance projects χωρίς legal.
+        </div>
+        <div class="g-explainer-text" style="margin-top: 8px;">
+          Σήμερα ο CEO δημιουργεί νέο <strong>legal</strong> project στην Polaris Financial.
+        </div>
+        <div class="g-explainer-note" style="margin-top: 8px;">
+          ✨ <strong>Αποτέλεσμα:</strong> Με το επόμενο refresh της Μαριάννας, η Polaris Financial <strong>εμφανίζεται αυτόματα</strong> στο sidebar της με count (1). Το σύστημα παρακολουθεί τη δραστηριότητα σε real-time.
+        </div>
+      </div>
+
+      <!-- ═══ NEW: Common scenarios Q&A ═══ -->
+      <div class="g-subsection" style="margin-top: 32px;">💡 Συχνά σενάρια</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>Θέλω κάποιον να δημιουργεί εταιρείες</strong><br>→ Ενεργοποίησε <code>manageCompanies</code></div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>Θέλω κάποιον να βλέπει legal και finance</strong><br>→ Ενεργοποίησε <code>viewLegal</code> + <code>viewFinance</code></div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>Θέλω κάποιον να δημιουργεί projects στο τμήμα του</strong><br>→ Ενεργοποίησε <code>createProject</code></div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>Θέλω να κρύψω τα financials από κάποιον</strong><br>→ Απενεργοποίησε <code>viewFinancials</code> (βλέπει τα projects αλλά όχι budget data)</div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>Νέα εταιρεία χωρίς projects εξαφανίζεται;</strong><br>→ Όχι. Εφόσον ο user έχει <code>manageCompanies</code>, βλέπει τις άδειες εταιρείες (orphan protection).</div></div>
+      </div>
+
+      <!-- ═══ NEW: Department vs Permissions ═══ -->
+      <div class="g-subsection" style="margin-top: 32px;">⚖️ Department vs Permissions — Ποια η διαφορά;</div>
+      <div class="g-explainer-box">
+        <div class="g-explainer-title">🏛️ Department = Βασική πρόσβαση</div>
+        <div class="g-explainer-text">
+          Το department (<strong>Legal / Finance / Dev / Marketing / Management</strong>) καθορίζεται όταν δημιουργείται ο χρήστης. Δίνει αυτόματα πρόσβαση στις αντίστοιχες κατηγορίες projects (π.χ. Legal department → βλέπει legal projects).
+        </div>
+      </div>
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">🎛️ Permissions = Extra πρόσβαση</div>
+        <div class="g-explainer-text">
+          Τα 14 permission flags είναι <em>επιπλέον</em> δικαιώματα που δίνει ο CEO για συγκεκριμένες ενέργειες. Ανεξάρτητα από το department.
+        </div>
+      </div>
+      <div class="g-tip" style="margin-top: 12px;">
+        💡 <strong>Παράδειγμα:</strong> Η Μαριάννα είναι Legal DEPT_HEAD (department) αλλά έχει και <code>manageCompanies</code> permission. Βλέπει legal projects (από το department) ΚΑΙ δημιουργεί εταιρείες (από το permission).
+      </div>
     </div>
 
     <!-- ── ΓΛΩΣΣΑΡΙΟ ── -->
