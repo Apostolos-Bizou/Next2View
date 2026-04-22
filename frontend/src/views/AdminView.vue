@@ -64,6 +64,9 @@
             <td><span class="status-dot active">Active</span></td>
             <td>
               <button class="icon-btn" @click="openCoModal(co)" title="Edit">✎</button>
+              <button v-if="permStore.isCEO()" class="icon-btn red" @click="deleteCompany(co)" :disabled="deletingCoId===co.id" title="Διαγραφή">
+                <span v-if="deletingCoId===co.id">⏳</span><span v-else>🗑</span>
+              </button>
             </td>
           </tr>
         </tbody>
@@ -231,8 +234,10 @@
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import { useProjectStore } from '@/stores/projects'
+import { usePermissionStore } from '@/stores/permissions'
 
 const store = useProjectStore()
+const permStore = usePermissionStore()
 const activeTab = ref('users')
 const tabs = [
   { id: 'users',     label: 'Χρήστες',   icon: '👤' },
@@ -365,6 +370,47 @@ async function saveCompany() {
     modalError.value = e.response?.data?.message || 'Σφάλμα αποθήκευσης.'
   } finally { modalSaving.value = false }
 }
+
+// ═══ DELETE COMPANY (CEO only, double confirm) ═══
+const deletingCoId = ref(null)
+
+async function deleteCompany(co) {
+  // Step 1: Γενικό confirm
+  const sure = window.confirm(
+    `Θέλεις να διαγράψεις την εταιρεία "${co.name}";\n\n` +
+    `Αυτή η ενέργεια θα την κρύψει από το σύστημα.\n` +
+    `Τα projects της θα παραμείνουν στη βάση αλλά δεν θα εμφανίζονται.`
+  )
+  if (!sure) return
+
+  // Step 2: Type-to-confirm
+  const typed = window.prompt(
+    `Για επιβεβαίωση, πληκτρολόγησε τον κωδικό της εταιρείας: ${co.code}`
+  )
+  if (typed === null) return // πάτησε cancel
+  if (typed.trim().toUpperCase() !== co.code.toUpperCase()) {
+    alert('Ο κωδικός δεν ταιριάζει. Η διαγραφή ακυρώθηκε.')
+    return
+  }
+
+  // Execute delete
+  deletingCoId.value = co.id
+  try {
+    await api.delete(`/companies/${co.id}`)
+    await loadCompanies()
+    // Refresh store ώστε να εξαφανιστεί και από το sidebar
+    if (store && typeof store.loadCompanies === 'function') {
+      await store.loadCompanies()
+    }
+    alert(`Η εταιρεία "${co.name}" διαγράφηκε επιτυχώς.`)
+  } catch (e) {
+    const msg = e?.response?.data?.message || e?.response?.data?.error || e.message || 'Άγνωστο σφάλμα'
+    alert(`Σφάλμα διαγραφής: ${msg}`)
+  } finally {
+    deletingCoId.value = null
+  }
+}
+
 
 // ════ PERMISSIONS ════
 const showPermModal = ref(false)
