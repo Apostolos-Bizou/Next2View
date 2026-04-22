@@ -154,4 +154,60 @@ public class PermissionEvaluator {
             case management -> null; // management is not a project category
         };
     }
+
+    // ═══════════════════════════════════════════════════════════════
+    // Permission-flag based checks (called from @PreAuthorize)
+    // ═══════════════════════════════════════════════════════════════
+
+    /**
+     * Used by @PreAuthorize as: hasRole('CEO') or @permissionEvaluator.canManageCompanies(principal)
+     * Returns true if the user has manageCompanies permission flag.
+     */
+    public boolean canManageCompanies(String userId) {
+        if (userId == null) return false;
+        try {
+            User user = requireUser(UUID.fromString(userId));
+            if (isCeo(user)) return true;
+            if (user.getRole() == User.Role.VIEWER) return false;
+            return userPermissionRepository.findByUserId(user.getId())
+                    .map(p -> Boolean.TRUE.equals(p.getManageCompanies()))
+                    .orElse(false);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Used by @PreAuthorize as: hasRole('CEO') or @permissionEvaluator.canManageUsers(principal)
+     */
+    public boolean canManageUsers(String userId) {
+        if (userId == null) return false;
+        try {
+            User user = requireUser(UUID.fromString(userId));
+            if (isCeo(user)) return true;
+            if (user.getRole() == User.Role.VIEWER) return false;
+            return userPermissionRepository.findByUserId(user.getId())
+                    .map(p -> Boolean.TRUE.equals(p.getManageUsers()))
+                    .orElse(false);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Used by @PreAuthorize as: hasRole('CEO') or @permissionEvaluator.canCreateProject(principal)
+     */
+    public boolean canCreateProject(String userId) {
+        if (userId == null) return false;
+        try {
+            User user = requireUser(UUID.fromString(userId));
+            if (isCeo(user)) return true;
+            if (user.getRole() == User.Role.VIEWER) return false;
+            return userPermissionRepository.findByUserId(user.getId())
+                    .map(p -> Boolean.TRUE.equals(p.getCreateProject()))
+                    .orElse(false);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
