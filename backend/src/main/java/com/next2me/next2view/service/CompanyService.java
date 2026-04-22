@@ -41,6 +41,14 @@ public class CompanyService {
                     .toList();
         }
 
+        // Users with manageCompanies permission see ALL companies
+        // (including those with 0 projects), same as CEO
+        if (permissions.canManageCompanies(actorId.toString())) {
+            return companies.stream()
+                    .map(c -> toDto(c, null))
+                    .toList();
+        }
+
         // Non-CEO: show all companies that have at least one project in the
         // user allowed categories. No filtering by user.company.
         java.util.Set<Project.Category> allowedCats = permissions.allowedCategories(actor);
