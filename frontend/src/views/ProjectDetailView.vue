@@ -603,6 +603,11 @@ const showNoteInput = ref(false)
 
 async function loadNotes() {
   if (!project.value) return
+  // Permission guard: skip fetch αν δεν μπορεί να δει CEO notes
+  if (!permStore.isCEO() && !permStore.can('viewCeoNotes')) {
+    notes.value = []
+    return
+  }
   try {
     const res = await api.get(`/projects/${project.value.id}/notes`)
     notes.value = res.data
