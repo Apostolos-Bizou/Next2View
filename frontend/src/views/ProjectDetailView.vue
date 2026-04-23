@@ -22,7 +22,8 @@
             <div class="ch-meta">
               <span :style="`color:var(--${project.category});font-weight:700;`">{{ project.companyCode }}</span>
               <span>{{ project.companyName }}</span>
-              <span v-if="project.deadline">Deadline: {{ formatDate(project.deadline) }}</span>
+              <span v-if="project.startDate || project.deadline" :title="timelineTooltip">📅 {{ formatDateRange(project.startDate, project.deadline) }}</span>
+              <span v-if="daysRemainingLabel" :class="['ch-days-pill', daysRemainingClass]">{{ daysRemainingLabel }}</span>
               <span v-if="project.budget">Budget: €{{ Number(project.budget).toLocaleString() }}</span>
             </div>
           </div>
@@ -39,7 +40,7 @@
           </div>
           <div class="cs-item">
             <div class="cs-lbl">Status</div>
-            <div class="cs-val" :class="`sv-${project.status}`" style="font-size:13px;">{{ statusLabel(project.status) }}</div>
+            <div class="cs-val" :style="`color:${smartStatus.color};font-size:13px;`">{{ smartStatus.icon }} {{ smartStatus.label }}</div>
           </div>
           <div v-if="project.budget" class="cs-item">
             <div class="cs-lbl">Budget</div>
@@ -47,10 +48,18 @@
           </div>
         </div>
         <div class="ch-progress-wrap">
+          <div class="ch-progress-label">Εργασίες</div>
           <div class="ch-progress-bar">
             <div class="ch-progress-fill" :style="`width:${project.completion}%;background:var(--${project.category});`"></div>
           </div>
           <span class="ch-progress-pct" :style="`color:var(--${project.category});`">{{ project.completion }}%</span>
+        </div>
+        <div v-if="timeProgress !== null" class="ch-progress-wrap" style="margin-top:8px;">
+          <div class="ch-progress-label">Χρόνος</div>
+          <div class="ch-progress-bar">
+            <div class="ch-progress-fill" :style="`width:${timeProgress}%;background:${smartStatus.color};opacity:0.8;`"></div>
+          </div>
+          <span class="ch-progress-pct" :style="`color:${smartStatus.color};`">{{ timeProgress }}%</span>
         </div>
       </div>
 
@@ -413,8 +422,43 @@
 
 <script setup>
 import GanttV2 from '@/components/GanttV2.vue'
+import { getTimeProgress, getDaysRemaining, getSmartStatus, formatDateRange, formatDaysRemaining } from '@/utils/projectMetrics'
 
 // ─── Gantt v3: Task Edit Modal ───
+
+// ══ Smart project metrics ══
+const timeProgress = computed(() => {
+  if (!project.value) return null
+  return getTimeProgress(project.value.startDate, project.value.deadline)
+})
+const daysRemaining = computed(() => {
+  if (!project.value || !project.value.deadline) return null
+  return getDaysRemaining(project.value.deadline)
+})
+const daysRemainingLabel = computed(() => {
+  const d = daysRemaining.value
+  if (d === null) return ''
+  return formatDaysRemaining(d)
+})
+const daysRemainingClass = computed(() => {
+  const d = daysRemaining.value
+  if (d === null) return ''
+  if (d < 0) return 'overdue'
+  if (d <= 7) return 'urgent'
+  if (d <= 30) return 'warning'
+  return 'ok'
+})
+const smartStatus = computed(() => {
+  if (!project.value) return { code: 'on_track', label: 'On Track', color: '#059669', icon: '🟢' }
+  return getSmartStatus(timeProgress.value, project.value.completion, project.value.status)
+})
+const timelineTooltip = computed(() => {
+  if (!project.value) return ''
+  const tp = timeProgress.value
+  if (tp === null) return 'Χρονικό εύρος project'
+  return `${tp}% του χρόνου έχει περάσει`
+})
+
 const editingTask = ref(null)           // the task being edited (cloned)
 const editingTaskModule = ref(null)     // the module that owns it
 const editingTaskSaving = ref(false)
@@ -1540,5 +1584,30 @@ function formatDate(iso) {
   color: var(--red, #dc2626);
 }
 .te-btn-danger:hover:not(:disabled) { background: var(--red, #dc2626); color: #fff; }
+
+
+/* ══ Smart project metrics styles ══ */
+.ch-days-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+.ch-days-pill.ok       { background: rgba(5,150,105,0.1);   color: #059669; }
+.ch-days-pill.warning  { background: rgba(217,119,6,0.1);   color: #d97706; }
+.ch-days-pill.urgent   { background: rgba(220,38,38,0.1);   color: #dc2626; }
+.ch-days-pill.overdue  { background: rgba(220,38,38,0.15);  color: #dc2626; font-weight: 800; }
+.ch-progress-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-mid);
+  min-width: 70px;
+  margin-right: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 </style>
