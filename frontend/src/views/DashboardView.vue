@@ -34,6 +34,7 @@
       <div class="gantt-ph">
         <div class="gantt-ph-title">📊 Project Timeline — All Active</div>
         <div style="display:flex;gap:8px;align-items:center;">
+          <input v-model="ganttSearch" type="search" placeholder="🔎 Αναζήτηση project..." class="gantt-search" />
           <select v-model="ganttFilter" class="gantt-select">
             <option value="">Όλες κατηγορίες</option>
             <option value="finance">$ Finance</option>
@@ -188,6 +189,7 @@ function dashSmartStatus(p) {
 }
 
 const ganttFilter = ref("");
+const ganttSearch = ref("");
 
 const visibleProjects = computed(() =>
   store.projects.filter(p => permStore.canViewCategory(p.category))
@@ -255,6 +257,13 @@ const todayPct = computed(() => {
 const ganttProjects = computed(() => {
   let ps = visibleProjects.value.filter(p => p.deadline)
   if (ganttFilter.value) ps = ps.filter(p => p.category === ganttFilter.value)
+  if (ganttSearch.value && ganttSearch.value.trim()) {
+    const q = ganttSearch.value.trim().toLowerCase()
+    ps = ps.filter(p =>
+      (p.title || '').toLowerCase().includes(q) ||
+      (p.companyName || '').toLowerCase().includes(q)
+    )
+  }
   return ps.sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
 })
 
@@ -380,6 +389,26 @@ function formatAgo(mins) {
 
 /* ════ GANTT ════ */
 .gantt-select { background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 6px; padding: 5px 10px; color: var(--text-mid); font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+.gantt-search {
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 12px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-bright, #e2e8f0);
+  border-radius: 6px;
+  background: var(--surface, #fff);
+  color: var(--text, #000);
+  min-width: 180px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.gantt-search:focus {
+  border-color: var(--accent, #3b82f6);
+}
+.gantt-search::placeholder {
+  color: var(--text-dim, #94a3b8);
+}
+
 .gantt-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
 .gantt-ph { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
 .gantt-ph-title { font-size: 14px; font-weight: 800; }
