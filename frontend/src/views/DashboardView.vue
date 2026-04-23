@@ -144,7 +144,7 @@
                   <div class="dl-label">{{ p.title }}</div>
                   <div class="dl-co">{{ p.companyName }}</div>
                 </div>
-                <div :class="`dl-days ${daysClass(p.deadline)}`">{{ daysLeft(p.deadline) }}d</div>
+                <div :class="`dl-days ${daysClass(p.deadline)}`" :title="dashSmartStatus(p).label">{{ dashSmartStatus(p).icon }} {{ daysLeft(p.deadline) }}d</div>
               </div>
               <div v-if="!upcomingDeadlines.length" class="empty-mini">Δεν υπάρχουν deadlines.</div>
             </div>
@@ -175,10 +175,18 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
 import { usePermissionStore } from "@/stores/permissions";
+import { getTimeProgress, getDaysRemaining, getSmartStatus, formatDaysRemaining } from '@/utils/projectMetrics'
 
 const store = useProjectStore();
 const permStore = usePermissionStore();
 const router = useRouter();
+
+// ══ Smart status helper ══
+function dashSmartStatus(p) {
+  const tp = getTimeProgress(p.startDate, p.deadline)
+  return getSmartStatus(tp, p.completion, p.status)
+}
+
 const ganttFilter = ref("");
 
 const visibleProjects = computed(() =>

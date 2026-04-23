@@ -47,9 +47,9 @@
                 </span>
               </td>
               <td>
-                <div style="display:flex;align-items:center;gap:5px;">
-                  <span :class="`sdot ${statusDot(p.status)}`"></span>
-                  <span class="status-txt">{{ statusLabel(p.status) }}</span>
+                <div style="display:flex;align-items:center;gap:5px;" :title="projSmartStatus(p).label + ' • ' + (daysLabel(p) || '')">
+                  <span :style="`color:${projSmartStatus(p).color};font-weight:700;`">{{ projSmartStatus(p).icon }}</span>
+                  <span class="status-txt" :style="`color:${projSmartStatus(p).color};`">{{ projSmartStatus(p).label }}</span>
                 </div>
               </td>
               <td>
@@ -97,8 +97,8 @@
         </div>
         <div class="pcm-footer">
           <span class="pcm-status"
-            :style="'background:var(--' + p.category + '-dim,rgba(0,0,0,0.05));color:var(--' + p.category + ')'">
-            {{ p.status?.replace('_',' ') }}
+            :style="'background:' + projSmartStatus(p).color + '15;color:' + projSmartStatus(p).color">
+            {{ projSmartStatus(p).icon }} {{ projSmartStatus(p).label }}
           </span>
           <span class="pcm-deadline" v-if="p.deadline">📅 {{ formatDate(p.deadline) }}</span>
         </div>
@@ -112,11 +112,23 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
 import { usePermissionStore } from "@/stores/permissions";
+import { getTimeProgress, getDaysRemaining, getSmartStatus, formatDaysRemaining } from '@/utils/projectMetrics'
 
 const store = useProjectStore();
 const permStore = usePermissionStore();
 const router = useRouter();
 const route = useRoute();
+
+// ══ Smart status helpers ══
+function projSmartStatus(p) {
+  const tp = getTimeProgress(p.startDate, p.deadline)
+  return getSmartStatus(tp, p.completion, p.status)
+}
+function daysLabel(p) {
+  const d = getDaysRemaining(p.deadline)
+  return formatDaysRemaining(d)
+}
+
 
 const filterCat = ref("");
 const filterCo  = ref("");
