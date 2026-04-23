@@ -38,3 +38,7 @@ dist/
 _patch_archive/
 patch_*.js
 fix_*.js
+
+# Local backup files from patch scripts
+*.vue.bak
+*.js.bak
