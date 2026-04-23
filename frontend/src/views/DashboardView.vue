@@ -33,8 +33,21 @@
     <div class="gantt-panel" style="margin-top:14px;">
       <div class="gantt-ph">
         <div class="gantt-ph-title">📊 Project Timeline — All Active</div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <input v-model="ganttSearch" type="search" placeholder="🔎 Αναζήτηση project..." class="gantt-search" />
+        <div class="gantt-toolbar">
+          <!-- Zoom level buttons -->
+          <div class="gantt-zoom-group">
+            <button v-for="z in GANTT_ZOOM_LEVELS" :key="z.key"
+              :class="['gantt-zoom-btn', { active: ganttZoom === z.key }]"
+              @click="setGanttZoom(z.key)"
+              :title="z.label">{{ z.label }}</button>
+          </div>
+          <!-- Navigation arrows -->
+          <div class="gantt-nav-group">
+            <button class="gantt-nav-btn" @click="navigateGantt(-1)" title="Πίσω">◀</button>
+            <button class="gantt-nav-btn gantt-today-btn" @click="navigateGanttToday" title="Σήμερα">Σήμερα</button>
+            <button class="gantt-nav-btn" @click="navigateGantt(1)" title="Μπροστά">▶</button>
+          </div>
+          <input v-model="ganttSearch" type="search" placeholder="Αναζήτηση project..." class="gantt-search" />
           <select v-model="ganttFilter" class="gantt-select">
             <option value="">Όλες κατηγορίες</option>
             <option value="finance">$ Finance</option>
@@ -50,10 +63,11 @@
         <div class="gantt-header">
           <div class="gantt-lbl-col">PROJECT</div>
           <div class="gantt-weeks-row">
-            <div v-for="w in ganttWeeks" :key="w.num"
-              :class="['gantt-wk-hd', { 'gantt-wk-today': w.isCurrentWeek }]">
-              <div class="gantt-wk-num">W{{ w.num }}</div>
-              <div class="gantt-wk-date">{{ w.dateLabel }}</div>
+            <div v-for="(col, idx) in ganttColumns" :key="idx"
+              :class="['gantt-wk-hd', { 'gantt-wk-today': col.isCurrent }]"
+              :style="`width:${100/ganttColumns.length}%`">
+              <div class="gantt-wk-num">{{ col.topLabel }}</div>
+              <div class="gantt-wk-date">{{ col.subLabel }}</div>
             </div>
           </div>
         </div>
@@ -224,48 +238,198 @@ const recentActivity = computed(() =>
 );
 
 // ════ GANTT ════
-const GANTT_WEEKS = 12
-const ganttStart = computed(() => {
-  const d = new Date()
-  d.setDate(d.getDate() - d.getDay()) // start of current week
-  return d
-})
-const ganttEnd = computed(() => {
-  const d = new Date(ganttStart.value)
-  d.setDate(d.getDate() + GANTT_WEEKS * 7)
-  return d
-})
-const totalDays = computed(() => (ganttEnd.value - ganttStart.value) / 86400000)
+// ──── GANTT ZOOM SYSTEM ────
+const GANTT_ZOOM_LEVELS = [
+  { key: "WEEK",    label: "Εβδομάδα", columns: 12, columnDays: 7,  navDays: 7  },
+  { key: "MONTH",   label: "Μήνας",    columns: 6,  columnDays: 30, navDays: 30 },
+  { key: "QUARTER", label: "Τρίμηνο",  columns: 4,  columnDays: 90, navDays: 90 },
+  { key: "YEAR",    label: "Έτος",     columns: 12, columnDays: 30, navDays: 365 },
+];
 
-const ganttWeeks = computed(() => {
-  const weeks = []
-  const months = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"]
-  for (let i = 0; i < GANTT_WEEKS; i++) {
-    const d = new Date(ganttStart.value)
-    d.setDate(d.getDate() + i * 7)
-    const isToday = i === 0
-    weeks.push({ num: i + 1, dateLabel: `${d.getDate()} ${months[d.getMonth()]}`, isCurrentWeek: isToday })
+// Load persisted state από localStorage (default: MONTH, σήμερα)
+const _savedZoom = (() => {
+  try { return localStorage.getItem("next2view_gantt_zoom"); } catch (e) { return null; }
+})();
+const _savedStart = (() => {
+  try {
+    const v = localStorage.getItem("next2view_gantt_viewStart");
+    return v ? new Date(v) : null;
+  } catch (e) { return null; }
+})();
+
+const ganttZoom = ref(_savedZoom && GANTT_ZOOM_LEVELS.find(z => z.key === _savedZoom) ? _savedZoom : "MONTH");
+
+// Helper: αρχή εβδομάδας (Κυριακή)
+function _weekStart(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() - d.getDay());
+  return d;
+}
+
+// Helper: default viewStart ανά zoom level (κεντράρει το σήμερα ή πάει λίγο πίσω)
+function _defaultViewStart(zoomKey) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const lvl = GANTT_ZOOM_LEVELS.find(z => z.key === zoomKey);
+  if (zoomKey === "WEEK") {
+    return _weekStart(now); // αρχή της τρέχουσας εβδομάδας
+  } else if (zoomKey === "MONTH") {
+    // 1 μήνα πίσω ώστε να φαίνεται context
+    const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return d;
+  } else if (zoomKey === "QUARTER") {
+    // Αρχή του τρέχοντος τριμήνου
+    const q = Math.floor(now.getMonth() / 3);
+    return new Date(now.getFullYear(), q * 3, 1);
+  } else { // YEAR
+    // Αρχή του έτους
+    return new Date(now.getFullYear(), 0, 1);
   }
-  return weeks
-})
+}
+
+const ganttViewStart = ref(_savedStart || _defaultViewStart(ganttZoom.value));
+
+const ganttConfig = computed(() =>
+  GANTT_ZOOM_LEVELS.find(z => z.key === ganttZoom.value) || GANTT_ZOOM_LEVELS[1]
+);
+
+const ganttViewEnd = computed(() => {
+  const cfg = ganttConfig.value;
+  const d = new Date(ganttViewStart.value);
+  d.setDate(d.getDate() + cfg.columns * cfg.columnDays);
+  return d;
+});
+
+const ganttStart = computed(() => ganttViewStart.value);
+const ganttEnd = computed(() => ganttViewEnd.value);
+const totalDays = computed(() => (ganttEnd.value - ganttStart.value) / 86400000);
+
+// Generate column headers ανάλογα με zoom
+const GR_MONTHS = ["Ιαν","Φεβ","Μαρ","Απρ","Μαϊ","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"];
+
+const ganttColumns = computed(() => {
+  const cfg = ganttConfig.value;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const cols = [];
+  for (let i = 0; i < cfg.columns; i++) {
+    const colStart = new Date(ganttViewStart.value);
+    colStart.setDate(colStart.getDate() + i * cfg.columnDays);
+    const colEnd = new Date(colStart);
+    colEnd.setDate(colEnd.getDate() + cfg.columnDays - 1);
+    const isCurrent = now >= colStart && now <= colEnd;
+    let topLabel, subLabel;
+    if (ganttZoom.value === "WEEK") {
+      topLabel = "W" + (i + 1);
+      subLabel = colStart.getDate() + " " + GR_MONTHS[colStart.getMonth()];
+    } else if (ganttZoom.value === "MONTH") {
+      topLabel = GR_MONTHS[colStart.getMonth()];
+      subLabel = String(colStart.getFullYear()).slice(-2);
+    } else if (ganttZoom.value === "QUARTER") {
+      const q = Math.floor(colStart.getMonth() / 3) + 1;
+      topLabel = "Q" + q;
+      subLabel = String(colStart.getFullYear());
+    } else { // YEAR
+      topLabel = GR_MONTHS[colStart.getMonth()];
+      subLabel = String(colStart.getFullYear()).slice(-2);
+    }
+    cols.push({ topLabel, subLabel, isCurrent, start: colStart, end: colEnd });
+  }
+  return cols;
+});
+
+// Backward compat: διατηρούμε ganttWeeks για όποιο residual binding
+const ganttWeeks = computed(() => ganttColumns.value.map((c, i) => ({
+  num: i + 1,
+  dateLabel: c.subLabel,
+  isCurrentWeek: c.isCurrent,
+})));
 
 const todayPct = computed(() => {
-  const now = new Date()
-  return Math.min(100, Math.max(0, (now - ganttStart.value) / (ganttEnd.value - ganttStart.value) * 100))
-})
+  const now = new Date().getTime();
+  const gs = ganttStart.value.getTime();
+  const ge = ganttEnd.value.getTime();
+  if (now < gs || now > ge) return -1; // κρυμμένη
+  return (now - gs) / (ge - gs) * 100;
+});
+
+// Zoom & nav actions
+function setGanttZoom(key) {
+  if (ganttZoom.value === key) return;
+  ganttZoom.value = key;
+  ganttViewStart.value = _defaultViewStart(key);
+  _persistGantt();
+}
+
+function navigateGantt(direction) {
+  const cfg = ganttConfig.value;
+  const d = new Date(ganttViewStart.value);
+  d.setDate(d.getDate() + direction * cfg.navDays);
+  ganttViewStart.value = d;
+  _persistGantt();
+}
+
+function navigateGanttToday() {
+  ganttViewStart.value = _defaultViewStart(ganttZoom.value);
+  _persistGantt();
+}
+
+function _persistGantt() {
+  try {
+    localStorage.setItem("next2view_gantt_zoom", ganttZoom.value);
+    localStorage.setItem("next2view_gantt_viewStart", ganttViewStart.value.toISOString());
+  } catch (e) { /* quota full or private mode — ignore */ }
+}
 
 const ganttProjects = computed(() => {
-  let ps = visibleProjects.value.filter(p => p.deadline)
-  if (ganttFilter.value) ps = ps.filter(p => p.category === ganttFilter.value)
+  // Πρώτα: κόβουμε σε projects που έχουν ΤΟΥΛΑΧΙΣΤΟΝ ένα από τα δύο (startDate OR deadline)
+  // ή καμία ημερομηνία (orphan → default σε σήμερα + 30d)
+  let ps = visibleProjects.value;
+  if (ganttFilter.value) ps = ps.filter(p => p.category === ganttFilter.value);
   if (ganttSearch.value && ganttSearch.value.trim()) {
-    const q = ganttSearch.value.trim().toLowerCase()
+    const q = ganttSearch.value.trim().toLowerCase();
     ps = ps.filter(p =>
-      (p.title || '').toLowerCase().includes(q) ||
-      (p.companyName || '').toLowerCase().includes(q)
-    )
+      (p.title || "").toLowerCase().includes(q) ||
+      (p.companyName || "").toLowerCase().includes(q)
+    );
   }
-  return ps.sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+  // Φιλτράρουμε μόνο αυτά που πέφτουν μέσα στο current view window
+  const gs = ganttStart.value.getTime();
+  const ge = ganttEnd.value.getTime();
+  ps = ps.filter(p => {
+    const b = _projectTimeRange(p);
+    return b.end >= gs && b.start <= ge;
+  });
+  return ps.sort((a, b) => _projectTimeRange(a).end - _projectTimeRange(b).end);
 })
+
+// Resolves start/end ημερομηνίες για ένα project με fallback chain:
+//   1. startDate + deadline → normal
+//   2. μόνο deadline → start = deadline - 30d
+//   3. μόνο startDate → end = startDate + 30d
+//   4. τίποτα → σήμερα + 30d (orphan)
+function _projectTimeRange(p) {
+  const DAY = 86400000;
+  const hasStart = !!p.startDate;
+  const hasEnd = !!p.deadline;
+  if (hasStart && hasEnd) {
+    return { start: new Date(p.startDate).getTime(), end: new Date(p.deadline).getTime() };
+  }
+  if (!hasStart && hasEnd) {
+    const end = new Date(p.deadline).getTime();
+    return { start: end - 30 * DAY, end };
+  }
+  if (hasStart && !hasEnd) {
+    const start = new Date(p.startDate).getTime();
+    return { start, end: start + 30 * DAY };
+  }
+  // orphan → σήμερα
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const start = now.getTime();
+  return { start, end: start + 30 * DAY };
+}
 
 function barStyle(p) {
   const end = new Date(p.deadline)
@@ -281,16 +445,15 @@ function barStyle(p) {
 }
 
 function dashBarStyle(p) {
-  const gs = ganttStart.value.getTime()
-  const ge = ganttEnd.value.getTime()
-  const range = ge - gs
-  const startRaw = p.startDate ? new Date(p.startDate).getTime() : gs
-  const endRaw = p.deadline ? new Date(p.deadline).getTime() : ge
-  const left = Math.max(0, (startRaw - gs) / range * 100)
-  const right = Math.min(100, (endRaw - gs) / range * 100)
-  const width = Math.max(2, right - left)
-  if (right <= 0 || left >= 100) return { show: false }
-  return { show: true, left, width }
+  const gs = ganttStart.value.getTime();
+  const ge = ganttEnd.value.getTime();
+  const range = ge - gs;
+  const b = _projectTimeRange(p);
+  const left = Math.max(0, (b.start - gs) / range * 100);
+  const right = Math.min(100, (b.end - gs) / range * 100);
+  const width = Math.max(1, right - left);
+  if (right <= 0 || left >= 100) return { show: false };
+  return { show: true, left, width };
 }
 
 function coShort(name) {
@@ -415,7 +578,7 @@ function formatAgo(mins) {
 .gantt-scroll { overflow-x: auto; }
 .gantt-header { display: flex; border-bottom: 2px solid var(--border); background: var(--surface2); }
 .gantt-lbl-col { width: 260px; flex-shrink: 0; padding: 10px 16px; font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; display: flex; align-items: flex-end; }
-.gantt-weeks-row { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); min-width: 600px; }
+.gantt-weeks-row { flex: 1; display: flex; min-width: 600px; }
 .gantt-wk-hd { padding: 8px 4px; text-align: center; border-left: 1px solid var(--border); }
 .gantt-wk-num { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; color: var(--text-dim); }
 .gantt-wk-date { font-family: "Nunito Sans", sans-serif; font-size: 9px; color: var(--text-dim); margin-top: 2px; }
@@ -459,5 +622,23 @@ function formatAgo(mins) {
   .gantt-track { min-width: 400px; }
   .gantt-ph { flex-wrap: wrap; gap: 8px; }
   .ph-badge { display: none; }
+}
+
+/* ──── GANTT ZOOM CONTROLS ──── */
+.gantt-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.gantt-zoom-group { display: inline-flex; border: 1px solid var(--border-bright); border-radius: 6px; overflow: hidden; background: var(--surface2); }
+.gantt-zoom-btn { padding: 5px 10px; font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; background: transparent; border: none; border-right: 1px solid var(--border-bright); color: var(--text-mid); cursor: pointer; transition: background 0.12s; }
+.gantt-zoom-btn:last-child { border-right: none; }
+.gantt-zoom-btn:hover { background: var(--accent-dim); }
+.gantt-zoom-btn.active { background: var(--accent); color: #fff; }
+.gantt-nav-group { display: inline-flex; gap: 4px; align-items: center; }
+.gantt-nav-btn { padding: 5px 10px; font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700; background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 6px; color: var(--text-mid); cursor: pointer; transition: background 0.12s; }
+.gantt-nav-btn:hover { background: var(--accent-dim); color: var(--accent); }
+.gantt-today-btn { font-size: 11px; font-weight: 800; }
+.gantt-wk-hd { flex: 1; padding: 8px 4px; text-align: center; border-left: 1px solid var(--border); box-sizing: border-box; }
+@media (max-width: 768px) {
+  .gantt-toolbar { gap: 6px; }
+  .gantt-zoom-btn { padding: 4px 7px; font-size: 10px; }
+  .gantt-nav-btn { padding: 4px 7px; font-size: 11px; }
 }
 </style>
