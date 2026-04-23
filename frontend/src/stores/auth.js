@@ -53,6 +53,9 @@ export const useAuthStore = defineStore("auth", () => {
           sessionStorage.setItem("refresh_token", res.data.refreshToken);
         }
       }
+      if (res.data.refreshToken) {
+        sessionStorage.setItem("refresh_token", res.data.refreshToken);
+      }
       user.value = res.data.user;
       initialized.value = true;
       return { success: true };
