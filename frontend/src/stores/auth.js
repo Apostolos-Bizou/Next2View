@@ -35,6 +35,7 @@ export const useAuthStore = defineStore("auth", () => {
     } catch {
       user.value = null;
       sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("refresh_token");
     }
   }
 
@@ -48,6 +49,9 @@ export const useAuthStore = defineStore("auth", () => {
       // Αποθηκεύουμε το πραγματικό JWT token
       if (res.data.accessToken) {
         sessionStorage.setItem("access_token", res.data.accessToken);
+      }
+      if (res.data.refreshToken) {
+        sessionStorage.setItem("refresh_token", res.data.refreshToken);
       }
       user.value = res.data.user;
       initialized.value = true;
@@ -67,6 +71,7 @@ export const useAuthStore = defineStore("auth", () => {
       user.value = null;
       initialized.value = false;
       sessionStorage.removeItem("access_token");
+      sessionStorage.removeItem("refresh_token");
     }
   }
 
