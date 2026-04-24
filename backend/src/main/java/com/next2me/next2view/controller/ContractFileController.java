@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -65,6 +67,7 @@ public class ContractFileController {
         User actor = permissions.requireUser(parseUserId(userId));
         Project project = requireProject(projectId);
         permissions.requireCanRead(actor, project);
+        permissions.requireMfaForLegal(project, isMfaVerified());
 
         List<ContractFile> files = contractFileService.listActive(projectId);
 
@@ -96,6 +99,7 @@ public class ContractFileController {
         User actor = permissions.requireUser(parseUserId(userId));
         Project project = requireProject(projectId);
         permissions.requireCanWrite(actor, project);
+        permissions.requireMfaForLegal(project, isMfaVerified());
 
         // Validate (throws 400 if invalid)
         FileValidator.Validated v = fileValidator.validate(file);
@@ -128,6 +132,7 @@ public class ContractFileController {
         // The service will also validate project match via findActiveById
         Project project = requireProject(projectId);
         permissions.requireCanRead(actor, project);
+        permissions.requireMfaForLegal(project, isMfaVerified());
 
         ContractFileService.DecryptedFile decrypted =
                 contractFileService.downloadDecrypted(fileId, actor);
@@ -163,6 +168,7 @@ public class ContractFileController {
         User actor = permissions.requireUser(parseUserId(userId));
         Project project = requireProject(projectId);
         permissions.requireCanWrite(actor, project);
+        permissions.requireMfaForLegal(project, isMfaVerified());
 
         contractFileService.softDelete(fileId, actor, reason);
         return ResponseEntity.noContent().build();
@@ -177,7 +183,15 @@ public class ContractFileController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
     }
 
-    private UUID parseUserId(String userId) {
+    private boolean isMfaVerified() {
+            try {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                if (auth == null) return false;
+                return auth.getAuthorities().stream().anyMatch(a -> "MFA_VERIFIED".equals(a.getAuthority()));
+            } catch (Exception e) { return false; }
+        }
+    
+        private UUID parseUserId(String userId) {
         if (userId == null || userId.isBlank() || "anonymousUser".equals(userId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }

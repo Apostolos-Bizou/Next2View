@@ -34,12 +34,17 @@ public class JwtService {
     }
 
     public String generateAccessToken(UUID userId, String email, String role) {
+        return generateAccessToken(userId, email, role, false);
+    }
+
+    public String generateAccessToken(UUID userId, String email, String role, boolean mfaVerified) {
         Instant now = Instant.now();
         Instant expiry = now.plusSeconds(accessTokenExpiryMinutes * 60L);
         return Jwts.builder()
                 .subject(userId.toString())
                 .claim("email", email)
                 .claim("role", role)
+                .claim("mfaVerified", mfaVerified)
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiry))
                 .signWith(privateKey, Jwts.SIG.RS256)
@@ -70,6 +75,11 @@ public class JwtService {
 
     public String extractRole(String token) {
         return validateAndParseClaims(token).get("role", String.class);
+    }
+
+    public boolean extractMfaVerified(String token) {
+        Boolean v = validateAndParseClaims(token).get("mfaVerified", Boolean.class);
+        return v != null && v;
     }
 
     private PrivateKey loadPrivateKey(String pem) throws Exception {

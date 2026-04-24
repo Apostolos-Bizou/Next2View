@@ -65,8 +65,11 @@ public class AuthService {
         user.setFailedAttempts(0);
         user.setLockedUntil(null);
         userRepository.save(user);
+        // Phase A: grace period — mfaVerified=true if (a) user completed MFA this session OR (b) user has no MFA setup yet.
+        // Phase B (future): require mfaEnabled=true AND valid code.
+        boolean mfaVerifiedForSession = !user.getMfaEnabled() || (request.mfaCode() != null && !request.mfaCode().isBlank());
         String accessToken = jwtService.generateAccessToken(
-                user.getId(), user.getEmail(), user.getRole().name());
+                user.getId(), user.getEmail(), user.getRole().name(), mfaVerifiedForSession);
         String rawRefresh = UUID.randomUUID().toString();
         String refreshHash = hashToken(rawRefresh);
         refreshTokenRepository.save(RefreshToken.builder()
@@ -87,7 +90,7 @@ public class AuthService {
         }
         User user = token.getUser();
         String newAccess = jwtService.generateAccessToken(
-                user.getId(), user.getEmail(), user.getRole().name());
+                user.getId(), user.getEmail(), user.getRole().name(), user.getMfaEnabled());
         return new AuthResponse(newAccess, null, "Bearer", 15 * 60, buildUserInfo(user), false);
     }
     @Transactional

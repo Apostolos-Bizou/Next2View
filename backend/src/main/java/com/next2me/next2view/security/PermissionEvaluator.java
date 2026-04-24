@@ -125,7 +125,14 @@ public class PermissionEvaluator {
         return allowedCategories(user).contains(targetCategory);
     }
 
-    public void requireCanRead(User user, Project project) {
+    public void requireMfaForLegal(Project project, boolean mfaVerified) {
+            if (project != null && project.getCategory() == Project.Category.legal && !mfaVerified) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "MFA verification required to access legal documents");
+            }
+        }
+    
+        public void requireCanRead(User user, Project project) {
         if (!canRead(user, project)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to this project");
         }
