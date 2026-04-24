@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import QRCode from 'qrcode'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/services/api'
@@ -189,6 +189,7 @@ const startSetup = async () => {
     secret.value = response.data.secret
     otpauthUrl.value = response.data.otpauthUrl
     setupState.value = 'pending'
+    await renderQR()
   } catch (err) {
     error.value = err.response?.data?.message || 'Αποτυχία δημιουργίας MFA setup'
   } finally {
