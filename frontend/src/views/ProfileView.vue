@@ -715,4 +715,4 @@ button:disabled {
     flex-direction: column;
   }
 }
-</style>
+</style>// rebuild trigger 2026-04-24T23:27:36.5362312+03:00
