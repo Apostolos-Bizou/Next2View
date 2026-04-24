@@ -130,6 +130,15 @@
             <artifactId>totp-spring-boot-starter</artifactId>
             <version>1.7.1</version>
         </dependency>
+        <!-- Legal Vault Day 2: Key Vault crypto + Managed Identity auth -->
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-security-keyvault-keys</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.azure</groupId>
+            <artifactId>azure-identity</artifactId>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
