@@ -142,6 +142,7 @@
         </div>
         <div v-else-if="!uploading" class="files-empty">Δεν υπάρχουν αρχεία. Ανέβασε συμβόλαιο ή έγγραφο.</div>
         <div v-if="uploadError" class="files-error">{{ uploadError }}</div>
+        <div v-if="fileError" class="files-error">{{ fileError }}</div>
       </div>
 
       <!-- FINANCIAL OVERVIEW -->
@@ -663,16 +664,33 @@ const files = ref([])
 const uploading = ref(false)
 const uploadError = ref("")
 
+const fileError = ref("")
+
 async function openFile(f) {
+  fileError.value = ""
   try {
-    const res = await api.get('/projects/' + project.value.id + '/files/' + f.id + '/download')
-    if (res.data.url) {
-      window.open(res.data.url, '_blank')
+    const url = `/projects/${project.value.id}/files/${f.id}/content`
+    const res = await api.get(url, { responseType: "blob" })
+    const blob = new Blob([res.data], { type: f.contentType || "application/octet-stream" })
+    const objectUrl = URL.createObjectURL(blob)
+    const isPreviewable = f.contentType && (
+      f.contentType.includes("pdf") || f.contentType.startsWith("image/")
+    )
+    if (isPreviewable) {
+      window.open(objectUrl, "_blank")
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 60000)
     } else {
-      alert('Δεν ήταν δυνατή η φόρτωση του αρχείου.')
+      const a = document.createElement("a")
+      a.href = objectUrl
+      a.download = f.fileName || "document"
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(objectUrl)
     }
-  } catch(e) {
-    alert('Σφάλμα κατά το άνοιγμα του αρχείου.')
+  } catch (e) {
+    console.error("File open error:", e)
+    fileError.value = "Σφάλμα κατά το άνοιγμα του αρχείου."
   }
 }
 
