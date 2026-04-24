@@ -168,12 +168,12 @@ const initials = computed(() => {
 // Methods
 const qrCanvas = ref(null)
 
-watch(otpauthUrl, async (val) => {
-  if (!val) return
+const renderQR = async () => {
   await nextTick()
-  if (!qrCanvas.value) return
-  await QRCode.toCanvas(qrCanvas.value, val, { width: 200, margin: 2 })
-})
+  await new Promise(r => setTimeout(r, 50))
+  if (!qrCanvas.value || !otpauthUrl.value) return
+  await QRCode.toCanvas(qrCanvas.value, otpauthUrl.value, { width: 200, margin: 2 })
+}
 
 const clearMessages = () => {
   error.value = null
