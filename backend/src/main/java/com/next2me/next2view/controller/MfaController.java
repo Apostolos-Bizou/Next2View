@@ -35,13 +35,13 @@ public class MfaController {
         user.setMfaEnabled(false); // not enabled until verified
         userRepo.save(user);
 
-        String otpAuthUrl = String.format(
+        String otpauthUrl = String.format(
             "otpauth://totp/Next2View:%s?secret=%s&issuer=Next2View",
             user.getEmail(), secret);
 
         return ResponseEntity.ok(Map.of(
             "secret", secret,
-            "otpAuthUrl", otpAuthUrl,
+            "otpauthUrl", otpauthUrl,
             "email", user.getEmail()
         ));
     }
