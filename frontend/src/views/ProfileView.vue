@@ -174,18 +174,20 @@ const renderQR = async () => {
     await new Promise(r => setTimeout(r, 100))
     if (!qrCanvas.value || !otpauthUrl.value) continue
     try {
-      const dataUrl = await QRCode.toDataURL(otpauthUrl.value, { width: 200, margin: 2 })
+      // Use api.qrserver.com - reliable free QR API
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(otpauthUrl.value)
       const img = new Image()
+      img.crossOrigin = 'anonymous'
       await new Promise((resolve, reject) => {
         img.onload = resolve
         img.onerror = reject
-        img.src = dataUrl
+        img.src = qrUrl
       })
       const ctx = qrCanvas.value.getContext('2d')
       qrCanvas.value.width = 200
       qrCanvas.value.height = 200
       ctx.drawImage(img, 0, 0, 200, 200)
-      console.log('QR rendered on attempt', attempt + 1)
+      console.log('QR rendered via qrserver.com on attempt', attempt + 1)
       return
     } catch (e) {
       console.warn('QR attempt ' + (attempt + 1) + ' failed:', e.message || e)
