@@ -169,30 +169,45 @@ const initials = computed(() => {
 const qrCanvas = ref(null)
 
 const renderQR = async () => {
+  console.log('[renderQR] Starting. otpauthUrl:', otpauthUrl.value, 'secret:', secret.value)
   for (let attempt = 0; attempt < 20; attempt++) {
     await nextTick()
     await new Promise(r => setTimeout(r, 100))
-    if (!qrCanvas.value || !otpauthUrl.value) continue
+    if (!qrCanvas.value) {
+      console.log('[renderQR] attempt', attempt + 1, '- canvas not ready')
+      continue
+    }
+    // Build otpauth URL from secret if otpauthUrl is missing
+    let urlToEncode = otpauthUrl.value
+    if (!urlToEncode && secret.value) {
+      const email = user.value?.email || 'user'
+      urlToEncode = 'otpauth://totp/Next2View:' + email + '?secret=' + secret.value + '&issuer=Next2View'
+      console.log('[renderQR] Built fallback URL:', urlToEncode)
+    }
+    if (!urlToEncode) {
+      console.log('[renderQR] attempt', attempt + 1, '- no URL available')
+      continue
+    }
     try {
-      // Use api.qrserver.com - reliable free QR API
-      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(otpauthUrl.value)
+      const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(urlToEncode)
+      console.log('[renderQR] Loading:', qrUrl.substring(0, 100))
       const img = new Image()
       await new Promise((resolve, reject) => {
         img.onload = resolve
-        img.onerror = reject
+        img.onerror = () => reject(new Error('Image load failed'))
         img.src = qrUrl
       })
       const ctx = qrCanvas.value.getContext('2d')
       qrCanvas.value.width = 200
       qrCanvas.value.height = 200
       ctx.drawImage(img, 0, 0, 200, 200)
-      console.log('QR rendered via qrserver.com on attempt', attempt + 1)
+      console.log('[renderQR] SUCCESS on attempt', attempt + 1)
       return
     } catch (e) {
-      console.warn('QR attempt ' + (attempt + 1) + ' failed:', e.message || e)
+      console.warn('[renderQR] attempt ' + (attempt + 1) + ' failed:', e.message || e)
     }
   }
-  console.error('QR render failed after 20 attempts')
+  console.error('[renderQR] FAILED after 20 attempts')
 }
 
 const clearMessages = () => {
