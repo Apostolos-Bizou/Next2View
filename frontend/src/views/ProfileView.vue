@@ -133,7 +133,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import QRCode from 'qrcode'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/services/api'
