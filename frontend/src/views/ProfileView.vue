@@ -169,10 +169,20 @@ const initials = computed(() => {
 const qrCanvas = ref(null)
 
 const renderQR = async () => {
-  await nextTick()
-  await new Promise(r => setTimeout(r, 50))
-  if (!qrCanvas.value || !otpauthUrl.value) return
-  await QRCode.toCanvas(qrCanvas.value, otpauthUrl.value, { width: 200, margin: 2 })
+  for (let attempt = 0; attempt < 10; attempt++) {
+    await nextTick()
+    await new Promise(r => setTimeout(r, 100))
+    if (qrCanvas.value && otpauthUrl.value) {
+      try {
+        await QRCode.toCanvas(qrCanvas.value, otpauthUrl.value, { width: 200, margin: 2 })
+        console.log('QR rendered on attempt', attempt + 1)
+        return
+      } catch (e) {
+        console.warn('QR attempt ' + (attempt + 1) + ' failed:', e)
+      }
+    }
+  }
+  console.error('QR render failed after 10 attempts')
 }
 
 const clearMessages = () => {
