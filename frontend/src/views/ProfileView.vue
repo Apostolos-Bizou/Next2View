@@ -177,7 +177,6 @@ const renderQR = async () => {
       // Use api.qrserver.com - reliable free QR API
       const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(otpauthUrl.value)
       const img = new Image()
-      img.crossOrigin = 'anonymous'
       await new Promise((resolve, reject) => {
         img.onload = resolve
         img.onerror = reject
