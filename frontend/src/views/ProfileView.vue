@@ -43,7 +43,7 @@
             
             <div class="setup-content">
               <div class="qr-section">
-                <canvas ref="qrCanvas" class="qr-code" v-show="otpauthUrl"></canvas>
+                <canvas ref="qrCanvas" class="qr-code"></canvas>
                 <div class="manual-entry">
                   <label>Εναλλακτικά, χειροκίνητη εισαγωγή:</label>
                   <div class="secret-input">
