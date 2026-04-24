@@ -1,213 +1,691 @@
-﻿<template>
-  <div class="content">
-    <div class="profile-grid">
-
-      <!-- LEFT: User Info -->
-      <div class="panel">
-        <div class="ph">
-          <div class="ph-title">👤 Στοιχεία Λογαριασμού</div>
-        </div>
-        <div class="pb">
-          <div class="avatar-big">{{ initials }}</div>
-          <div class="form-group">
-            <label>Ονομα</label>
-            <input v-model="form.fullName" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label>Email</label>
-            <input v-model="form.email" type="email" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label>Role</label>
-            <input :value="auth.user?.role" class="form-input" disabled />
-          </div>
-          <div v-if="saveMsg" :class="`save-msg ${saveMsg.type}`">{{ saveMsg.text }}</div>
-          <button class="btn-submit" @click="saveProfile" :disabled="saving">
-            {{ saving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
-          </button>
+<template>
+  <div class="profile-view">
+    <!-- Profile Header Card -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar">{{ initials }}</div>
+        <div class="profile-info">
+          <h2 class="profile-name">{{ user?.fullName || 'Χρήστης' }}</h2>
+          <p class="profile-email">{{ user?.email || '' }}</p>
+          <span class="profile-role">{{ user?.role || 'Χρήστης' }}</span>
         </div>
       </div>
+    </div>
 
-      <!-- RIGHT: Password + MFA -->
-      <div style="display:flex;flex-direction:column;gap:14px;">
-
-        <!-- Password Change -->
-        <div class="panel">
-          <div class="ph"><div class="ph-title">🔑 Αλλαγή Κωδικού</div></div>
-          <div class="pb">
-            <div class="form-group">
-              <label>Τρέχων Κωδικός</label>
-              <input v-model="pwForm.current" type="password" class="form-input" placeholder="••••••••" />
-            </div>
-            <div class="form-group">
-              <label>Νέος Κωδικός</label>
-              <input v-model="pwForm.newPw" type="password" class="form-input" placeholder="Τουλάχιστον 8 χαρακτήρες" />
-            </div>
-            <div class="form-group">
-              <label>Επιβεβαίωση Νέου</label>
-              <input v-model="pwForm.confirm" type="password" class="form-input" placeholder="Επανάληψη" />
-            </div>
-            <div v-if="pwMsg" :class="`save-msg ${pwMsg.type}`">{{ pwMsg.text }}</div>
-            <button class="btn-submit" @click="changePassword" :disabled="pwSaving">
-              {{ pwSaving ? 'Αποθήκευση...' : 'Αλλαγή Κωδικού' }}
+    <!-- Security Section Card -->
+    <div class="profile-card">
+      <div class="card-header">
+        <h3 class="card-title">🔐 Ασφάλεια</h3>
+      </div>
+      <div class="card-content">
+        
+        <!-- MFA Row - Dynamic State -->
+        <div class="security-row">
+          <div class="security-info">
+            <div class="security-label">Έλεγχος Ταυτότητας (MFA)</div>
+            <div class="security-desc">Δεύτερος παράγοντας ελέγχου με εφαρμογή TOTP</div>
+          </div>
+          
+          <!-- STATE A: MFA Disabled -->
+          <div v-if="!mfaEnabled && setupState === 'idle'" class="security-controls">
+            <span class="status-badge warning">⚠ Ανενεργό</span>
+            <button class="btn-primary" @click="startSetup" :disabled="loading">
+              Ενεργοποίηση MFA →
             </button>
           </div>
-        </div>
 
-        <!-- MFA Status -->
-        <div class="panel">
-          <div class="ph"><div class="ph-title">🔒 Two-Factor Authentication</div></div>
-          <div class="pb">
-            <div :class="`mfa-status-badge ${mfaEnabled ? 'on' : 'off'}`">
-              {{ mfaEnabled ? '✅ MFA Ενεργό' : '⚠ MFA Ανενεργό' }}
+          <!-- STATE B: Setup Pending -->
+          <div v-if="setupState === 'pending'" class="mfa-setup">
+            <div class="setup-header">
+              <h4>Ενεργοποίηση MFA</h4>
+              <p>Σκανάρισε το QR code με την εφαρμογή TOTP (π.χ. Google Authenticator, Authy)</p>
             </div>
-            <p class="mfa-desc">{{ mfaEnabled ? 'Ο λογαριασμός σου προστατεύεται με 2FA.' : 'Ενεργοποίησε MFA για επιπλέον ασφάλεια.' }}</p>
+            
+            <div class="setup-content">
+              <div class="qr-section">
+                <img :src="qrUrl" alt="QR Code" class="qr-code" v-if="qrUrl" />
+                <div class="manual-entry">
+                  <label>Εναλλακτικά, χειροκίνητη εισαγωγή:</label>
+                  <div class="secret-input">
+                    <code class="secret-code">{{ secret }}</code>
+                    <button class="btn-copy" @click="copySecret" title="Αντιγραφή">
+                      📋
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="verify-section">
+                <label for="verify-code">Κώδικας επαλήθευσης (6 ψηφία):</label>
+                <input 
+                  id="verify-code"
+                  v-model="codeInput" 
+                  type="text" 
+                  maxlength="6" 
+                  placeholder="123456"
+                  class="code-input"
+                  :disabled="loading"
+                />
+                <div class="verify-controls">
+                  <button class="btn-secondary" @click="cancelSetup" :disabled="loading">
+                    Ακύρωση
+                  </button>
+                  <button class="btn-primary" @click="verifySetup" :disabled="!codeInput || codeInput.length !== 6 || loading">
+                    {{ loading ? 'Επαλήθευση...' : 'Επαλήθευση' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <div v-if="error" class="error-message">{{ error }}</div>
+          </div>
+
+          <!-- STATE C: MFA Enabled -->
+          <div v-if="mfaEnabled && setupState === 'idle'" class="security-controls">
+            <span class="status-badge success">✅ Ενεργό</span>
+            <button class="btn-danger" @click="startDisable" :disabled="loading">
+              Απενεργοποίηση
+            </button>
+          </div>
+
+          <!-- STATE C2: Disable Confirmation -->
+          <div v-if="setupState === 'disabling'" class="mfa-disable">
+            <div class="danger-warning">
+              <h4>⚠️ Επικίνδυνη ενέργεια</h4>
+              <p>Η απενεργοποίηση του MFA μειώνει την ασφάλεια του λογαριασμού σας.</p>
+            </div>
+            <div class="disable-form">
+              <label for="disable-code">Εισάγετε κώδικα MFA για επιβεβαίωση:</label>
+              <input 
+                id="disable-code"
+                v-model="codeInput" 
+                type="text" 
+                maxlength="6" 
+                placeholder="123456"
+                class="code-input"
+                :disabled="loading"
+              />
+              <div class="verify-controls">
+                <button class="btn-secondary" @click="cancelDisable" :disabled="loading">
+                  Ακύρωση
+                </button>
+                <button class="btn-danger" @click="confirmDisable" :disabled="!codeInput || codeInput.length !== 6 || loading">
+                  {{ loading ? 'Απενεργοποίηση...' : 'Επιβεβαίωση Απενεργοποίησης' }}
+                </button>
+              </div>
+            </div>
+            
+            <div v-if="error" class="error-message">{{ error }}</div>
           </div>
         </div>
       </div>
-
-      <!-- PERMISSIONS -->
-      <div class="panel" style="grid-column:1/-1;">
-        <div class="ph"><div class="ph-title">✅ Δικαιώματα Πρόσβασης</div></div>
-        <div class="pb">
-          <div class="perms-grid">
-            <div v-for="perm in allPerms" :key="perm.key" :class="`perm-card ${permStore.can(perm.key) || permStore.isCEO() ? 'active' : 'inactive'}`">
-              <span class="perm-icon">{{ perm.icon }}</span>
-              <span class="perm-label">{{ perm.label }}</span>
-              <span class="perm-dot">{{ permStore.can(perm.key) || permStore.isCEO() ? '✓' : '✗' }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </div>
+
+    <!-- Info Box -->
+    <div class="info-card">
+      <h4>💡 Γιατί MFA;</h4>
+      <p>Ο δεύτερος παράγοντας ελέγχου προστατεύει τον λογαριασμό σας ακόμα κι αν κάποιος μάθει τον κωδικό σας. Απαραίτητο για πρόσβαση σε νομικά έγγραφα υψηλής εμπιστευτικότητας.</p>
+    </div>
+
+    <!-- Success Message -->
+    <div v-if="successMsg" class="success-message">{{ successMsg }}</div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { usePermissionStore } from '@/stores/permissions'
 import api from '@/services/api'
 
-const auth = useAuthStore()
-const permStore = usePermissionStore()
+// Store
+const authStore = useAuthStore()
 
-const form = ref({ fullName: '', email: '' })
-const saving = ref(false)
-const saveMsg = ref(null)
+// Reactive state
+const setupState = ref('idle') // 'idle' | 'pending' | 'disabling'
+const secret = ref('')
+const otpauthUrl = ref('')
+const codeInput = ref('')
+const loading = ref(false)
+const error = ref(null)
+const successMsg = ref(null)
 
-const pwForm = ref({ current: '', newPw: '', confirm: '' })
-const pwSaving = ref(false)
-const pwMsg = ref(null)
-
-const mfaEnabled = ref(false)
+// Computed
+const user = computed(() => authStore.user)
+const mfaEnabled = computed(() => user.value?.mfaEnabled || false)
 
 const initials = computed(() => {
-  const name = form.value.fullName || ''
-  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'AK'
+  const name = user.value?.fullName || 'XX'
+  return name.split(' ')
+    .map(w => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 })
 
-onMounted(async () => {
-  form.value.fullName = auth.user?.fullName || ''
-  form.value.email = auth.user?.email || ''
-  await permStore.loadMyPermissions()
-  try {
-    const res = await api.get('/auth/mfa/status')
-    mfaEnabled.value = res.data.mfaEnabled
-  } catch {}
+const qrUrl = computed(() => {
+  if (!otpauthUrl.value) return null
+  const encoded = encodeURIComponent(otpauthUrl.value)
+  return `https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=${encoded}`
 })
 
-async function saveProfile() {
-  saving.value = true
-  saveMsg.value = null
-  try {
-    const userId = auth.user?.id
-    await api.put(`/admin/users/${userId}`, {
-      fullName: form.value.fullName,
-      email: form.value.email,
-      role: auth.user?.role,
-      active: true
-    })
-    auth.user.fullName = form.value.fullName
-    auth.user.email = form.value.email
-    saveMsg.value = { type: 'success', text: 'Τα στοιχεία αποθηκεύτηκαν!' }
-  } catch (e) {
-    saveMsg.value = { type: 'error', text: e.response?.data?.message || 'Σφάλμα αποθήκευσης.' }
-  } finally { saving.value = false }
+// Methods
+const clearMessages = () => {
+  error.value = null
+  successMsg.value = null
 }
 
-async function changePassword() {
-  pwMsg.value = null
-  if (pwForm.value.newPw !== pwForm.value.confirm) {
-    pwMsg.value = { type: 'error', text: 'Οι κωδικοί δεν ταιριάζουν.' }
-    return
-  }
-  if (pwForm.value.newPw.length < 8) {
-    pwMsg.value = { type: 'error', text: 'Τουλάχιστον 8 χαρακτήρες.' }
-    return
-  }
-  pwSaving.value = true
+const startSetup = async () => {
+  loading.value = true
+  clearMessages()
+  
   try {
-    await api.post('/auth/change-password', {
-      currentPassword: pwForm.value.current,
-      newPassword: pwForm.value.newPw
-    })
-    pwMsg.value = { type: 'success', text: 'Ο κωδικός άλλαξε!' }
-    pwForm.value = { current: '', newPw: '', confirm: '' }
-  } catch (e) {
-    pwMsg.value = { type: 'error', text: e.response?.data?.message || 'Λάθος τρέχων κωδικός.' }
-  } finally { pwSaving.value = false }
+    const response = await api.post('/auth/mfa/setup')
+    secret.value = response.data.secret
+    otpauthUrl.value = response.data.otpauthUrl
+    setupState.value = 'pending'
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Αποτυχία δημιουργίας MFA setup'
+  } finally {
+    loading.value = false
+  }
 }
 
-const allPerms = [
-  { key: 'viewFinance',    icon: '$',  label: 'Βλέπει Finance' },
-  { key: 'viewLegal',      icon: '▪',  label: 'Βλέπει Legal' },
-  { key: 'viewDev',        icon: '✨', label: 'Βλέπει Developing' },
-  { key: 'viewMarketing',  icon: '◆',  label: 'Βλέπει Marketing' },
-  { key: 'viewFinancials', icon: '💰', label: 'Financial Data' },
-  { key: 'viewCeoNotes',   icon: '📓', label: 'CEO Notes' },
-  { key: 'updateTasks',    icon: '✎',  label: 'Update Tasks' },
-  { key: 'uploadFiles',    icon: '📎', label: 'Upload Files' },
-  { key: 'createProject',  icon: '+',  label: 'Δημιουργία Project' },
-  { key: 'editProject',    icon: '✎',  label: 'Επεξεργασία Project' },
-  { key: 'manageUsers',    icon: '👤', label: 'Manage Users' },
-  { key: 'manageCompanies',icon: '🏢', label: 'Manage Companies' },
-  { key: 'aiCeoReport',    icon: '⦿',  label: 'AI CEO Report' },
-  { key: 'aiContract',     icon: '📄', label: 'AI Contract' },
-]
+const verifySetup = async () => {
+  loading.value = true
+  clearMessages()
+  
+  try {
+    await api.post('/auth/mfa/verify', { code: codeInput.value })
+    
+    // Update user MFA status (defensive pattern)
+    if (authStore.user) {
+      authStore.user.mfaEnabled = true
+    }
+    // Optional: call store method if exists
+    if (authStore.updateUser && typeof authStore.updateUser === 'function') {
+      await authStore.updateUser()
+    }
+    
+    setupState.value = 'idle'
+    codeInput.value = ''
+    secret.value = ''
+    otpauthUrl.value = ''
+    successMsg.value = 'MFA ενεργοποιήθηκε επιτυχώς! 🎉'
+    
+    // Clear success message after 4 seconds
+    setTimeout(() => {
+      successMsg.value = null
+    }, 4000)
+    
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Μη έγκυρος κώδικας επαλήθευσης'
+  } finally {
+    loading.value = false
+  }
+}
+
+const cancelSetup = () => {
+  setupState.value = 'idle'
+  codeInput.value = ''
+  secret.value = ''
+  otpauthUrl.value = ''
+  clearMessages()
+}
+
+const startDisable = () => {
+  setupState.value = 'disabling'
+  codeInput.value = ''
+  clearMessages()
+}
+
+const confirmDisable = async () => {
+  loading.value = true
+  clearMessages()
+  
+  try {
+    await api.post('/auth/mfa/disable', { code: codeInput.value })
+    
+    // Update user MFA status (defensive pattern)
+    if (authStore.user) {
+      authStore.user.mfaEnabled = false
+    }
+    // Optional: call store method if exists
+    if (authStore.updateUser && typeof authStore.updateUser === 'function') {
+      await authStore.updateUser()
+    }
+    
+    setupState.value = 'idle'
+    codeInput.value = ''
+    successMsg.value = 'MFA απενεργοποιήθηκε.'
+    
+    // Clear success message after 4 seconds
+    setTimeout(() => {
+      successMsg.value = null
+    }, 4000)
+    
+  } catch (err) {
+    error.value = err.response?.data?.message || 'Μη έγκυρος κώδικας επαλήθευσης'
+  } finally {
+    loading.value = false
+  }
+}
+
+const cancelDisable = () => {
+  setupState.value = 'idle'
+  codeInput.value = ''
+  clearMessages()
+}
+
+const copySecret = async () => {
+  try {
+    await navigator.clipboard.writeText(secret.value)
+    // Temporary success feedback
+    const originalText = secret.value
+    secret.value = 'Αντιγράφηκε!'
+    setTimeout(() => {
+      secret.value = originalText
+    }, 1000)
+  } catch (err) {
+    console.warn('Clipboard API not available:', err)
+  }
+}
+
+// Lifecycle
+onMounted(() => {
+  clearMessages()
+})
 </script>
 
 <style scoped>
-.content { padding:26px 32px; overflow-y:auto; flex:1; }
-.profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.panel { background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
-.ph { padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface2); }
-.ph-title { font-size:14px; font-weight:800; }
-.pb { padding:20px; display:flex; flex-direction:column; gap:12px; }
-.avatar-big { width:64px; height:64px; background:var(--accent); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:#fff; margin:0 auto 8px; }
-.form-group { display:flex; flex-direction:column; gap:5px; }
-.form-group label { font-family:"Nunito Sans",sans-serif; font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-dim); }
-.form-input { padding:9px 12px; border:1px solid var(--border-bright); border-radius:7px; background:var(--surface2); color:var(--text); font-family:"Nunito",sans-serif; font-size:13px; }
-.form-input:focus { outline:none; border-color:var(--accent); }
-.form-input:disabled { opacity:0.5; cursor:not-allowed; }
-.btn-submit { padding:10px 20px; background:var(--accent); border:none; border-radius:7px; color:#fff; font-family:"Nunito",sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
-.btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
-.save-msg { padding:8px 12px; border-radius:7px; font-size:12px; font-weight:600; }
-.save-msg.success { background:var(--green-dim); color:var(--green); }
-.save-msg.error { background:var(--red-dim); color:var(--red); }
-.mfa-status-badge { display:inline-block; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:700; }
-.mfa-status-badge.on { background:var(--green-dim); color:var(--green); }
-.mfa-status-badge.off { background:var(--red-dim); color:var(--red); }
-.mfa-desc { font-size:12px; color:var(--text-dim); margin:0; }
-.perms-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:8px; }
-.perm-card { display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:8px; border:1px solid var(--border); }
-.perm-card.active { background:var(--green-dim); border-color:var(--green); }
-.perm-card.inactive { background:var(--surface2); opacity:0.5; }
-.perm-icon { font-size:16px; }
-.perm-label { font-size:12px; font-weight:600; flex:1; }
-.perm-dot { font-size:14px; font-weight:800; }
-.perm-card.active .perm-dot { color:var(--green); }
-.perm-card.inactive .perm-dot { color:var(--red); }
-@media (max-width:768px) { .profile-grid { grid-template-columns:1fr !important; } .content { padding:14px !important; } }
+.profile-view {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profile-card,
+.info-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent, #3b82f6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.profile-info {
+  flex: 1;
+}
+
+.profile-name {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text, #1f2937);
+}
+
+.profile-email {
+  margin: 0 0 8px 0;
+  color: var(--text-mid, #6b7280);
+  font-size: 14px;
+}
+
+.profile-role {
+  display: inline-block;
+  padding: 4px 12px;
+  background: var(--accent-dim, #dbeafe);
+  color: var(--accent, #3b82f6);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card-header {
+  padding: 20px 24px 0 24px;
+  border-bottom: 1px solid var(--border, #e2e8f0);
+}
+
+.card-title {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text, #1f2937);
+}
+
+.card-content {
+  padding: 20px 24px 24px 24px;
+}
+
+.security-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.security-info {
+  flex: 1;
+}
+
+.security-label {
+  font-weight: 600;
+  color: var(--text, #1f2937);
+  margin-bottom: 4px;
+}
+
+.security-desc {
+  font-size: 14px;
+  color: var(--text-mid, #6b7280);
+}
+
+.security-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.success {
+  background: var(--green-dim, #dcfce7);
+  color: var(--green, #16a34a);
+}
+
+.status-badge.warning {
+  background: var(--yellow-dim, #fef3c7);
+  color: var(--yellow, #d97706);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-copy {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--accent, #3b82f6);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--accent-dark, #2563eb);
+}
+
+.btn-secondary {
+  background: var(--surface2, #f8fafc);
+  color: var(--text-mid, #6b7280);
+  border: 1px solid var(--border, #e2e8f0);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--border, #e2e8f0);
+}
+
+.btn-danger {
+  background: var(--red, #dc2626);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--red-dark, #b91c1c);
+}
+
+.btn-copy {
+  background: var(--surface2, #f8fafc);
+  border: 1px solid var(--border, #e2e8f0);
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-copy:hover {
+  background: var(--border, #e2e8f0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mfa-setup,
+.mfa-disable {
+  width: 100%;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+  padding: 20px;
+  background: var(--surface2, #f8fafc);
+}
+
+.setup-header h4,
+.danger-warning h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text, #1f2937);
+}
+
+.setup-header p,
+.danger-warning p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: var(--text-mid, #6b7280);
+}
+
+.setup-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.qr-code {
+  width: 200px;
+  height: 200px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+}
+
+.manual-entry {
+  width: 100%;
+}
+
+.manual-entry label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-mid, #6b7280);
+  margin-bottom: 8px;
+}
+
+.secret-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.secret-code {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+  padding: 8px 12px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 6px;
+  flex: 1;
+  word-break: break-all;
+}
+
+.verify-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.verify-section label,
+.disable-form label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #1f2937);
+}
+
+.code-input {
+  padding: 12px;
+  border: 1px solid var(--border, #e2e8f0);
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+  letter-spacing: 2px;
+  font-family: 'Monaco', 'Menlo', monospace;
+}
+
+.code-input:focus {
+  outline: none;
+  border-color: var(--accent, #3b82f6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.verify-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.danger-warning {
+  background: var(--red-dim, #fef2f2);
+  border: 1px solid var(--red, #dc2626);
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.danger-warning h4 {
+  color: var(--red, #dc2626);
+}
+
+.disable-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-card {
+  padding: 20px 24px;
+  background: var(--accent-dim, #dbeafe);
+  border-color: var(--accent, #3b82f6);
+}
+
+.info-card h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent, #3b82f6);
+}
+
+.info-card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-mid, #6b7280);
+  line-height: 1.5;
+}
+
+.error-message {
+  background: var(--red-dim, #fef2f2);
+  border: 1px solid var(--red, #dc2626);
+  color: var(--red, #dc2626);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+.success-message {
+  background: var(--green-dim, #dcfce7);
+  border: 1px solid var(--green, #16a34a);
+  color: var(--green, #16a34a);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .profile-view {
+    padding: 16px;
+    gap: 16px;
+  }
+  
+  .profile-header {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+  
+  .security-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .setup-content {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .qr-code {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .verify-controls {
+    flex-direction: column;
+  }
+}
 </style>
