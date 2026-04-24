@@ -43,7 +43,7 @@
             
             <div class="setup-content">
               <div class="qr-section">
-                <img :src="qrUrl" alt="QR Code" class="qr-code" v-if="qrUrl" />
+                <canvas ref="qrCanvas" class="qr-code" v-show="otpauthUrl"></canvas>
                 <div class="manual-entry">
                   <label>Εναλλακτικά, χειροκίνητη εισαγωγή:</label>
                   <div class="secret-input">
@@ -133,7 +133,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import QRCode from 'qrcode'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/services/api'
 
@@ -162,13 +163,18 @@ const initials = computed(() => {
     .toUpperCase()
 })
 
-const qrUrl = computed(() => {
-  if (!otpauthUrl.value) return null
-  const encoded = encodeURIComponent(otpauthUrl.value)
-  return `https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=${encoded}`
-})
+
 
 // Methods
+const qrCanvas = ref(null)
+
+watch(otpauthUrl, async (val) => {
+  if (!val) return
+  await nextTick()
+  if (!qrCanvas.value) return
+  await QRCode.toCanvas(qrCanvas.value, val, { width: 200, margin: 2 })
+})
+
 const clearMessages = () => {
   error.value = null
   successMsg.value = null
