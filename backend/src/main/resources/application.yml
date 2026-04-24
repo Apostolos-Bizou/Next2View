@@ -25,9 +25,9 @@ spring:
         jdbc:
           time_zone: UTC
   flyway:
-    enabled: false
+    enabled: true
     locations: classpath:db/migration
-    baseline-on-migrate: false
+    baseline-on-migrate: true
     validate-on-migrate: false
     out-of-order: true
     repair-on-migrate: true
@@ -55,6 +55,16 @@ azure:
   storage:
     account: ${AZURE_STORAGE_ACCOUNT:}
     key: ${AZURE_STORAGE_KEY:}
+
+# Legal Vault (Day 2) - GDPR-compliant encrypted contract storage
+# Uses Managed Identity (no secrets needed); falls back to az CLI locally
+legal-vault:
+  storage:
+    account: ${LEGAL_VAULT_STORAGE_ACCOUNT:next2viewlegalstorage}
+    container: ${LEGAL_VAULT_CONTAINER:legal-contracts}
+  keyvault:
+    uri: ${LEGAL_VAULT_KEYVAULT_URI:https://next2view-dev-kv.vault.azure.net/}
+    key-name: ${LEGAL_VAULT_KEY_NAME:legal-contracts-cmk}
 
 anthropic:
   api:
