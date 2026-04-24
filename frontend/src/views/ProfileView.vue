@@ -189,7 +189,7 @@ const startSetup = async () => {
     secret.value = response.data.secret
     otpauthUrl.value = response.data.otpauthUrl
     setupState.value = 'pending'
-    await renderQR()
+    try { await renderQR() } catch (e) { console.warn('QR render failed:', e) }
   } catch (err) {
     error.value = err.response?.data?.message || 'Αποτυχία δημιουργίας MFA setup'
   } finally {
