@@ -27,14 +27,14 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// ── Response interceptor: auto-refresh σε 401 ──
+// ── Response interceptor: auto-refresh σε 401/403 ──
 api.interceptors.response.use(
   (res) => res,
   async (err) => {
     const originalRequest = err.config;
 
     // Αν δεν είναι 401 ή αν έχουμε ήδη κάνει retry, βγες
-    if (err.response?.status !== 401 || originalRequest._retry) {
+    if ((err.response?.status !== 401 && err.response?.status !== 403) || originalRequest._retry) {
       return Promise.reject(err);
     }
 
