@@ -29,7 +29,7 @@ public class ReportController {
     private User getCurrentUser() {
         String subjectId = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findById(UUID.fromString(subjectId))
-            .orElseThrow(() -> new RuntimeException("User not found: " + username));
+            .orElseThrow(() -> new RuntimeException("User not found: " + subjectId));
     }
 
     private boolean isCEO(User user) {
