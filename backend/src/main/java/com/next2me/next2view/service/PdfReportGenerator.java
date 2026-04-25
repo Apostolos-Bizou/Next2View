@@ -16,6 +16,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@SuppressWarnings("unchecked")
 public class PdfReportGenerator {
 
     // ── Brand Colors ──
