@@ -84,16 +84,8 @@ public class ReportController {
 
         try {
             // For now, return preview data as JSON
-            // PDF generation will be added in Step 3 (PdfReportGenerator)
             ReportDataDTO data = reportService.generatePreviewData(templateId);
-
-            // Log the generation
-            // reportService.logGeneration(templateId, template.get().getName(), user.getId(), 0L);
-
-            // TODO: Replace with actual PDF bytes from PdfReportGenerator
-            // For now, return a placeholder response
-            String jsonContent = "PDF generation will be implemented in Step 3";
-            byte[] content = jsonContent.getBytes();
+            byte[] content = pdfReportGenerator.generatePdf(data);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
