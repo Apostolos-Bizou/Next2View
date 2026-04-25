@@ -1,4 +1,3 @@
-@SuppressWarnings("unchecked")
 package com.next2me.next2view.service;
 
 import com.lowagie.text.*;
@@ -99,7 +98,7 @@ public class PdfReportGenerator {
     // ══════════════════════════════════════════
     // HEADER BAND — Navy gradient with logo
     // ══════════════════════════════════════════
-    private void addHeaderBand(PdfWriter writer, Document doc, ReportDataDTO data) throws DocumentException {
+    private void addHeaderBand(PdfWriter writer, Document doc, ReportDataDTO data) throws DocumentException, java.io.IOException {
         PdfContentByte cb = writer.getDirectContent();
         float pageWidth = doc.getPageSize().getWidth();
         float top = doc.getPageSize().getHeight() - 15;
