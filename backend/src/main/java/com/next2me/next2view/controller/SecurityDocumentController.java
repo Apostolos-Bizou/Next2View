@@ -37,12 +37,38 @@ public class SecurityDocumentController {
 
     private final SecurityDocumentRepository repo;
     private final UserRepository userRepo;
+    private final com.next2me.next2view.security.PermissionEvaluator permissionEvaluator;
 
     @Value("${azure.storage.legal-vault.account-name:next2viewlegalstorage}")
     private String storageAccount;
 
     @Value("${azure.storage.security-docs.container:security-docs}")
     private String containerName;
+
+
+
+    private String getCurrentUserId() {
+        org.springframework.security.core.Authentication auth = 
+            org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null || "anonymousUser".equals(auth.getName())) return null;
+        return auth.getName();
+    }
+
+    // Inline permission check - replaces @PreAuthorize for reliability
+    private boolean canViewSecurity(String userId) {
+        if (userId == null) return false;
+        try {
+            UUID uid = UUID.fromString(userId);
+            User user = userRepo.findById(uid).orElse(null);
+            if (user == null) return false;
+            // CEO has full access
+            if (user.getRole() == User.Role.CEO) return true;
+            // Otherwise check viewSecurity flag - we use direct query via repository
+            return permissionEvaluator.canViewSecurity(userId);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     private BlobContainerClient getContainer() {
         BlobServiceClient client = new BlobServiceClientBuilder()
@@ -58,8 +84,8 @@ public class SecurityDocumentController {
 
     // List all active security documents
     @GetMapping
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<List<Map<String, Object>>> list() {
+        if (!canViewSecurity(getCurrentUserId())) return ResponseEntity.status(403).body(java.util.Collections.emptyList());
         List<SecurityDocument> docs = repo.findAllActive();
         List<Map<String, Object>> response = docs.stream().map(d -> {
             Map<String, Object> m = new HashMap<>();
@@ -80,7 +106,6 @@ public class SecurityDocumentController {
 
     // Upload new document
     @PostMapping("/upload")
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<Map<String, Object>> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "description", required = false) String description,
@@ -133,9 +158,9 @@ public class SecurityDocumentController {
 
     // Download document
     @GetMapping("/{id}/download")
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<?> download(@PathVariable UUID id) {
         try {
+            if (!canViewSecurity(getCurrentUserId())) return ResponseEntity.status(403).body(java.util.Map.of("error", "forbidden"));
             SecurityDocument doc = repo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Document not found"));
             if (doc.getDeletedAt() != null) {
@@ -169,8 +194,11 @@ public class SecurityDocumentController {
 
     // Soft-delete document
     @DeleteMapping("/{id}")
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable UUID id) {
+        String uid = getCurrentUserId();
+        if (uid == null) return ResponseEntity.status(403).body(java.util.Map.of("error", "forbidden"));
+        User u = userRepo.findById(UUID.fromString(uid)).orElse(null);
+        if (u == null || u.getRole() != User.Role.CEO) return ResponseEntity.status(403).body(java.util.Map.of("error", "ceo only"));
         SecurityDocument doc = repo.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Document not found"));
         doc.setDeletedAt(Instant.now());
