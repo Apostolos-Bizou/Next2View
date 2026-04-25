@@ -1911,13 +1911,22 @@ const glossary = [
 
 /* ============= Print Styles for Security Tab ============= */
 @media print {
-  /* Hide everything except security panel */
-  body > *:not(#app),
+  @page {
+    size: A4;
+    margin: 1.5cm 1.2cm;
+  }
+
+  body, html {
+    background: white !important;
+    color: black !important;
+  }
+
+  .app-sidebar,
   .sidebar,
-  .nav,
+  aside,
   nav,
   header,
-  .header,
+  .layout-header,
   .top-bar,
   .topbar,
   .dashboard-sidebar,
@@ -1925,83 +1934,83 @@ const glossary = [
   .guide-tabs,
   .g-sec-toolbar,
   .g-doc-actions,
+  .new-project-btn,
+  .add-button,
   button {
     display: none !important;
   }
 
-  /* Clean print layout */
-  body, html {
-    background: white !important;
-    color: black !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .guide-panel,
   .layout-main,
   main,
-  .main-content {
-    padding: 0 !important;
+  .main-content,
+  #app > div {
     margin: 0 !important;
+    padding: 0 !important;
     background: white !important;
-    max-width: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
-  /* Show only security panel */
-  .guide-panel {
-    display: block !important;
-  }
-
-  /* Print-friendly card and table styles */
-  .g-stat-card,
-  .g-doc-card,
-  .g-layer,
-  .g-sec-hero {
-    border: 1px solid #ccc !important;
-    background: white !important;
-    page-break-inside: avoid;
-  }
-
-  .g-table {
-    page-break-inside: auto;
-    border: 1px solid #ccc;
-  }
-
-  .g-table tr {
-    page-break-inside: avoid;
-  }
-
-  .g-callout-info,
-  .g-callout-warning,
-  .g-callout-success {
-    border: 1px solid #999 !important;
-    background: #f9f9f9 !important;
-    page-break-inside: avoid;
+  * {
+    overflow: visible !important;
+    max-height: none !important;
   }
 
   h2, h3 {
     page-break-after: avoid;
+    color: black !important;
+  }
+
+  table, .g-table {
+    page-break-inside: auto;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  table tr,
+  .g-table tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  .g-stat-card,
+  .g-doc-card,
+  .g-layer,
+  .g-sec-hero,
+  .g-callout-info,
+  .g-callout-warning,
+  .g-callout-success {
+    page-break-inside: avoid;
+    border: 1px solid #999 !important;
+    background: white !important;
+  }
+
+  .g-table {
+    border: 1px solid #999;
+  }
+
+  .g-table th,
+  .g-table td {
+    border-bottom: 1px solid #ccc;
+    padding: 6px 8px;
   }
 
   .g-badge {
     border: 1px solid #999 !important;
+    background: white !important;
+    color: black !important;
   }
 
-  /* Hide download icons in print */
-  .g-doc-icon {
-    font-size: 20px !important;
+  .g-grid-4 {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    page-break-inside: avoid;
   }
 
-  /* Add print header */
-  .guide-panel::before {
-    content: "Next2View — Security Documentation — Printed " attr(data-print-date);
-    display: block;
-    text-align: center;
-    font-size: 11px;
-    color: #666;
-    border-bottom: 1px solid #ccc;
-    padding-bottom: 6px;
-    margin-bottom: 14px;
+  .g-loading,
+  .g-empty {
+    display: none !important;
   }
 }
 
