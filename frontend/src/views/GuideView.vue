@@ -1913,66 +1913,118 @@ const glossary = [
 @media print {
   @page {
     size: A4;
-    margin: 1.5cm 1.2cm;
+    margin: 1.2cm;
   }
 
+  /* Reset basics */
   body, html {
     background: white !important;
     color: black !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  .app-sidebar,
+  /* Hide app navigation chrome - but NOT content areas */
   .sidebar,
-  aside,
-  nav,
-  header,
-  .layout-header,
-  .top-bar,
-  .topbar,
+  aside.sidebar,
   .dashboard-sidebar,
   .layout-sidebar,
-  .guide-tabs,
-  .g-sec-toolbar,
-  .g-doc-actions,
+  .app-sidebar,
+  nav.main-nav,
+  header.app-header,
+  .top-bar,
+  .topbar,
   .new-project-btn,
-  .add-button,
-  button {
+  .add-button {
     display: none !important;
   }
 
+  /* Hide guide tabs (we only want active panel content) */
+  .guide-tabs {
+    display: none !important;
+  }
+
+  /* Hide buttons in print (they're not useful in PDF) */
+  .g-sec-toolbar,
+  .g-doc-actions,
+  .g-btn-mini,
+  button.g-btn-action {
+    display: none !important;
+  }
+
+  /* Make content area full width */
   .layout-main,
   main,
   .main-content,
-  #app > div {
+  .guide-container,
+  .container {
     margin: 0 !important;
     padding: 0 !important;
-    background: white !important;
     width: 100% !important;
     max-width: 100% !important;
+    background: white !important;
+    box-shadow: none !important;
   }
 
-  * {
+  /* Page header (the h1 area) - keep but compact */
+  .guide-header,
+  .page-header {
+    margin-bottom: 12pt !important;
+    padding: 0 !important;
+    border: none !important;
+    background: white !important;
+  }
+
+  /* CRITICAL: Allow guide-panel content to flow naturally across pages */
+  .guide-panel {
+    display: block !important;
+    page-break-inside: auto !important;
     overflow: visible !important;
+    height: auto !important;
     max-height: none !important;
   }
 
-  h2, h3 {
+  /* Headings: avoid orphaned headings at page bottom */
+  h1, h2, h3, h4 {
     page-break-after: avoid;
+    page-break-inside: avoid;
     color: black !important;
   }
 
-  table, .g-table {
+  h2 { font-size: 16pt !important; margin-top: 16pt !important; }
+  h3 { font-size: 13pt !important; margin-top: 12pt !important; }
+
+  /* Tables: handle page breaks gracefully */
+  .g-table {
     page-break-inside: auto;
     border-collapse: collapse;
-    width: 100%;
+    width: 100% !important;
+    font-size: 9pt !important;
+    margin: 6pt 0 12pt 0 !important;
   }
 
-  table tr,
-  .g-table tr {
+  .g-table thead {
+    display: table-header-group;
+  }
+
+  .g-table tbody tr {
     page-break-inside: avoid;
     page-break-after: auto;
   }
 
+  .g-table th, .g-table td {
+    padding: 4pt 6pt !important;
+    border: 1px solid #ccc !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  .g-table thead th {
+    background: #f0f0f0 !important;
+    font-weight: bold !important;
+  }
+
+  /* Cards: keep together if possible */
   .g-stat-card,
   .g-doc-card,
   .g-layer,
@@ -1983,34 +2035,74 @@ const glossary = [
     page-break-inside: avoid;
     border: 1px solid #999 !important;
     background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    padding: 8pt !important;
+    margin-bottom: 8pt !important;
   }
 
-  .g-table {
-    border: 1px solid #999;
+  /* Stats grid */
+  .g-grid-4 {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6pt !important;
+    margin-bottom: 12pt;
   }
 
-  .g-table th,
-  .g-table td {
-    border-bottom: 1px solid #ccc;
-    padding: 6px 8px;
+  /* Layers visualization */
+  .g-layers {
+    display: block !important;
+    margin: 8pt 0 !important;
   }
 
+  .g-layer {
+    display: flex !important;
+    margin-bottom: 4pt !important;
+    padding: 6pt 8pt !important;
+  }
+
+  .g-layer-num {
+    background: #1e3a8a !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* Badges */
   .g-badge {
     border: 1px solid #999 !important;
     background: white !important;
     color: black !important;
+    padding: 1pt 6pt !important;
   }
 
-  .g-grid-4 {
-    display: grid !important;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important;
-    page-break-inside: avoid;
-  }
-
+  /* Hide loading/empty/error states */
   .g-loading,
   .g-empty {
     display: none !important;
+  }
+
+  /* Hide other guide panels - only show active one */
+  .guide-panel[v-if="activeTab === 'dashboard'"],
+  .guide-panel[v-if="activeTab === 'companies'"],
+  .guide-panel[v-if="activeTab === 'projects'"],
+  .guide-panel[v-if="activeTab === 'tasks'"],
+  .guide-panel[v-if="activeTab === 'contracts'"],
+  .guide-panel[v-if="activeTab === 'ai'"],
+  .guide-panel[v-if="activeTab === 'notifications'"],
+  .guide-panel[v-if="activeTab === 'roles'"],
+  .guide-panel[v-if="activeTab === 'glossary'"],
+  .guide-panel[v-if="activeTab === 'mfa'"] {
+    display: none !important;
+  }
+
+  /* Links: show URLs */
+  a[href]:after {
+    content: "";
+  }
+
+  /* Page break helpers */
+  .page-break {
+    page-break-before: always;
   }
 }
 
