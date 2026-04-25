@@ -118,7 +118,26 @@
       <router-view />
     </main>
 
-    <!-- ════ NEW PROJECT MODAL ════ -->
+    
+    <!-- MFA NUDGE POPUP -->
+    <div v-if="showMfaNudge" class="mfa-nudge-overlay" @click.self="showMfaNudge = false">
+      <div class="mfa-nudge-modal">
+        <button class="mfa-nudge-close" @click="showMfaNudge = false">✕</button>
+        <div class="mfa-nudge-icon">🔐</div>
+        <div class="mfa-nudge-greeting">Γεια σου {{ firstName }}!</div>
+        <div class="mfa-nudge-body">
+          <p>Λοιπόν, {{ firstName }}, <strong>πρόσεξε καλά</strong>,</p>
+          <p>Σε παρακαλώ πααάρα πολύ, έμπα στο <strong>Guide</strong> και διάβασε με λεπτομέρεια το section <strong>MFA Setup</strong>.</p>
+          <p class="mfa-nudge-highlight">Σε παρακαλώ ΕΝΕΡΓΟΠΟΙΗΣΟΥΟΥ!!!</p>
+          <p>Γιατί βλέπω να πιάνει κανένα σκουπόξυλο ο Αναστασίου και να μας κάνει μπάουλο στο ξύλο όλους παρέα.</p>
+          <p class="mfa-nudge-love">Match Moods ρε!! ❤️</p>
+        </div>
+        <button class="mfa-nudge-btn" @click="goToGuide">📖 Πήγαινέ με στο Guide</button>
+        <button class="mfa-nudge-dismiss" @click="dismissMfaNudge">Το έκανα ήδη — μην το ξαναδείξεις</button>
+      </div>
+    </div>
+
+<!-- ════ NEW PROJECT MODAL ════ -->
     <div v-if="showNewProject" class="modal-overlay" @click.self="closeModal">
       <div class="modal modal-lg">
         <div class="modal-header">
@@ -590,6 +609,41 @@ function coShortName(name) {
   return m[name] || name.split(' ').slice(0,2).join(' ')
 }
 
+
+const showMfaNudge = ref(false)
+const firstName = computed(() => {
+  const full = auth.user?.fullName || ''
+  const first = full.split(' ')[0] || 'User'
+  // Greek vocative approximation
+  if (first.endsWith('ος')) return first.slice(0, -1) + 'ε'
+  if (first.endsWith('ας')) return first.slice(0, -1)
+  if (first.endsWith('ης')) return first.slice(0, -1)
+  return first
+})
+
+function checkMfaNudge() {
+  // Show only if user has NO MFA and hasn't dismissed
+  const dismissed = sessionStorage.getItem('mfa_nudge_dismissed')
+  if (dismissed) return
+  // Check if user has MFA - if mfaEnabled is false, show nudge
+  if (auth.user && !auth.user.mfaEnabled) {
+    showMfaNudge.value = true
+  }
+}
+
+function dismissMfaNudge() {
+  showMfaNudge.value = false
+  sessionStorage.setItem('mfa_nudge_dismissed', 'true')
+}
+
+function goToGuide() {
+  showMfaNudge.value = false
+  router.push('/guide')
+}
+
+// Check on mount after small delay
+setTimeout(() => checkMfaNudge(), 1500)
+
 const initials = computed(() => {
   const name = auth.user?.fullName || ''
   return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'AB'
@@ -831,4 +885,56 @@ textarea.form-input { resize: vertical; min-height: 60px; }
     min-width: 0 !important;
   }
 }
+
+.mfa-nudge-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+  z-index: 9999; display: flex; align-items: center; justify-content: center;
+  animation: mfaFadeIn 0.3s ease;
+}
+@keyframes mfaFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mfaBounce { 0% { transform: scale(0.8) translateY(20px); opacity: 0; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+.mfa-nudge-modal {
+  background: var(--surface); border-radius: 20px; padding: 36px 32px;
+  max-width: 520px; width: 90%; text-align: center; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3); animation: mfaBounce 0.4s ease;
+  border-top: 4px solid #7c3aed;
+}
+.mfa-nudge-close {
+  position: absolute; top: 14px; right: 18px; background: none; border: none;
+  font-size: 18px; color: var(--text-dim); cursor: pointer;
+}
+.mfa-nudge-close:hover { color: var(--text); }
+.mfa-nudge-icon { font-size: 48px; margin-bottom: 12px; }
+.mfa-nudge-greeting {
+  font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 18px;
+  font-family: 'Nunito', sans-serif;
+}
+.mfa-nudge-body {
+  text-align: left; font-size: 14px; line-height: 1.8; color: var(--text);
+  margin-bottom: 24px; padding: 0 8px;
+}
+.mfa-nudge-body p { margin-bottom: 10px; }
+.mfa-nudge-highlight {
+  font-size: 18px !important; font-weight: 800; color: #dc2626;
+  text-align: center; margin: 16px 0 !important;
+  letter-spacing: 1px;
+}
+.mfa-nudge-love {
+  font-size: 16px !important; font-weight: 700; color: #7c3aed;
+  text-align: center; margin-top: 16px !important;
+}
+.mfa-nudge-btn {
+  display: block; width: 100%; padding: 14px; background: #7c3aed;
+  color: white; border: none; border-radius: 10px; font-size: 15px;
+  font-weight: 700; cursor: pointer; margin-bottom: 10px;
+  font-family: 'Nunito', sans-serif; transition: background 0.2s;
+}
+.mfa-nudge-btn:hover { background: #6d28d9; }
+.mfa-nudge-dismiss {
+  display: block; width: 100%; padding: 10px; background: none;
+  border: 1px solid var(--border); border-radius: 8px; font-size: 12px;
+  color: var(--text-dim); cursor: pointer; font-family: 'Nunito', sans-serif;
+}
+.mfa-nudge-dismiss:hover { border-color: var(--text-mid); color: var(--text-mid); }
 </style>
