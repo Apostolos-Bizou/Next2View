@@ -217,4 +217,22 @@ public class PermissionEvaluator {
             return false;
         }
     }
+
+    /**
+     * Used by @PreAuthorize as: @permissionEvaluator.canViewSecurity(principal)
+     * Returns true if the user has view_security permission flag, or if the user is CEO.
+     */
+    public boolean canViewSecurity(String userId) {
+        if (userId == null) return false;
+        try {
+            User user = requireUser(UUID.fromString(userId));
+            if (isCeo(user)) return true;
+            return userPermissionRepository.findByUserId(user.getId())
+                    .map(p -> Boolean.TRUE.equals(p.getViewSecurity()))
+                    .orElse(false);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
