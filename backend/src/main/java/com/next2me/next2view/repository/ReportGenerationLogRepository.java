@@ -14,7 +14,7 @@ public interface ReportGenerationLogRepository extends JpaRepository<ReportGener
     @Query("SELECT r FROM ReportGenerationLog r ORDER BY r.generatedAt DESC")
     List<ReportGenerationLog> findAllOrderByDate();
 
-    List<ReportGenerationLog> findByGeneratedByOrderByGeneratedAtDesc(Long userId);
+    List<ReportGenerationLog> findByGeneratedByOrderByGeneratedAtDesc(UUID userId);
 
     List<ReportGenerationLog> findByTemplateIdOrderByGeneratedAtDesc(String templateId);
 }
