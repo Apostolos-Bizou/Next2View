@@ -130,7 +130,7 @@
           <p>Σε παρακαλώ πααάρα πολύ, έμπα στο <strong>Guide</strong> και διάβασε με λεπτομέρεια το section <strong>MFA Setup</strong>.</p>
           <p class="mfa-nudge-highlight">Σε παρακαλώ ΕΝΕΡΓΟΠΟΙΗΣΟΥΟΥ!!!</p>
           <p>Γιατί βλέπω να πιάνει κανένα σκουπόξυλο ο Αναστασίου και να μας κάνει μπάουλο στο ξύλο όλους παρέα.</p>
-          <p class="mfa-nudge-love">Match Moods ρε!! ❤️</p>
+          <p class="mfa-nudge-love">Ματς Μουτς ρε!! ❤️</p>
         </div>
         <button class="mfa-nudge-btn" @click="goToGuide">📖 Πήγαινέ με στο Guide</button>
         <button class="mfa-nudge-dismiss" @click="dismissMfaNudge">Το έκανα ήδη — μην το ξαναδείξεις</button>
