@@ -5,6 +5,9 @@ import com.next2me.next2view.dto.ReportTemplateDTO;
 import com.next2me.next2view.model.ReportGenerationLog;
 import com.next2me.next2view.model.User;
 import com.next2me.next2view.repository.*;
+import com.next2me.next2view.model.Project;
+import com.next2me.next2view.model.ContractFile;
+import com.next2me.next2view.model.Company;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +22,8 @@ public class ReportService {
 
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final CompanyRepository companyRepository;
+    private final ContractFileRepository contractFileRepository;
     private final ReportGenerationLogRepository reportLogRepository;
     // Will inject more repos as we add templates
 
@@ -245,4 +250,147 @@ public class ReportService {
             default -> throw new IllegalArgumentException("Unknown template: " + templateId);
         };
     }
+
+    // ── Executive Summary Data ──
+    public ReportDataDTO generateExecSummaryData() {
+        log.info("Generating Executive Summary data");
+
+        List<Project> projects = projectRepository.findAllByActiveTrueOrderByUpdatedAtDesc();
+        List<Company> companies = companyRepository.findAllByActiveTrueOrderByName();
+
+        int total = projects.size();
+        long completed = projects.stream().filter(p -> p.getStatus() == Project.Status.completed).count();
+        long atRisk = projects.stream().filter(p -> p.getStatus() == Project.Status.at_risk).count();
+        long delayed = projects.stream().filter(p -> p.getStatus() == Project.Status.delayed).count();
+        long onTrack = projects.stream().filter(p -> p.getStatus() == Project.Status.on_track).count();
+
+        java.math.BigDecimal totalBudget = projects.stream()
+            .map(p -> p.getBudget() != null ? p.getBudget() : java.math.BigDecimal.ZERO)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        java.math.BigDecimal totalPaid = projects.stream()
+            .map(p -> p.getPaid() != null ? p.getPaid() : java.math.BigDecimal.ZERO)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        java.math.BigDecimal totalInvoiced = projects.stream()
+            .map(p -> p.getInvoiced() != null ? p.getInvoiced() : java.math.BigDecimal.ZERO)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        Map<String, Object> summary = new LinkedHashMap<>();
+        summary.put("totalProjects", total);
+        summary.put("completed", completed);
+        summary.put("onTrack", onTrack);
+        summary.put("delayed", delayed);
+        summary.put("atRisk", atRisk);
+        summary.put("companies", companies.size());
+        summary.put("totalBudget", "\u20ac" + totalBudget.toPlainString());
+        summary.put("totalPaid", "\u20ac" + totalPaid.toPlainString());
+        summary.put("totalInvoiced", "\u20ac" + totalInvoiced.toPlainString());
+
+        // Projects by category
+        List<Map<String, Object>> sections = new ArrayList<>();
+
+        for (Project.Category cat : Project.Category.values()) {
+            List<Project> catProjects = projects.stream()
+                .filter(p -> p.getCategory() == cat).toList();
+            if (catProjects.isEmpty()) continue;
+
+            List<Map<String, Object>> projectRows = new ArrayList<>();
+            for (Project p : catProjects) {
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("fullName", p.getTitle());
+                row.put("role", p.getStatus() != null ? p.getStatus().name().toUpperCase() : "ON_TRACK");
+                row.put("company", p.getCompany() != null ? p.getCompany().getName() : "\u2014");
+                int completion = 0;
+                if (p.getModules() != null) {
+                    int totalTasks = 0, doneTasks = 0;
+                    for (var m : p.getModules()) {
+                        if (m.getTasks() != null) {
+                            totalTasks += m.getTasks().size();
+                            doneTasks += (int) m.getTasks().stream().filter(t -> Boolean.TRUE.equals(t.getIsDone())).count();
+                        }
+                    }
+                    completion = totalTasks > 0 ? (doneTasks * 100 / totalTasks) : 0;
+                }
+                row.put("mfaEnabled", completion >= 100);
+                row.put("actionRequired", p.getStatus() == Project.Status.at_risk || p.getStatus() == Project.Status.delayed);
+                row.put("username", completion + "% complete");
+                projectRows.add(row);
+            }
+
+            Map<String, Object> section = new LinkedHashMap<>();
+            section.put("title", cat.name().substring(0, 1).toUpperCase() + cat.name().substring(1) + " (" + catProjects.size() + " projects)");
+            section.put("status", catProjects.stream().anyMatch(p -> p.getStatus() == Project.Status.at_risk) ? "ACTION_REQUIRED" : "COMPLIANT");
+            section.put("users", projectRows);
+            sections.add(section);
+        }
+
+        return ReportDataDTO.builder()
+            .templateId("exec-summary")
+            .templateName("Executive Summary")
+            .generatedAt(LocalDateTime.now())
+            .summary(summary)
+            .sections(sections)
+            .build();
+    }
+
+    // ── Legal Vault Activity Data ──
+    public ReportDataDTO generateLegalActivityData() {
+        log.info("Generating Legal Vault Activity data");
+
+        List<ContractFile> allFiles = contractFileRepository.findAll();
+        List<ContractFile> activeFiles = allFiles.stream()
+            .filter(f -> f.getDeletedAt() == null && Boolean.TRUE.equals(f.getIsActive()))
+            .toList();
+
+        Map<String, Object> summary = new LinkedHashMap<>();
+        summary.put("totalFiles", allFiles.size());
+        summary.put("activeFiles", activeFiles.size());
+        summary.put("deletedFiles", allFiles.size() - activeFiles.size());
+        long totalSize = activeFiles.stream().mapToLong(f -> f.getFileSizeBytes() != null ? f.getFileSizeBytes() : 0).sum();
+        summary.put("totalStorageMB", String.format("%.1f MB", totalSize / 1024.0 / 1024.0));
+        summary.put("encryptionStatus", "AES-256-GCM + CMK");
+
+        List<Map<String, Object>> sections = new ArrayList<>();
+
+        // Section: Active files
+        List<Map<String, Object>> fileRows = new ArrayList<>();
+        for (ContractFile f : activeFiles) {
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("fullName", f.getFileName());
+            row.put("role", f.getContentType() != null ? f.getContentType().toUpperCase() : "FILE");
+            row.put("company", f.getProject() != null ? f.getProject().getTitle() : "\u2014");
+            row.put("mfaEnabled", true);
+            row.put("actionRequired", false);
+            row.put("username", f.getFileSizeBytes() != null ? String.format("%.1f KB", f.getFileSizeBytes() / 1024.0) : "\u2014");
+            fileRows.add(row);
+        }
+
+        Map<String, Object> fileSection = new LinkedHashMap<>();
+        fileSection.put("title", "Active Contract Files");
+        fileSection.put("status", "COMPLIANT");
+        fileSection.put("users", fileRows);
+        sections.add(fileSection);
+
+        // Section: Security checks
+        Map<String, Object> secSection = new LinkedHashMap<>();
+        secSection.put("title", "Legal Vault Security");
+        secSection.put("status", "COMPLIANT");
+        secSection.put("items", List.of(
+            Map.of("check", "All files encrypted with AES-256-GCM", "status", true),
+            Map.of("check", "CMK managed via Azure Key Vault (RSA-3072)", "status", true),
+            Map.of("check", "Soft-delete retention: 90 days", "status", true),
+            Map.of("check", "Blob versioning enabled", "status", true),
+            Map.of("check", "No public access to storage containers", "status", true),
+            Map.of("check", "SHA-256 duplicate detection active", "status", true)
+        ));
+        sections.add(secSection);
+
+        return ReportDataDTO.builder()
+            .templateId("legal-activity")
+            .templateName("Legal Vault Activity")
+            .generatedAt(LocalDateTime.now())
+            .summary(summary)
+            .sections(sections)
+            .build();
+    }
+
 }

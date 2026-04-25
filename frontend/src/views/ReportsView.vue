@@ -142,6 +142,30 @@
       </div>
     </div>
 
+    <!-- AI Conversational Mode -->
+    <div v-if="selectedTemplate?.aiEnhanced" class="rh-ai-section">
+      <div class="rh-ai-header">
+        <span class="rh-ai-icon">✦</span>
+        <span class="rh-ai-title">AI Assistant — Ρώτα ό,τι θέλεις</span>
+      </div>
+      <div class="rh-ai-input-row">
+        <input
+          v-model="aiQuestion"
+          class="rh-ai-input"
+          placeholder="π.χ. Πόσες υποθέσεις έχω ανοιχτές στο Legal της Crossworld;"
+          @keyup.enter="askAi"
+        />
+        <button class="rh-btn rh-btn-ai" @click="askAi" :disabled="aiLoading || !aiQuestion.trim()">
+          {{ aiLoading ? 'Σκέφτομαι...' : '✦ Ρώτα' }}
+        </button>
+      </div>
+      <div v-if="aiAnswer" class="rh-ai-answer" v-html="renderMarkdown(aiAnswer)"></div>
+      <div v-if="aiLoading" class="rh-ai-loading">
+        <div class="rh-spinner"></div>
+        <span>Αναλύω τα δεδομένα σου...</span>
+      </div>
+    </div>
+
     <!-- Empty state (no template selected) -->
     <div v-if="!selectedTemplate && templates.length > 0" class="rh-empty-state">
       <div class="rh-empty-icon">📊</div>
@@ -166,6 +190,9 @@ const previewData = ref(null)
 const loadingPreview = ref(false)
 const downloading = ref(false)
 const error = ref(null)
+const aiQuestion = ref('')
+const aiAnswer = ref('')
+const aiLoading = ref(false)
 
 const ICONS = {
   shield: '🛡️',
@@ -207,6 +234,27 @@ async function downloadPdf() {
   } finally {
     downloading.value = false
   }
+}
+
+async function askAi() {
+  if (!aiQuestion.value.trim()) return
+  aiLoading.value = true
+  aiAnswer.value = ''
+  try {
+    aiAnswer.value = await reportService.aiQuery(aiQuestion.value)
+  } catch (e) {
+    aiAnswer.value = '⚠ ' + (e.response?.data?.answer || e.message)
+  } finally {
+    aiLoading.value = false
+  }
+}
+
+function renderMarkdown(text) {
+  return text
+    .replace(/## (.*)/g, '<h3 style="margin:12px 0 6px;color:var(--text);">$1</h3>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/- (.*)/g, '<div style="padding:2px 0 2px 12px;">• $1</div>')
+    .replace(/\n/g, '<br>')
 }
 
 function formatDate(dt) {
@@ -688,6 +736,74 @@ onMounted(async () => {
   cursor: pointer;
   font-size: 16px;
   padding: 0 4px;
+}
+
+.rh-ai-section {
+  background: linear-gradient(135deg, rgba(124,58,237,0.03), rgba(59,130,246,0.03));
+  border: 1px solid rgba(124,58,237,0.15);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+.rh-ai-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rh-ai-icon {
+  font-size: 20px;
+  color: #7c3aed;
+}
+.rh-ai-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #7c3aed;
+}
+.rh-ai-input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.rh-ai-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  font-family: 'Nunito', sans-serif;
+}
+.rh-ai-input:focus {
+  border-color: #7c3aed;
+  outline: none;
+}
+.rh-btn-ai {
+  background: #7c3aed;
+  color: white;
+  border-color: #7c3aed;
+  white-space: nowrap;
+}
+.rh-btn-ai:hover:not(:disabled) {
+  background: #6d28d9;
+}
+.rh-ai-answer {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.rh-ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  color: #7c3aed;
+  font-size: 13px;
 }
 
 /* Responsive */
