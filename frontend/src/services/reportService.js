@@ -11,6 +11,11 @@ export const reportService = {
     return res.data
   },
 
+  async aiQuery(question) {
+    const res = await api.post('/reports/ai-query', { question })
+    return res.data.answer
+  },
+
   async downloadReport(templateId) {
     const res = await api.get(`/reports/generate/${templateId}`, {
       responseType: 'blob'
