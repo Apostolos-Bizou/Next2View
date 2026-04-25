@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/reports")
@@ -26,8 +27,8 @@ public class ReportController {
 
     // ── Helper: get current user + CEO check ──
     private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(username)
+        String subjectId = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findById(UUID.fromString(subjectId))
             .orElseThrow(() -> new RuntimeException("User not found: " + username));
     }
 
