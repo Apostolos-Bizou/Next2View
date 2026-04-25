@@ -246,7 +246,8 @@ public class ReportService {
         return switch (templateId) {
             case "security-snapshot" -> generateSecuritySnapshotData();
             case "mfa-status" -> generateMfaStatusData();
-            // exec-summary and legal-activity will be added in Step 6
+            case "exec-summary" -> generateExecSummaryData();
+            case "legal-activity" -> generateLegalActivityData();
             default -> throw new IllegalArgumentException("Unknown template: " + templateId);
         };
     }
