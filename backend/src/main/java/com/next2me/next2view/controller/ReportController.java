@@ -88,7 +88,7 @@ public class ReportController {
             ReportDataDTO data = reportService.generatePreviewData(templateId);
 
             // Log the generation
-            reportService.logGeneration(templateId, template.get().getName(), user.getId(), 0L);
+            // reportService.logGeneration(templateId, template.get().getName(), user.getId(), 0L);
 
             // TODO: Replace with actual PDF bytes from PdfReportGenerator
             // For now, return a placeholder response
