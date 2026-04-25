@@ -30,6 +30,7 @@ public class ReportGenerationLog {
     private Long fileSizeBytes;
 
     @Column(name = "parameters", columnDefinition = "jsonb")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String parameters;
 
     @Column(name = "status", nullable = false, length = 20)
