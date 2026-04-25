@@ -5,6 +5,7 @@ import com.next2me.next2view.dto.ReportTemplateDTO;
 import com.next2me.next2view.model.User;
 import com.next2me.next2view.repository.UserRepository;
 import com.next2me.next2view.service.ReportService;
+import com.next2me.next2view.service.PdfReportGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +24,7 @@ import java.util.UUID;
 public class ReportController {
 
     private final ReportService reportService;
+    private final PdfReportGenerator pdfReportGenerator;
     private final UserRepository userRepository;
 
     // ── Helper: get current user + CEO check ──
