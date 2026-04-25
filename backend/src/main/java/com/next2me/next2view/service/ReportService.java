@@ -229,6 +229,7 @@ public class ReportService {
             .templateName(templateName)
             .generatedBy(userId)
             .fileSizeBytes(fileSize)
+            .parameters(null)
             .status("SUCCESS")
             .build();
         reportLogRepository.save(logEntry);
