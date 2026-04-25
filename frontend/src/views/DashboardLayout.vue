@@ -39,6 +39,9 @@
         <router-link v-if="permStore.isCEO()" to="/admin" class="nav-item" active-class="active">
           <span class="nav-ico" style="color:var(--text-dim);">⚙</span>Admin
         </router-link>
+        <router-link v-if="permStore.isCEO()" to="/reports" class="nav-item" active-class="active">
+          <span class="nav-ico" style="color:var(--accent);">📊</span>Reports
+        </router-link>
 
         <div v-if="['finance','legal','dev','marketing'].some(cat => permStore.canViewCategory(cat))" class="nav-section" style="margin-top:6px;">Κατηγορία</div>
         <div v-if="permStore.canViewCategory('finance')" :class="['nav-item', route.query.category==='finance' ? 'active' : '']"

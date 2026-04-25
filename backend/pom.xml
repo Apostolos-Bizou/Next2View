@@ -139,6 +139,13 @@
             <groupId>com.azure</groupId>
             <artifactId>azure-identity</artifactId>
         </dependency>
+    
+        <!-- OpenPDF for server-side PDF report generation -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>2.0.3</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
