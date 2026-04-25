@@ -1,3 +1,4 @@
+@SuppressWarnings("unchecked")
 package com.next2me.next2view.service;
 
 import com.lowagie.text.*;
@@ -317,7 +318,7 @@ public class PdfReportGenerator {
         Object items = section.get("items");
         if (items instanceof List<?> itemList && !itemList.isEmpty()) {
             Object first = itemList.get(0);
-            if (first instanceof Map<?, ?> firstMap) {
+            if (first instanceof Map firstMap) {
                 if (firstMap.containsKey("check")) {
                     addChecklist(doc, itemList);
                 } else if (firstMap.containsKey("action")) {
@@ -341,7 +342,7 @@ public class PdfReportGenerator {
         table.setSpacingBefore(6);
 
         for (Object item : items) {
-            if (item instanceof Map<?, ?> map) {
+            if (item instanceof Map map) {
                 boolean ok = Boolean.TRUE.equals(map.get("status"));
                 String check = String.valueOf(map.getOrDefault("check", ""));
 
@@ -374,7 +375,7 @@ public class PdfReportGenerator {
         table.setSpacingBefore(6);
 
         for (Object item : items) {
-            if (item instanceof Map<?, ?> map) {
+            if (item instanceof Map map) {
                 String priority = String.valueOf(map.getOrDefault("priority", ""));
                 String user = String.valueOf(map.getOrDefault("user", ""));
                 String action = String.valueOf(map.getOrDefault("action", ""));
@@ -433,7 +434,7 @@ public class PdfReportGenerator {
         // Data rows
         boolean alternate = false;
         for (Object user : users) {
-            if (user instanceof Map<?, ?> map) {
+            if (user instanceof Map map) {
                 Color rowBg = alternate ? LIGHT_BG : WHITE;
                 String fullName = String.valueOf(map.getOrDefault("fullName", map.getOrDefault("username", "—")));
                 String role = String.valueOf(map.getOrDefault("role", "—"));
