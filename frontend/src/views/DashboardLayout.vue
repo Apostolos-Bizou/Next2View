@@ -137,6 +137,23 @@
       </div>
     </div>
 
+
+    <!-- MFA SUCCESS POPUP -->
+    <div v-if="showMfaSuccess" class="mfa-nudge-overlay" @click.self="showMfaSuccess = false">
+      <div class="mfa-nudge-modal" style="border-top-color:#059669;">
+        <button class="mfa-nudge-close" @click="showMfaSuccess = false">✕</button>
+        <div class="mfa-nudge-icon">🎉</div>
+        <div class="mfa-nudge-greeting">Μπράβο! {{ mfaFirstName }}!</div>
+        <div class="mfa-nudge-body" style="text-align:center;">
+          <p style="font-size:18px;font-weight:800;color:#059669;margin-bottom:14px;">Γλιτώσαμε το ξύλο! 😂😂😂</p>
+          <p>Και εγώ και εσύ! 🙏</p>
+          <p>Το MFA σου είναι <strong>ενεργό</strong> και ο λογαριασμός σου είναι πλέον <strong>προστατευμένος</strong>.</p>
+          <p class="mfa-nudge-love">Ματς Μουτς ρε!! ❤️</p>
+        </div>
+        <button class="mfa-nudge-btn" style="background:#059669;" @click="showMfaSuccess = false">✔ Τέλειο!</button>
+      </div>
+    </div>
+
 <!-- ════ NEW PROJECT MODAL ════ -->
     <div v-if="showNewProject" class="modal-overlay" @click.self="closeModal">
       <div class="modal modal-lg">
@@ -611,6 +628,7 @@ function coShortName(name) {
 
 
 const showMfaNudge = ref(false)
+const showMfaSuccess = ref(false)
 const firstName = computed(() => {
   const full = auth.user?.fullName || ''
   const first = full.split(' ')[0] || 'User'
@@ -643,6 +661,12 @@ function goToGuide() {
 
 // Check on mount after small delay
 setTimeout(() => checkMfaNudge(), 1500)
+
+window.addEventListener('mfa-activated', () => {
+  showMfaNudge.value = false
+  showMfaSuccess.value = true
+  sessionStorage.setItem('mfa_nudge_dismissed', 'true')
+})
 
 const initials = computed(() => {
   const name = auth.user?.fullName || ''
