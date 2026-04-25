@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS security_document (
     content_type VARCHAR(100) NOT NULL,
     size_bytes   BIGINT NOT NULL,
     description  TEXT,
-    uploader_id  UUID NOT NULL REFERENCES app_user(id),
+    uploader_id  UUID NOT NULL REFERENCES users(id),
     uploaded_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at   TIMESTAMP WITH TIME ZONE
 );
