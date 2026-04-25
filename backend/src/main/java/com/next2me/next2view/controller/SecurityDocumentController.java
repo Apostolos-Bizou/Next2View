@@ -58,7 +58,7 @@ public class SecurityDocumentController {
 
     // List all active security documents
     @GetMapping
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(principal)")
+    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<List<Map<String, Object>>> list() {
         List<SecurityDocument> docs = repo.findAllActive();
         List<Map<String, Object>> response = docs.stream().map(d -> {
@@ -80,7 +80,7 @@ public class SecurityDocumentController {
 
     // Upload new document
     @PostMapping("/upload")
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(principal)")
+    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<Map<String, Object>> upload(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "description", required = false) String description,
@@ -133,7 +133,7 @@ public class SecurityDocumentController {
 
     // Download document
     @GetMapping("/{id}/download")
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(principal)")
+    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<?> download(@PathVariable UUID id) {
         try {
             SecurityDocument doc = repo.findById(id)
@@ -169,7 +169,7 @@ public class SecurityDocumentController {
 
     // Soft-delete document
     @DeleteMapping("/{id}")
-    @PreAuthorize("@permissionEvaluator.canViewSecurity(principal)")
+    @PreAuthorize("@permissionEvaluator.canViewSecurity(authentication.name)")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable UUID id) {
         SecurityDocument doc = repo.findById(id)
             .orElseThrow(() -> new IllegalArgumentException("Document not found"));
