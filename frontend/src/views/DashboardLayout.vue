@@ -615,7 +615,7 @@ const firstName = computed(() => {
   const full = auth.user?.fullName || ''
   const first = full.split(' ')[0] || 'User'
   // Greek vocative approximation
-  if (first.endsWith('ος')) return first.slice(0, -1) + 'ε'
+  if (first.endsWith('ος')) return first.slice(0, -2) + 'ο'
   if (first.endsWith('ας')) return first.slice(0, -1)
   if (first.endsWith('ης')) return first.slice(0, -1)
   return first
