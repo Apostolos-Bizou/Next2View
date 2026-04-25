@@ -308,7 +308,7 @@ onMounted(async () => {
 
 /* Header */
 .rh-header {
-  margin-bottom: 28px;
+  margin-bottom: 16px;
 }
 .rh-title-row {
   display: flex;
@@ -344,7 +344,7 @@ onMounted(async () => {
 /* Gallery */
 .rh-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 14px;
   margin-bottom: 28px;
 }
