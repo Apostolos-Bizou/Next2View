@@ -1183,14 +1183,20 @@ const formatDate = (iso) => {
 }
 
 const printSecurityTab = () => {
-  // Switch to security tab if not active (just in case)
+  // Switch to security tab if not active
   if (activeTab.value !== 'security') {
     activeTab.value = 'security'
   }
-  // Wait a tick then print
+  // Add a class to body to enable print isolation CSS
+  document.body.classList.add('print-security-mode')
+  // Wait for DOM to settle, then print
   setTimeout(() => {
     window.print()
-  }, 100)
+    // Clean up after print dialog closes
+    setTimeout(() => {
+      document.body.classList.remove('print-security-mode')
+    }, 1000)
+  }, 200)
 }
 
 onMounted(() => {
@@ -1909,11 +1915,20 @@ const glossary = [
 .g-btn-download:hover { background: rgba(5,150,105,0.1); border-color: rgba(5,150,105,0.4); }
 .g-btn-delete:hover { background: rgba(220,38,38,0.1); border-color: rgba(220,38,38,0.4); }
 
-/* ============= Print Styles for Security Tab ============= */
+/* ============= Print isolation - applied via .print-security-mode body class ============= */
+body.print-security-mode {
+  /* When in print mode, hide everything except #app and security panel */
+}
+
 @media print {
   @page {
     size: A4;
     margin: 1.2cm;
+  }
+
+  /* CRITICAL: When body has print-security-mode class, isolate the security panel */
+  body.print-security-mode > *:not(#app) {
+    display: none !important;
   }
 
   /* Reset basics */
@@ -1922,51 +1937,60 @@ const glossary = [
     color: black !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Hide app navigation chrome - but NOT content areas */
+  /* Hide chrome - sidebar, header, navigation */
   .sidebar,
-  aside.sidebar,
+  aside,
+  nav,
+  header,
+  .layout-header,
+  .top-bar,
+  .topbar,
   .dashboard-sidebar,
   .layout-sidebar,
   .app-sidebar,
-  nav.main-nav,
-  header.app-header,
-  .top-bar,
-  .topbar,
   .new-project-btn,
   .add-button {
     display: none !important;
   }
 
-  /* Hide guide tabs (we only want active panel content) */
-  .guide-tabs {
+  /* Hide guide tabs row and toolbar buttons */
+  .guide-tabs,
+  .g-sec-toolbar {
     display: none !important;
   }
 
-  /* Hide buttons in print (they're not useful in PDF) */
-  .g-sec-toolbar,
+  /* Hide ALL guide panels by default - we'll show only security via :has trick or just leave all blocks visible */
+  /* Vue's v-if removes panels from DOM, so only the active one is rendered. Trust that. */
+
+  /* Hide doc actions and small buttons */
   .g-doc-actions,
-  .g-btn-mini,
-  button.g-btn-action {
+  button,
+  .g-btn-mini {
     display: none !important;
   }
 
-  /* Make content area full width */
+  /* Make content full-width and visible */
   .layout-main,
   main,
   .main-content,
   .guide-container,
-  .container {
+  .container,
+  .guide-page {
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
     background: white !important;
     box-shadow: none !important;
+    overflow: visible !important;
+    height: auto !important;
   }
 
-  /* Page header (the h1 area) - keep but compact */
+  /* Page header */
   .guide-header,
   .page-header {
     margin-bottom: 12pt !important;
@@ -1975,32 +1999,34 @@ const glossary = [
     background: white !important;
   }
 
-  /* CRITICAL: Allow guide-panel content to flow naturally across pages */
+  /* Allow guide-panel content to flow */
   .guide-panel {
     display: block !important;
     page-break-inside: auto !important;
     overflow: visible !important;
     height: auto !important;
     max-height: none !important;
+    width: 100% !important;
   }
 
-  /* Headings: avoid orphaned headings at page bottom */
+  /* Headings */
   h1, h2, h3, h4 {
     page-break-after: avoid;
     page-break-inside: avoid;
     color: black !important;
   }
 
-  h2 { font-size: 16pt !important; margin-top: 16pt !important; }
-  h3 { font-size: 13pt !important; margin-top: 12pt !important; }
+  h1 { font-size: 18pt !important; }
+  h2 { font-size: 15pt !important; margin-top: 14pt !important; }
+  h3 { font-size: 12pt !important; margin-top: 10pt !important; margin-bottom: 6pt !important; }
 
-  /* Tables: handle page breaks gracefully */
+  /* Tables */
   .g-table {
     page-break-inside: auto;
     border-collapse: collapse;
     width: 100% !important;
     font-size: 9pt !important;
-    margin: 6pt 0 12pt 0 !important;
+    margin: 4pt 0 10pt 0 !important;
   }
 
   .g-table thead {
@@ -2009,22 +2035,23 @@ const glossary = [
 
   .g-table tbody tr {
     page-break-inside: avoid;
-    page-break-after: auto;
   }
 
   .g-table th, .g-table td {
-    padding: 4pt 6pt !important;
+    padding: 3pt 5pt !important;
     border: 1px solid #ccc !important;
     background: white !important;
     color: black !important;
+    text-align: left;
+    vertical-align: top;
   }
 
   .g-table thead th {
-    background: #f0f0f0 !important;
+    background: #eee !important;
     font-weight: bold !important;
   }
 
-  /* Cards: keep together if possible */
+  /* Cards */
   .g-stat-card,
   .g-doc-card,
   .g-layer,
@@ -2037,34 +2064,39 @@ const glossary = [
     background: white !important;
     color: black !important;
     box-shadow: none !important;
-    padding: 8pt !important;
-    margin-bottom: 8pt !important;
+    padding: 6pt !important;
+    margin-bottom: 6pt !important;
+    font-size: 10pt !important;
   }
 
   /* Stats grid */
   .g-grid-4 {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 6pt !important;
-    margin-bottom: 12pt;
+    gap: 4pt !important;
+    margin-bottom: 10pt !important;
   }
 
-  /* Layers visualization */
+  /* Layers */
   .g-layers {
-    display: block !important;
-    margin: 8pt 0 !important;
+    margin: 6pt 0 !important;
   }
 
   .g-layer {
     display: flex !important;
-    margin-bottom: 4pt !important;
-    padding: 6pt 8pt !important;
+    margin-bottom: 3pt !important;
+    padding: 4pt 6pt !important;
+    align-items: center;
+    gap: 8pt;
   }
 
   .g-layer-num {
     background: #1e3a8a !important;
     color: white !important;
     -webkit-print-color-adjust: exact !important;
+    width: 24pt;
+    height: 24pt;
+    flex-shrink: 0;
   }
 
   /* Badges */
@@ -2072,37 +2104,52 @@ const glossary = [
     border: 1px solid #999 !important;
     background: white !important;
     color: black !important;
-    padding: 1pt 6pt !important;
+    padding: 1pt 4pt !important;
+    font-size: 8pt !important;
   }
 
-  /* Hide loading/empty/error states */
+  /* Hide loading/empty/error */
   .g-loading,
   .g-empty {
     display: none !important;
   }
 
-  /* Hide other guide panels - only show active one */
-  .guide-panel[v-if="activeTab === 'dashboard'"],
-  .guide-panel[v-if="activeTab === 'companies'"],
-  .guide-panel[v-if="activeTab === 'projects'"],
-  .guide-panel[v-if="activeTab === 'tasks'"],
-  .guide-panel[v-if="activeTab === 'contracts'"],
-  .guide-panel[v-if="activeTab === 'ai'"],
-  .guide-panel[v-if="activeTab === 'notifications'"],
-  .guide-panel[v-if="activeTab === 'roles'"],
-  .guide-panel[v-if="activeTab === 'glossary'"],
-  .guide-panel[v-if="activeTab === 'mfa'"] {
-    display: none !important;
+  /* Section spacing */
+  .g-section {
+    margin-bottom: 10pt !important;
+    page-break-inside: avoid;
   }
 
-  /* Links: show URLs */
-  a[href]:after {
-    content: "";
+  /* Hero card compact */
+  .g-sec-hero {
+    padding: 8pt !important;
+    margin-bottom: 10pt !important;
   }
 
-  /* Page break helpers */
-  .page-break {
-    page-break-before: always;
+  .g-sec-hero-icon {
+    font-size: 24pt !important;
+  }
+
+  .g-sec-hero-title {
+    font-size: 14pt !important;
+  }
+
+  /* Doc cards in repository */
+  .g-doc-card {
+    padding: 6pt 8pt !important;
+    margin-bottom: 4pt !important;
+  }
+
+  .g-doc-icon {
+    font-size: 18pt !important;
+  }
+
+  .g-doc-title {
+    font-size: 10pt !important;
+  }
+
+  .g-doc-meta {
+    font-size: 8pt !important;
   }
 }
 
