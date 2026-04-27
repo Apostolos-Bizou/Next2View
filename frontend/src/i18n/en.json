@@ -400,5 +400,16 @@
       "openFailed": "Error opening file.",
       "titleRequired": "Title is required."
     }
+  },
+  "guide": {
+    "title": "🔐 User Guide",
+    "subtitle": "Complete guide for every feature of the platform. Select a category below.",
+    "tabs": {
+      "companies": "Companies",
+      "contracts": "Contracts",
+      "glossary": "Glossary"
+    },
+    "confirmDeleteDoc": "Delete \"{name}\"?",
+    "loadError": "Failed to load documents"
   }
 }

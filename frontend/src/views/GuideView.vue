@@ -3,7 +3,7 @@
     <div class="guide-header">
       <div class="guide-badge">NEXT2VIEW</div>
       <div class="guide-title">📘 Οδηγός Χρήσης</div>
-      <div class="guide-sub">Πλήρης οδηγός για κάθε λειτουργία της πλατφόρμας. Επίλεξε κατηγορία παρακάτω.</div>
+      <div class="guide-sub">{{ t('guide.subtitle') }}</div>
     </div>
 
     <div class="guide-tabs">
@@ -1062,23 +1062,25 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { usePermissionStore } from '@/stores/permissions'
 
+const { t } = useI18n()
 const activeTab = ref('dashboard')
 
 const tabs = [
   { id: 'mfa',           label: 'MFA Setup',     icon: '🔐', style: 'background:rgba(5,150,105,0.1);border-color:rgba(5,150,105,0.35);color:#047857;' },
   { id: 'dashboard',     label: 'Dashboard',    icon: '◈' },
-  { id: 'companies',     label: 'Εταιρείες',    icon: '🏢' },
+  { id: 'companies',     label: t('guide.tabs.companies'),    icon: '🏢' },
   { id: 'projects',      label: 'Projects',     icon: '⬡' },
   { id: 'tasks',         label: 'Tasks',        icon: '✅' },
-  { id: 'contracts',     label: 'Συμβάσεις',    icon: '📄' },
+  { id: 'contracts',     label: t('guide.tabs.contracts'),    icon: '📄' },
   { id: 'ai',            label: 'AI Features',  icon: '✦', style: 'background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#7c3aed;' },
   { id: 'notifications', label: 'Notifications', icon: '🔔', style: 'background:rgba(220,38,38,0.07);border-color:rgba(220,38,38,0.25);color:var(--red);' },
   { id: 'roles',         label: 'Roles',        icon: '👤' },
   { id: 'security',      label: 'Security',     icon: '🔒', style: 'background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.35);color:#b45309;' },
 
-  { id: 'glossary',      label: 'Γλωσσάριο',   icon: '📖' },
+  { id: 'glossary',      label: t('guide.tabs.glossary'),   icon: '📖' },
 ]
 
   const permStore = usePermissionStore()
@@ -1099,7 +1101,7 @@ const loadSecurityDocs = async () => {
     const res = await api.get('/security-documents')
     securityDocs.value = res.data || []
   } catch (e) {
-    secDocsError.value = 'Δεν φορτώθηκαν τα έγγραφα: ' + (e.response?.data?.error || e.message)
+    secDocsError.value = t('guide.loadError') + ': ' + (e.response?.data?.error || e.message)
     console.error('Load security docs failed:', e)
   } finally {
     secDocsLoading.value = false
