@@ -145,5 +145,12 @@
   },
   "auth": {
     "forgotPassword": "Forgot your password?"
+  },
+  "reports": {
+    "aiTitle": "AI Assistant — ask anything",
+    "aiPlaceholder": "e.g. How many open cases do I have in Crossworld Legal?",
+    "aiThinking": "Thinking...",
+    "aiAsk": "ask",
+    "aiAnalyzing": "Analyzing your data..."
   }
 }

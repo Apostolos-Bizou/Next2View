@@ -145,5 +145,12 @@
   },
   "auth": {
     "forgotPassword": "Ξέχασες τον κωδικό;"
+  },
+  "reports": {
+    "aiTitle": "AI Assistant — ρώτα ό,τι θέλεις",
+    "aiPlaceholder": "π.χ. Πόσες υποθέσεις έχω ανοιχτές στο Legal της Crossworld;",
+    "aiThinking": "Σκέφτομαι...",
+    "aiAsk": "ρώτα",
+    "aiAnalyzing": "Αναλύω τα δεδομένα σου..."
   }
 }

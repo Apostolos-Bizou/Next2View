@@ -152,7 +152,7 @@
         <input
           v-model="aiQuestion"
           class="rh-ai-input"
-          placeholder="π.χ. Πόσες υποθέσεις έχω ανοιχτές στο Legal της Crossworld;"
+          :placeholder="t('reports.aiPlaceholder')"
           @keyup.enter="askAi"
         />
         <button class="rh-btn rh-btn-ai" @click="askAi" :disabled="aiLoading || !aiQuestion.trim()">
@@ -162,7 +162,7 @@
       <div v-if="aiAnswer" class="rh-ai-answer" v-html="renderMarkdown(aiAnswer)"></div>
       <div v-if="aiLoading" class="rh-ai-loading">
         <div class="rh-spinner"></div>
-        <span>Αναλύω τα δεδομένα σου...</span>
+        <span>{{ t('reports.aiAnalyzing') }}</span>
       </div>
     </div>
 
@@ -183,7 +183,9 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { reportService } from '../services/reportService'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const templates = ref([])
 const selectedTemplate = ref(null)
 const previewData = ref(null)
@@ -260,7 +262,7 @@ function renderMarkdown(text) {
 function formatDate(dt) {
   if (!dt) return '—'
   const d = new Date(dt)
-  return d.toLocaleDateString('el-GR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString(t('months.short') ? 'el' : 'en', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function formatKey(key) {
