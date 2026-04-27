@@ -44,7 +44,7 @@
         <div class="ap-title">{{ t('admin.manageCompanies') }}</div>
         <button class="ap-btn" @click="openCoModal()">{{ t('admin.newCompany') }}</button>
       </div>
-      <div v-if="loadingCos" class="ap-loading">Φόρτωση...</div>
+      <div v-if="loadingCos" class="ap-loading">{{ t('admin.loading') }}</div>
       <table v-else class="admin-tbl">
         <thead><tr>
           <th>{{ t('admin.th.company') }}</th><th>Code</th><th>{{ t('admin.th.color') }}</th><th>Projects</th><th>Avg %</th><th>Status</th><th></th>
@@ -81,8 +81,8 @@
           <button class="modal-close" @click="showUserModal=false">✕</button>
         </div>
         <div class="modal-body">
-          <div class="form-group"><label>Ονομα *</label>
-            <input v-model="userForm.fullName" class="form-input" placeholder="Απόστολος Βίζου" /></div>
+          <div class="form-group"><label>{{ t('admin.nameReq') }}</label>
+            <input v-model="userForm.fullName" class="form-input" :placeholder="t('admin.fullNamePlaceholder')" /></div>
           <div class="form-group"><label>Email *</label>
             <input v-model="userForm.email" type="email" class="form-input" placeholder="user@next2me.com" /></div>
           <div v-if="!editUser?.id" class="form-group"><label>Password *</label>
@@ -161,7 +161,7 @@
       </div>
       <div class="modal-body">
         <div class="perm-section">
-          <div class="perm-section-title">📊 Ορατότητα Κατηγοριών</div>
+          <div class="perm-section-title">{{ t('admin.perm.visibility') }}</div>
           <div class="perm-grid">
             <label class="perm-item" v-for="p in visibilityPerms" :key="p.key">
               <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
@@ -171,7 +171,7 @@
           </div>
         </div>
         <div class="perm-section">
-          <div class="perm-section-title">✏ Ενέργειες</div>
+          <div class="perm-section-title">{{ t('admin.perm.actions') }}</div>
           <div class="perm-grid">
             <label class="perm-item" v-for="p in actionPerms" :key="p.key">
               <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
@@ -213,7 +213,7 @@
         </div>
         <div class="perm-shortcuts">
           <button class="perm-shortcut" @click="setAll(true)">{{ t('admin.perm.enableAll') }}</button>
-          <button class="perm-shortcut" @click="setAll(false)">❌ Απενεργοποίηση Όλων</button>
+          <button class="perm-shortcut" @click="setAll(false)">{{ t('admin.perm.disableAll') }}</button>
         </div>
         <div v-if="permError" class="form-error">{{ permError }}</div>
       </div>
@@ -380,14 +380,13 @@ async function deleteCompany(co) {
   // Step 1: Γενικό confirm
   const sure = window.confirm(
     `Θέλεις να διαγράψεις την εταιρεία "${co.name}";\n\n` +
-    `Αυτή η ενέργεια θα την κρύψει από το σύστημα.\n` +
-    `Τα projects της θα παραμείνουν στη βάση αλλά δεν θα εμφανίζονται.`
+    t('admin.confirmDeleteCompanyBody')
   )
   if (!sure) return
 
   // Step 2: Type-to-confirm
   const typed = window.prompt(
-    `Για επιβεβαίωση, πληκτρολόγησε τον κωδικό της εταιρείας: ${co.code}`
+    t('admin.confirmDeleteCompanyPrompt', { code: co.code })
   )
   if (typed === null) return // πάτησε cancel
   if (typed.trim().toUpperCase() !== co.code.toUpperCase()) {
@@ -406,8 +405,8 @@ async function deleteCompany(co) {
     }
     alert(t('admin.companyDeleted', {name: co.name}))
   } catch (e) {
-    const msg = e?.response?.data?.message || e?.response?.data?.error || e.message || 'Άγνωστο σφάλμα'
-    alert(`Σφάλμα διαγραφής: ${msg}`)
+    const msg = e?.response?.data?.message || e?.response?.data?.error || e.message || t('admin.err.unknown')
+    alert(t('admin.err.deleteErrorMsg', { msg }))
   } finally {
     deletingCoId.value = null
   }

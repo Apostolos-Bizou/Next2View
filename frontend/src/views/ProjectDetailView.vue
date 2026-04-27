@@ -124,7 +124,7 @@
       <!-- CONTRACT FILES -->
       <div class="files-panel" style="margin-top:14px;">
         <div class="files-header">
-          <div class="files-title">📎 Συμβόλαια & Αρχεία</div>
+          <div class="files-title">{{ t('pd.filesTitle') }}</div>
           <label v-if="permStore.isCEO() || permStore.can('uploadFiles')" class="files-upload-btn" :class="{uploading: uploading}">
             <input type="file" @change="uploadFile" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="uploading" />
             {{ uploading ? t('pd.uploading') : t('pd.upload') }}
@@ -137,7 +137,7 @@
               <div class="file-name">{{ f.fileName }}</div>
               <div class="file-meta">{{ formatSize(f.fileSizeBytes) }} · {{ f.uploadedBy }} · {{ formatInstant(f.uploadedAt) }}</div>
             </div>
-            <button class="file-del" @click.stop="deleteFile(f.id)" title="Διαγραφή">✕</button>
+            <button class="file-del" @click.stop="deleteFile(f.id)" :title="t('pd.delete')">✕</button>
           </div>
         </div>
         <div v-else-if="!uploading" class="files-empty">{{ t('pd.noFiles') }}</div>
@@ -265,7 +265,7 @@
           <div class="te-toggles">
             <label class="te-toggle">
               <input type="checkbox" v-model="editingTask.isDone" :disabled="editingTaskSaving" />
-              <span>✓ Ολοκληρώθηκε</span>
+              <span>{{ t('pd.completed') }}</span>
             </label>
             <label class="te-toggle">
               <input type="checkbox" v-model="editingTask.isBlocked" :disabled="editingTaskSaving" />
@@ -344,7 +344,7 @@
             <input v-model="editForm.budget" type="number" class="form-input" />
           </div>
           <div class="form-group">
-            <label>Ημ. Εναρξης</label>
+            <label>{{ t('pd.startDateLabel') }}</label>
             <input v-model="editForm.startDate" type="date" class="form-input" />
           </div>
           <div class="form-group">
@@ -393,9 +393,9 @@
                 <button @click="m.tasks.splice(ti,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 6px;cursor:pointer;">✕</button>
               </div>
               <div style="display:flex;gap:6px;align-items:center;padding-left:4px;">
-                <label style="font-size:10px;color:var(--text-dim);min-width:55px;">Έναρξη</label>
+                <label style="font-size:10px;color:var(--text-dim);min-width:55px;">{{ t('pd.start') }}</label>
                 <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
-                <label style="font-size:10px;color:var(--text-dim);min-width:35px;">Λήξη</label>
+                <label style="font-size:10px;color:var(--text-dim);min-width:35px;">{{ t('pd.end') }}</label>
                 <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
               </div>
             </div>
@@ -1047,7 +1047,7 @@ function budgetPct(amount, budget) {
 function formatInstant(instant) {
   if (!instant) return ""
   const d = new Date(instant)
-  const m = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"]
+  const m = t('months.short')
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}, ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`
 }
 
@@ -1208,7 +1208,7 @@ const statusLabel = (s) => ({ on_track:'On Track', delayed:'Delayed', at_risk:'A
 function formatDate(iso) {
   if (!iso) return '—'
   const d = new Date(iso)
-  const m = ['Ιαν','Φεβ','Μαρ','Απρ','Μαι','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ']
+  const m = t('months.short')
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`
 }
 </script>

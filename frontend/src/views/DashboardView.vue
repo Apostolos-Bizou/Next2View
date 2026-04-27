@@ -308,7 +308,7 @@ const ganttEnd = computed(() => ganttViewEnd.value);
 const totalDays = computed(() => (ganttEnd.value - ganttStart.value) / 86400000);
 
 // Generate column headers ανάλογα με zoom
-const GR_MONTHS = ["Ιαν","Φεβ","Μαρ","Απρ","Μαϊ","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"];
+const GR_MONTHS = computed(() => t('months.short'));
 
 const ganttColumns = computed(() => {
   const cfg = ganttConfig.value;

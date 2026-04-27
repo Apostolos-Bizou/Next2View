@@ -56,7 +56,7 @@
               </div>
               
               <div class="verify-section">
-                <label for="verify-code">Κώδικας επαλήθευσης (6 ψηφία):</label>
+                <label for="verify-code">{{ t('profile.verifyLabel') }}</label>
                 <input 
                   id="verify-code"
                   v-model="codeInput" 
@@ -92,7 +92,7 @@
               <p>{{ t('profile.dangerDesc') }}</p>
             </div>
             <div class="disable-form">
-              <label for="disable-code">Εισάγετε κώδικα MFA για επιβεβαίωση:</label>
+              <label for="disable-code">{{ t('profile.disableCodeLabel') }}</label>
               <input 
                 id="disable-code"
                 v-model="codeInput" 
@@ -118,8 +118,8 @@
 
     <!-- Info Box -->
     <div class="info-card">
-      <h4>💡 Γιατί MFA;</h4>
-      <p>Ο δεύτερος παράγοντας ελέγχου προστατεύει τον λογαριασμό σας ακόμα κι αν κάποιος μάθει τον κωδικό σας. Απαραίτητο για πρόσβαση σε νομικά έγγραφα υψηλής εμπιστευτικότητας.</p>
+      <h4>{{ t('profile.whyMfaTitle') }}</h4>
+      <p>{{ t('profile.whyMfaDesc') }}</p>
     </div>
 
     <!-- Success Message -->
@@ -257,7 +257,7 @@ const verifySetup = async () => {
     }, 4000)
     
   } catch (err) {
-    error.value = err.response?.data?.message || 'Μη έγκυρος κώδικας επαλήθευσης'
+    error.value = err.response?.data?.message || t('profile.invalidCode')
   } finally {
     loading.value = false
   }
@@ -303,7 +303,7 @@ const confirmDisable = async () => {
     }, 4000)
     
   } catch (err) {
-    error.value = err.response?.data?.message || 'Μη έγκυρος κώδικας επαλήθευσης'
+    error.value = err.response?.data?.message || t('profile.invalidCode')
   } finally {
     loading.value = false
   }

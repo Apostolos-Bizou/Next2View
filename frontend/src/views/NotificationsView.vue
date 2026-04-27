@@ -5,13 +5,13 @@
         <span v-if="critical.length" class="notif-count critical">{{ critical.length }} {{ t('notif.critical') }}</span>
         <span v-if="warnings.length" class="notif-count warning">{{ warnings.length }} {{ t('notif.warnings') }}</span>
         <span v-if="infos.length" class="notif-count info">{{ infos.length }} {{ t('notif.infos') }}</span>
-        <span v-if="!allNotifs.length" class="notif-count ok">✓ Όλα καλά</span>
+        <span v-if="!allNotifs.length" class="notif-count ok">{{ t('notif.allOk') }}</span>
       </div>
       <div style="display:flex;gap:8px;">
         <button class="filter-btn" :class="{active: filter===''}" @click="filter=''">{{ t('notif.all') }}</button>
         <button class="filter-btn" :class="{active: filter==='critical'}" @click="filter='critical'">🔴 {{ t('notif.critical') }}</button>
         <button class="filter-btn" :class="{active: filter==='warning'}" @click="filter='warning'">🟡 {{ t('notif.warnings') }}</button>
-        <button class="filter-btn" :class="{active: filter==='info'}" @click="filter='info'">🔵 Ενημερώσεις</button>
+        <button class="filter-btn" :class="{active: filter==='info'}" @click="filter='info'">{{ t('notif.filterInfo') }}</button>
       </div>
     </div>
 

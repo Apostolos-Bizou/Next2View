@@ -4,35 +4,35 @@
       <div class="login-logo">
         <div class="logo-mark">Next2me Group</div>
         <div class="logo-name">Next<span>2</span>View</div>
-        <div class="logo-sub">Νέος Κωδικός</div>
+        <div class="logo-sub">{{ t('auth.reset.subtitle') }}</div>
       </div>
 
       <div v-if="!done">
         <form class="login-form" @submit.prevent="handleSubmit">
           <div class="field">
-            <label>Νέος Κωδικός</label>
-            <input v-model="password" type="password" placeholder="Τουλάχιστον 8 χαρακτήρες" required minlength="8" />
+            <label>{{ t('auth.reset.newPassword') }}</label>
+            <input v-model="password" type="password" :placeholder="t('auth.reset.minCharsPlaceholder')" required minlength="8" />
           </div>
           <div class="field">
-            <label>Επιβεβαίωση Κωδικού</label>
-            <input v-model="confirm" type="password" placeholder="Επανάληψη κωδικού" required />
+            <label>{{ t('auth.reset.confirmPassword') }}</label>
+            <input v-model="confirm" type="password" :placeholder="t('auth.reset.repeatPlaceholder')" required />
           </div>
           <div v-if="error" class="login-error">⚠ {{ error }}</div>
           <button type="submit" class="login-btn" :disabled="loading">
             <span v-if="loading" class="spinner"></span>
-            <span v-else>Αποθήκευση Κωδικού</span>
+            <span v-else>{{ t('auth.reset.saveBtn') }}</span>
           </button>
         </form>
       </div>
 
       <div v-else class="success-box">
         <div class="success-icon">✓</div>
-        <div class="success-title">Ο κωδικός άλλαξε!</div>
-        <div class="success-msg">Μπορείς τώρα να συνδεθείς με τον νέο σου κωδικό.</div>
-        <button class="login-btn" style="margin-top:20px;" @click="router.push('/login')">Σύνδεση</button>
+        <div class="success-title">{{ t('auth.reset.successTitle') }}</div>
+        <div class="success-msg">{{ t('auth.reset.successMsg') }}</div>
+        <button class="login-btn" style="margin-top:20px;" @click="router.push('/login')">{{ t('auth.reset.loginBtn') }}</button>
       </div>
 
-      <div class="back-link" @click="router.push('/login')">← Επιστροφή στη Σύνδεση</div>
+      <div class="back-link" @click="router.push('/login')">{{ t('auth.backToLogin') }}</div>
     </div>
   </div>
 </template>
@@ -56,18 +56,18 @@ const token = ref('')
 onMounted(() => {
   token.value = route.query.token || ''
   if (!token.value) {
-    error.value = 'Μη έγκυρος σύνδεσμος επαναφοράς.'
+    error.value = t('auth.reset.invalidLink')
   }
 })
 
 async function handleSubmit() {
   error.value = ''
   if (password.value !== confirm.value) {
-    error.value = 'Οι κωδικοί δεν ταιριάζουν.'
+    error.value = t('auth.reset.mismatch')
     return
   }
   if (password.value.length < 8) {
-    error.value = 'Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.'
+    error.value = t('auth.reset.tooShort')
     return
   }
   loading.value = true
@@ -75,7 +75,7 @@ async function handleSubmit() {
     await api.post('/auth/reset-password', { token: token.value, newPassword: password.value })
     done.value = true
   } catch (e) {
-    error.value = e.response?.data?.message || 'Ο σύνδεσμος έχει λήξει ή είναι μη έγκυρος.'
+    error.value = e.response?.data?.message || t('auth.reset.expired')
   } finally {
     loading.value = false
   }

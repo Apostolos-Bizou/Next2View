@@ -27,7 +27,8 @@
     "newProject": "Δημιούργησε νέο project. Βάλε τίτλο, εταιρεία, κατηγορία, budget, ημερομηνίες, modules και tasks.",
     "newCompany": "Πρόσθεσε νέα εταιρεία στον Όμιλο. Βάλε όνομα, κωδικό (π.χ. PFS) και χρώμα κατηγορίας.",
     "newUser": "Πρόσθεσε νέο χρήστη. Βάλε email, κωδικό και ρόλο (CEO / Manager / Member).",
-    "profile": "Προφίλ & ρυθμίσεις"
+    "profile": "Προφίλ & ρυθμίσεις",
+    "guideFull": "Πλήρης οδηγός πλατφόρμας"
   },
   "dashboard": {
     "overall": "Overall",
@@ -69,7 +70,9 @@
     "cancel": "Ακύρωση",
     "creating": "Δημιουργία...",
     "createProject": "Δημιουργία Project",
-    "required": "* υποχρεωτικό"
+    "required": "* υποχρεωτικό",
+    "errRequired": "Τίτλος, Εταιρεία και Κατηγορία είναι υποχρεωτικά.",
+    "errCreate": "Αποτυχία δημιουργίας project."
   },
   "mfa": {
     "disabled": "MFA απενεργοποιημένο",
@@ -106,7 +109,8 @@
     "analyzing": "Η AI αναλύει {count} projects...",
     "reportFailed": "Δεν ήταν δυνατή η δημιουργία αναφοράς.",
     "close": "Κλείσιμο",
-    "refresh": "Ανανέωση"
+    "refresh": "Ανανέωση",
+    "errorMd": "## ⚠️ Σφάλμα\n\nΔεν ήταν δυνατή η σύνδεση με το AI."
   },
   "gantt": {
     "back": "Πίσω",
@@ -257,7 +261,9 @@
       "legal": "Legal",
       "dev": "Developing",
       "marketing": "Marketing"
-    }
+    },
+    "allOk": "✓ Όλα καλά",
+    "filterInfo": "🔵 Ενημερώσεις"
   },
   "profile": {
     "user": "Χρήστης",
@@ -338,7 +344,10 @@
       "deleteErrorMsg": "Σφάλμα διαγραφής: {msg}"
     },
     "confirmDeleteUser": "Διαγραφή χρήστη \"{name}\"; Αυτή η ενέργεια δεν αναιρείται.",
-    "companyDeleted": "Η εταιρεία \"{name}\" διαγράφηκε επιτυχώς."
+    "companyDeleted": "Η εταιρεία \"{name}\" διαγράφηκε επιτυχώς.",
+    "fullNamePlaceholder": "π.χ. Απόστολος Βίζου",
+    "confirmDeleteCompanyBody": "Αυτή η ενέργεια θα την κρύψει από το σύστημα.\nΤα projects της θα παραμείνουν στη βάση αλλά δεν θα εμφανίζονται.",
+    "confirmDeleteCompanyPrompt": "Για επιβεβαίωση, πληκτρολόγησε τον κωδικό της εταιρείας: {code}"
   },
   "pd": {
     "loading": "Φόρτωση...",
@@ -399,7 +408,8 @@
       "uploadFailed": "Σφάλμα ανεβάσματος.",
       "openFailed": "Σφάλμα κατά το άνοιγμα του αρχείου.",
       "titleRequired": "Ο τίτλος είναι υποχρεωτικός."
-    }
+    },
+    "startDateLabel": "Ημ. Έναρξης"
   },
   "guide": {
     "title": "🔐 Οδηγός Χρήσης",

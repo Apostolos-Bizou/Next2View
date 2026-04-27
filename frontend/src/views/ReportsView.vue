@@ -146,7 +146,7 @@
     <div v-if="selectedTemplate?.aiEnhanced" class="rh-ai-section">
       <div class="rh-ai-header">
         <span class="rh-ai-icon">✦</span>
-        <span class="rh-ai-title">AI Assistant — Ρώτα ό,τι θέλεις</span>
+        <span class="rh-ai-title">{{ t('reports.aiTitle') }}</span>
       </div>
       <div class="rh-ai-input-row">
         <input

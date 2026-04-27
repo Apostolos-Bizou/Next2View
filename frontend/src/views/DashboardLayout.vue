@@ -96,7 +96,7 @@
         </div>
       </div>
 
-      <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" title="Προφίλ & Ρυθμίσεις">
+      <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" :title="t('tooltips.profile')">
         <div class="avatar">{{ initials }}</div>
         <div>
           <div class="user-name">{{ auth.user?.fullName?.split(' ')[0] || 'CEO' }}</div>
@@ -120,39 +120,11 @@
 
     
     <!-- MFA NUDGE POPUP -->
-    <div v-if="showMfaNudge" class="mfa-nudge-overlay" @click.self="showMfaNudge = false">
-      <div class="mfa-nudge-modal">
-        <button class="mfa-nudge-close" @click="showMfaNudge = false">✕</button>
-        <div class="mfa-nudge-icon">🔐</div>
-        <div class="mfa-nudge-greeting">{{ t('mfa.nudgeGreeting', { name: firstName }) }}</div>
-        <div class="mfa-nudge-body">
-          <p>{{ t('mfa.nudgeBody1', { name: firstName }) }}</p>
-          <p>Σε παρακαλώ πααάρα πολύ, έμπα στο <strong>Guide</strong> και διάβασε με λεπτομέρεια το section <strong>MFA Setup</strong>.</p>
-          <p class="mfa-nudge-highlight">Σε παρακαλώ ΕΝΕΡΓΟΠΟΙΗΣΟΥΟΥ!!!</p>
-          <p>Γιατί βλέπω να πιάνει κανένα σκουπόξυλο ο Αναστασίου και να μας κάνει μπάουλο στο ξύλο όλους παρέα.</p>
-          <p class="mfa-nudge-love">Ματς Μουτς ρε!! ❤️</p>
-        </div>
-        <button class="mfa-nudge-btn" @click="goToGuide">📖 {{ t('mfa.nudgeGoGuide') }}</button>
-        <button class="mfa-nudge-dismiss" @click="dismissMfaNudge">{{ t('mfa.nudgeDismiss') }}</button>
-      </div>
-    </div>
+    
 
 
     <!-- MFA SUCCESS POPUP -->
-    <div v-if="showMfaSuccess" class="mfa-nudge-overlay" @click.self="showMfaSuccess = false">
-      <div class="mfa-nudge-modal" style="border-top-color:#059669;">
-        <button class="mfa-nudge-close" @click="showMfaSuccess = false">✕</button>
-        <div class="mfa-nudge-icon">🎉</div>
-        <div class="mfa-nudge-greeting">{{ t('mfa.successGreeting', { name: mfaFirstName }) }}</div>
-        <div class="mfa-nudge-body" style="text-align:center;">
-          <p style="font-size:18px;font-weight:800;color:#059669;margin-bottom:14px;">Γλιτώσαμε το ξύλο! 😂😂😂</p>
-          <p>Και εγώ και εσύ! 🙏</p>
-          <p>Το MFA σου είναι <strong>ενεργό</strong> και ο λογαριασμός σου είναι πλέον <strong>προστατευμένος</strong>.</p>
-          <p class="mfa-nudge-love">Ματς Μουτς ρε!! ❤️</p>
-        </div>
-        <button class="mfa-nudge-btn" style="background:#059669;" @click="showMfaSuccess = false">✔ Τέλειο!</button>
-      </div>
-    </div>
+    
 
 <!-- ════ NEW PROJECT MODAL ════ -->
     <div v-if="showNewProject" class="modal-overlay" @click.self="closeModal">
@@ -194,7 +166,7 @@
               <input v-model="form.budget" type="number" placeholder="0" class="form-input" />
             </div>
             <div class="form-group">
-              <label>Ημ. Εναρξης</label>
+              <label>{{ t('form.startDate') }}</label>
               <input v-model="form.startDate" type="date" class="form-input" />
             </div>
             <div class="form-group">
@@ -220,11 +192,11 @@
             </div>
             <div class="spec-dates">
               <div class="spec-date-field">
-                <label class="spec-date-lbl">Εναρξη</label>
+                <label class="spec-date-lbl">{{ t('form.specStart') }}</label>
                 <input v-model="s.startDate" type="date" class="form-input spec-date-input" />
               </div>
               <div class="spec-date-field">
-                <label class="spec-date-lbl">Ληξη</label>
+                <label class="spec-date-lbl">{{ t('form.specEnd') }}</label>
                 <input v-model="s.endDate" type="date" class="form-input spec-date-input" />
               </div>
             </div>
@@ -291,7 +263,7 @@
       <div class="modal-body ai-body">
         <div v-if="aiLoading" class="ai-loading">
           <div class="ai-spinner"></div>
-          <div class="ai-loading-txt">Ο AI αναλύει {{ store.projects.length }} projects...</div>
+          <div class="ai-loading-txt">{{ t('ai.analyzing', { count: store.projects.length }) }}</div>
         </div>
         <div v-else-if="aiReport" class="ai-report" v-html="renderMarkdown(aiReport)"></div>
         <div v-else class="ai-error">{{ t('ai.reportFailed') }}</div>
@@ -355,7 +327,7 @@
           <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : "Ενεργοποίηση MFA" }}</button>
         </div>
         <div v-if="mfaSetupData" class="mfa-setup">
-          <div class="mfa-status">📱 Σκάναρε το QR Code</div>
+          <div class="mfa-status">📱 {{ t('mfa.scanQR') }}</div>
           <div class="mfa-qr-wrap">
             <img :src="qrCodeUrl" class="mfa-qr" alt="QR Code" />
           </div>
@@ -371,7 +343,7 @@
         <div v-if="mfaEnabled && !mfaSetupData" class="mfa-info">
           <div class="mfa-status on">✅ {{ t('mfa.enabledAlt') }}</div>
           <p class="mfa-desc">{{ t('mfa.protectedDescAlt') }}</p>
-          <input v-model="mfaCode" type="text" maxlength="6" placeholder="Κωδικός για απενεργοποίηση..." class="form-input mfa-code-input" />
+          <input v-model="mfaCode" type="text" maxlength="6" :placeholder="t('mfa.disablePlaceholder')" class="form-input mfa-code-input" />
           <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : "Απενεργοποίηση MFA" }}</button>
         </div>
       </div>
@@ -582,7 +554,7 @@ function addTask(m) {
 async function submitProject() {
   formError.value = ''
   if (!form.value.title || !form.value.companyId || !form.value.category) {
-    formError.value = 'Τίτλος, Εταιρεία και Κατηγορία είναι υποχρεωτικά.'
+    formError.value = t('form.errRequired')
     return
   }
   submitting.value = true
@@ -614,7 +586,7 @@ async function submitProject() {
     closeModal()
     router.push(`/projects/${proj.id}`)
   } catch (e) {
-    formError.value = e.response?.data?.message || 'Αποτυχία δημιουργίας project.'
+    formError.value = e.response?.data?.message || t('form.errCreate')
   } finally {
     submitting.value = false
   }
@@ -679,14 +651,14 @@ const pageTitle = computed(() => ({
   Dashboard: 'Group Dashboard',
   Projects: 'All Projects',
   ProjectDetail: store.selectedProject?.title || 'Project Detail',
-  Guide: 'Οδηγός Χρήσης',
+  Guide: t('sidebar.guide'),
 }[route.name] || 'Next2View'))
 
 const pageSubtitle = computed(() => ({
   Dashboard: 'All companies · All categories · CEO view',
   Projects: `${store.projects.length} projects`,
   ProjectDetail: store.selectedProject ? `${store.selectedProject.companyName} · ${store.selectedProject.category}` : '',
-  Guide: 'Πλήρης οδηγός πλατφόρμας',
+  Guide: t('tooltips.guideFull'),
 }[route.name] || ''))
 
 async function handleLogout() {
@@ -711,7 +683,7 @@ async function loadAiReport() {
     const res = await api.post('/ai/ceo-report')
     aiReport.value = res.data.report
   } catch (e) {
-    aiReport.value = '## ⚠️ Σφάλμα\n\nΔεν ήταν δυνατή η σύνδεση με το AI.'
+    aiReport.value = t('ai.errorMd')
   } finally {
     aiLoading.value = false
   }

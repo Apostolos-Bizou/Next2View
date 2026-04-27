@@ -27,7 +27,8 @@
     "newProject": "Create a new project. Add title, company, category, budget, dates, modules and tasks.",
     "newCompany": "Add a new company to the Group. Set name, code (e.g. PFS), and category color.",
     "newUser": "Add a new user. Set email, password, and role (CEO / Manager / Member).",
-    "profile": "Profile & settings"
+    "profile": "Profile & settings",
+    "guideFull": "Full platform guide"
   },
   "dashboard": {
     "overall": "Overall",
@@ -69,7 +70,9 @@
     "cancel": "Cancel",
     "creating": "Creating...",
     "createProject": "Create Project",
-    "required": "* required"
+    "required": "* required",
+    "errRequired": "Title, Company and Category are required.",
+    "errCreate": "Failed to create project."
   },
   "mfa": {
     "disabled": "MFA disabled",
@@ -106,7 +109,8 @@
     "analyzing": "AI is analyzing {count} projects...",
     "reportFailed": "Could not generate the report.",
     "close": "Close",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "errorMd": "## ⚠️ Error\n\nCould not connect to AI."
   },
   "gantt": {
     "back": "Back",
@@ -257,7 +261,9 @@
       "legal": "Legal",
       "dev": "Developing",
       "marketing": "Marketing"
-    }
+    },
+    "allOk": "✓ All good",
+    "filterInfo": "🔵 Updates"
   },
   "profile": {
     "user": "User",
@@ -338,7 +344,10 @@
       "deleteErrorMsg": "Delete error: {msg}"
     },
     "confirmDeleteUser": "Delete user \"{name}\"? This action cannot be undone.",
-    "companyDeleted": "Company \"{name}\" deleted successfully."
+    "companyDeleted": "Company \"{name}\" deleted successfully.",
+    "fullNamePlaceholder": "e.g. Apostolos Bizou",
+    "confirmDeleteCompanyBody": "This action will hide it from the system.\nIts projects will remain in the database but will not be shown.",
+    "confirmDeleteCompanyPrompt": "To confirm, type the company code: {code}"
   },
   "pd": {
     "loading": "Loading...",
@@ -399,7 +408,8 @@
       "uploadFailed": "Upload failed.",
       "openFailed": "Error opening file.",
       "titleRequired": "Title is required."
-    }
+    },
+    "startDateLabel": "Start Date"
   },
   "guide": {
     "title": "🔐 User Guide",
