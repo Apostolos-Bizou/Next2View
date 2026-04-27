@@ -4,7 +4,7 @@
       <div class="login-logo">
         <div class="logo-mark">Next2me Group</div>
         <div class="logo-name">Next<span>2</span>View</div>
-        <div class="logo-sub">Επαναφορά Κωδικού</div>
+        <div class="logo-sub">{{ t('auth.resetTitle') }}</div>
       </div>
 
       <div v-if="!sent">
@@ -16,18 +16,18 @@
           <div v-if="error" class="login-error">⚠ {{ error }}</div>
           <button type="submit" class="login-btn" :disabled="loading">
             <span v-if="loading" class="spinner"></span>
-            <span v-else>Αποστολή Συνδέσμου</span>
+            <span v-else>{{ t('auth.sendLink') }}</span>
           </button>
         </form>
       </div>
 
       <div v-else class="success-box">
         <div class="success-icon">✓</div>
-        <div class="success-title">Email Εστάλη!</div>
-        <div class="success-msg">Αν το email υπάρχει στο σύστημα, θα λάβεις σύνδεσμο επαναφοράς κωδικού σε λίγα λεπτά.</div>
+        <div class="success-title">{{ t('auth.emailSent') }}</div>
+        <div class="success-msg">{{ t('auth.emailSentMsg') }}</div>
       </div>
 
-      <div class="back-link" @click="router.push('/login')">← Επιστροφή στη Σύνδεση</div>
+      <div class="back-link" @click="router.push('/login')">{{ t('auth.backToLogin') }}</div>
     </div>
   </div>
 </template>
@@ -36,8 +36,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
+const { t } = useI18n()
 const email = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -50,7 +52,7 @@ async function handleSubmit() {
     await api.post('/auth/forgot-password', { email: email.value })
     sent.value = true
   } catch (e) {
-    error.value = 'Σφάλμα αποστολής. Δοκίμασε ξανά.'
+    error.value = t('auth.sendError')
   } finally {
     loading.value = false
   }

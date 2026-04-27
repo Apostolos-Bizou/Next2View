@@ -144,7 +144,13 @@
     "noProjects": "Δεν υπάρχουν projects."
   },
   "auth": {
-    "forgotPassword": "Ξέχασες τον κωδικό;"
+    "forgotPassword": "Ξέχασες τον κωδικό;",
+    "resetTitle": "Επαναφορά Κωδικού",
+    "sendLink": "Αποστολή Συνδέσμου",
+    "emailSent": "Email Εστάλη!",
+    "emailSentMsg": "Αν το email υπάρχει στο σύστημα, θα λάβεις σύνδεσμο επαναφοράς κωδικού σε λίγα λεπτά.",
+    "backToLogin": "← Επιστροφή στη Σύνδεση",
+    "sendError": "Σφάλμα αποστολής. Δοκίμασε ξανά."
   },
   "reports": {
     "aiTitle": "AI Assistant — ρώτα ό,τι θέλεις",

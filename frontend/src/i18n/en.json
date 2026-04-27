@@ -144,7 +144,13 @@
     "noProjects": "No projects found."
   },
   "auth": {
-    "forgotPassword": "Forgot your password?"
+    "forgotPassword": "Forgot your password?",
+    "resetTitle": "Reset Password",
+    "sendLink": "Send Reset Link",
+    "emailSent": "Email Sent!",
+    "emailSentMsg": "If the email exists in our system, you'll receive a password reset link shortly.",
+    "backToLogin": "← Back to Sign In",
+    "sendError": "Failed to send. Please try again."
   },
   "reports": {
     "aiTitle": "AI Assistant — ask anything",
