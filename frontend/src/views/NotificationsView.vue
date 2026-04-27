@@ -2,23 +2,23 @@
   <div class="content">
     <div class="notif-header-bar">
       <div class="notif-summary">
-        <span v-if="critical.length" class="notif-count critical">{{ critical.length }} κρίσιμα</span>
-        <span v-if="warnings.length" class="notif-count warning">{{ warnings.length }} προειδοποιήσεις</span>
-        <span v-if="infos.length" class="notif-count info">{{ infos.length }} ενημερώσεις</span>
+        <span v-if="critical.length" class="notif-count critical">{{ critical.length }} {{ t('notif.critical') }}</span>
+        <span v-if="warnings.length" class="notif-count warning">{{ warnings.length }} {{ t('notif.warnings') }}</span>
+        <span v-if="infos.length" class="notif-count info">{{ infos.length }} {{ t('notif.infos') }}</span>
         <span v-if="!allNotifs.length" class="notif-count ok">✓ Όλα καλά</span>
       </div>
       <div style="display:flex;gap:8px;">
-        <button class="filter-btn" :class="{active: filter===''}" @click="filter=''">Όλα</button>
-        <button class="filter-btn" :class="{active: filter==='critical'}" @click="filter='critical'">🔴 Κρίσιμα</button>
-        <button class="filter-btn" :class="{active: filter==='warning'}" @click="filter='warning'">🟡 Προειδοποιήσεις</button>
+        <button class="filter-btn" :class="{active: filter===''}" @click="filter=''">{{ t('notif.all') }}</button>
+        <button class="filter-btn" :class="{active: filter==='critical'}" @click="filter='critical'">🔴 {{ t('notif.critical') }}</button>
+        <button class="filter-btn" :class="{active: filter==='warning'}" @click="filter='warning'">🟡 {{ t('notif.warnings') }}</button>
         <button class="filter-btn" :class="{active: filter==='info'}" @click="filter='info'">🔵 Ενημερώσεις</button>
       </div>
     </div>
 
     <div v-if="!filtered.length" class="notif-empty">
       <div class="notif-empty-ico">✓</div>
-      <div class="notif-empty-txt">Δεν υπάρχουν ειδοποιήσεις αυτή τη στιγμή.</div>
-      <div class="notif-empty-sub">Όλα τα projects είναι σε καλή πορεία.</div>
+      <div class="notif-empty-txt">{{ t('notif.emptyText') }}</div>
+      <div class="notif-empty-sub">{{ t('notif.emptySub') }}</div>
     </div>
 
     <div class="notif-list">
@@ -33,7 +33,7 @@
             <span v-if="n.company" class="notif-co">{{ n.company }}</span>
             <span v-if="n.category" :class="`notif-cat ${n.category}`">{{ catLabel(n.category) }}</span>
             <span v-if="n.daysLeft !== undefined" :class="`notif-days ${n.daysLeft < 0 ? 'overdue' : n.daysLeft < 7 ? 'urgent' : ''}`">
-              {{ n.daysLeft < 0 ? `${Math.abs(n.daysLeft)}d καθυστέρηση` : `${n.daysLeft}d απομένουν` }}
+              {{ n.daysLeft < 0 ? t('notif.daysOverdue', {d: Math.abs(n.daysLeft)}) : t('notif.daysLeft', {d: n.daysLeft}) }}
             </span>
           </div>
         </div>
@@ -45,9 +45,11 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 
+const { t } = useI18n()
 const store = useProjectStore()
 const router = useRouter()
 const filter = ref('')
@@ -67,8 +69,8 @@ const allNotifs = computed(() => {
       if (dl < 0 && p.status !== 'completed') {
         notifs.push({
           id: id++, level: 'critical', icon: '🔴',
-          title: `Εκπρόθεσμο: ${p.title}`,
-          description: `Η deadline πέρασε πριν ${Math.abs(dl)} ημέρες χωρίς ολοκλήρωση (${p.completion}%).`,
+          title: t('notif.overdueTitle', {title: p.title}),
+          description: t('notif.overdueDesc', {days: Math.abs(dl), pct: p.completion}),
           company: p.companyName, category: p.category,
           daysLeft: dl, projectId: p.id
         })
@@ -77,8 +79,8 @@ const allNotifs = computed(() => {
       else if (dl >= 0 && dl < 7 && p.status !== 'completed') {
         notifs.push({
           id: id++, level: 'critical', icon: '⚠️',
-          title: `Επείγουσα Deadline: ${p.title}`,
-          description: `Η deadline είναι σε ${dl} ημέρες και η πρόοδος είναι ${p.completion}%.`,
+          title: t('notif.urgentTitle', {title: p.title}),
+          description: t('notif.urgentDesc', {days: dl, pct: p.completion}),
           company: p.companyName, category: p.category,
           daysLeft: dl, projectId: p.id
         })
@@ -87,8 +89,8 @@ const allNotifs = computed(() => {
       else if (dl >= 7 && dl < 14 && p.status !== 'completed') {
         notifs.push({
           id: id++, level: 'warning', icon: '🟡',
-          title: `Deadline Πλησιάζει: ${p.title}`,
-          description: `Η deadline είναι σε ${dl} ημέρες. Πρόοδος: ${p.completion}%.`,
+          title: t('notif.approachTitle', {title: p.title}),
+          description: t('notif.approachDesc', {days: dl, pct: p.completion}),
           company: p.companyName, category: p.category,
           daysLeft: dl, projectId: p.id
         })
@@ -100,7 +102,7 @@ const allNotifs = computed(() => {
       notifs.push({
         id: id++, level: 'critical', icon: '🚨',
         title: `At Risk: ${p.title}`,
-        description: `Το project έχει επισημανθεί ως "At Risk". Απαιτείται άμεση παρέμβαση.`,
+        description: t('notif.atRiskDesc'),
         company: p.companyName, category: p.category, projectId: p.id
       })
     }
@@ -109,8 +111,8 @@ const allNotifs = computed(() => {
     if (p.status === 'stale' || p.updatedAgo > 10080) { // 7 days in minutes
       notifs.push({
         id: id++, level: 'warning', icon: '😴',
-        title: `Αδρανές Project: ${p.title}`,
-        description: `Δεν υπάρχει ενημέρωση εδώ και ${Math.round((p.updatedAgo||0)/1440)} ημέρες.`,
+        title: t('notif.staleTitle', {title: p.title}),
+        description: t('notif.staleDesc', {days: Math.round((p.updatedAgo||0)/1440)}),
         company: p.companyName, category: p.category, projectId: p.id
       })
     }
@@ -119,8 +121,8 @@ const allNotifs = computed(() => {
     if (p.status === 'delayed') {
       notifs.push({
         id: id++, level: 'warning', icon: '⏰',
-        title: `Καθυστέρηση: ${p.title}`,
-        description: `Το project έχει καθυστερήσει. Τρέχουσα πρόοδος: ${p.completion}%.`,
+        title: t('notif.delayedTitle', {title: p.title}),
+        description: t('notif.delayedDesc', {pct: p.completion}),
         company: p.companyName, category: p.category, projectId: p.id
       })
     }
@@ -129,8 +131,8 @@ const allNotifs = computed(() => {
     if (p.deadline && p.completion < 30 && daysLeft(p.deadline) < 30 && p.status !== 'completed') {
       notifs.push({
         id: id++, level: 'warning', icon: '📉',
-        title: `Χαμηλή Πρόοδος: ${p.title}`,
-        description: `Μόνο ${p.completion}% ολοκλήρωση με deadline σε ${daysLeft(p.deadline)} ημέρες.`,
+        title: t('notif.lowProgressTitle', {title: p.title}),
+        description: t('notif.lowProgressDesc', {pct: p.completion, days: daysLeft(p.deadline)}),
         company: p.companyName, category: p.category, projectId: p.id
       })
     }
@@ -141,7 +143,7 @@ const allNotifs = computed(() => {
       notifs.push({
         id: id++, level: 'warning', icon: '🚫',
         title: `Blocked Tasks: ${p.title}`,
-        description: `${blockedTasks.length} task(s) είναι blocked και εμποδίζουν την πρόοδο.`,
+        description: t('notif.blockedDesc', {count: blockedTasks.length}),
         company: p.companyName, category: p.category, projectId: p.id
       })
     }
@@ -150,8 +152,8 @@ const allNotifs = computed(() => {
     if (p.status === 'completed' || p.completion === 100) {
       notifs.push({
         id: id++, level: 'info', icon: '✅',
-        title: `Ολοκληρώθηκε: ${p.title}`,
-        description: `Το project ολοκληρώθηκε επιτυχώς!`,
+        title: t('notif.completedTitle', {title: p.title}),
+        description: t('notif.completedDesc'),
         company: p.companyName, category: p.category, projectId: p.id
       })
     }
@@ -171,7 +173,7 @@ const filtered = computed(() => {
   return allNotifs.value.filter(n => n.level === filter.value)
 })
 
-const catLabel = (c) => ({ finance:'Finance', legal:'Legal', dev:'Developing', marketing:'Marketing' }[c] || c)
+const catLabel = (c) => t('notif.cats.' + c, c)
 </script>
 
 <style scoped>

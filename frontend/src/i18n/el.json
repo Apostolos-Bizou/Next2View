@@ -225,5 +225,38 @@
     "subtitle": "Πρόσβαση από την επιφάνεια εργασίας σας",
     "install": "Εγκατάσταση",
     "notNow": "Όχι τώρα"
+  },
+  "notif": {
+    "critical": "κρίσιμα",
+    "warnings": "προειδοποιήσεις",
+    "infos": "ενημερώσεις",
+    "allGood": "Όλα καλά",
+    "all": "Όλα",
+    "emptyText": "Δεν υπάρχουν ειδοποιήσεις αυτή τη στιγμή.",
+    "emptySub": "Όλα τα projects είναι σε καλή πορεία.",
+    "daysOverdue": "{d}d καθυστέρηση",
+    "daysLeft": "{d}d απομένουν",
+    "overdueTitle": "Εκπρόθεσμο: {title}",
+    "overdueDesc": "Η deadline πέρασε πριν {days} ημέρες χωρίς ολοκλήρωση ({pct}%).",
+    "urgentTitle": "Επείγουσα Deadline: {title}",
+    "urgentDesc": "Η deadline είναι σε {days} ημέρες και η πρόοδος είναι {pct}%.",
+    "approachTitle": "Deadline Πλησιάζει: {title}",
+    "approachDesc": "Η deadline είναι σε {days} ημέρες. Πρόοδος: {pct}%.",
+    "atRiskDesc": "Το project έχει επισημανθεί ως \"At Risk\". Απαιτείται άμεση παρέμβαση.",
+    "staleTitle": "Αδρανές Project: {title}",
+    "staleDesc": "Δεν υπάρχει ενημέρωση εδώ και {days} ημέρες.",
+    "delayedTitle": "Καθυστέρηση: {title}",
+    "delayedDesc": "Το project έχει καθυστερήσει. Τρέχουσα πρόοδος: {pct}%.",
+    "lowProgressTitle": "Χαμηλή Πρόοδος: {title}",
+    "lowProgressDesc": "Μόνο {pct}% ολοκλήρωση με deadline σε {days} ημέρες.",
+    "blockedDesc": "{count} task(s) είναι blocked και εμποδίζουν την πρόοδο.",
+    "completedTitle": "Ολοκληρώθηκε: {title}",
+    "completedDesc": "Το project ολοκληρώθηκε επιτυχώς!",
+    "cats": {
+      "finance": "Finance",
+      "legal": "Legal",
+      "dev": "Developing",
+      "marketing": "Marketing"
+    }
   }
 }

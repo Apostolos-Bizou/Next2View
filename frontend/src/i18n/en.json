@@ -225,5 +225,38 @@
     "subtitle": "Access from your desktop",
     "install": "Install",
     "notNow": "Not now"
+  },
+  "notif": {
+    "critical": "critical",
+    "warnings": "warnings",
+    "infos": "updates",
+    "allGood": "All good",
+    "all": "All",
+    "emptyText": "No notifications at this time.",
+    "emptySub": "All projects are on track.",
+    "daysOverdue": "{d}d overdue",
+    "daysLeft": "{d}d remaining",
+    "overdueTitle": "Overdue: {title}",
+    "overdueDesc": "Deadline passed {days} days ago without completion ({pct}%).",
+    "urgentTitle": "Urgent Deadline: {title}",
+    "urgentDesc": "Deadline is in {days} days and progress is {pct}%.",
+    "approachTitle": "Deadline Approaching: {title}",
+    "approachDesc": "Deadline is in {days} days. Progress: {pct}%.",
+    "atRiskDesc": "Project is flagged as \"At Risk\". Immediate action required.",
+    "staleTitle": "Stale Project: {title}",
+    "staleDesc": "No updates for {days} days.",
+    "delayedTitle": "Delayed: {title}",
+    "delayedDesc": "Project is delayed. Current progress: {pct}%.",
+    "lowProgressTitle": "Low Progress: {title}",
+    "lowProgressDesc": "Only {pct}% complete with deadline in {days} days.",
+    "blockedDesc": "{count} task(s) are blocked and preventing progress.",
+    "completedTitle": "Completed: {title}",
+    "completedDesc": "Project completed successfully!",
+    "cats": {
+      "finance": "Finance",
+      "legal": "Legal",
+      "dev": "Developing",
+      "marketing": "Marketing"
+    }
   }
 }
