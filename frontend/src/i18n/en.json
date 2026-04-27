@@ -150,7 +150,22 @@
     "emailSent": "Email Sent!",
     "emailSentMsg": "If the email exists in our system, you'll receive a password reset link shortly.",
     "backToLogin": "← Back to Sign In",
-    "sendError": "Failed to send. Please try again."
+    "sendError": "Failed to send. Please try again.",
+    "reset": {
+      "subtitle": "New Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "minCharsPlaceholder": "At least 8 characters",
+      "repeatPlaceholder": "Repeat password",
+      "saveBtn": "Save Password",
+      "successTitle": "Password changed!",
+      "successMsg": "You can now sign in with your new password.",
+      "loginBtn": "Sign In",
+      "invalidLink": "Invalid reset link.",
+      "mismatch": "Passwords do not match.",
+      "tooShort": "Password must be at least 8 characters.",
+      "expired": "The link has expired or is invalid."
+    }
   },
   "reports": {
     "aiTitle": "AI Assistant — ask anything",
