@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <div v-if="loading" class="loading">Φόρτωση...</div>
+    <div v-if="loading" class="loading">{{ t('pd.loading') }}</div>
     <div v-else-if="project">
 
       <!-- BREADCRUMB -->
@@ -14,8 +14,8 @@
 
       <!-- CONTRACT HEADER -->
       <div :class="`contract-header ${project.category}`" style="position:relative;">
-        <button v-if="permStore.isCEO() || permStore.can('editProject')" class="edit-project-btn" @click="openEditModal" title="Επεξεργασία">✎ Επεξεργασία</button>
-        <button v-if="permStore.isCEO()" class="delete-project-btn" @click="confirmDeleteProject" title="Διαγραφή project">🗑 Διαγραφή</button>
+        <button v-if="permStore.isCEO() || permStore.can('editProject')" class="edit-project-btn" @click="openEditModal" :title="t('pd.edit')">{{ t('pd.editBtn') }}</button>
+        <button v-if="permStore.isCEO()" class="delete-project-btn" @click="confirmDeleteProject" :title="t('pd.deleteProject')">🗑 {{ t('pd.delete') }}</button>
         <div class="ch-top">
           <div>
             <div class="ch-title">{{ project.title }}</div>
@@ -48,14 +48,14 @@
           </div>
         </div>
         <div class="ch-progress-wrap">
-          <div class="ch-progress-label">Εργασίες</div>
+          <div class="ch-progress-label">{{ t('pd.tasks') }}</div>
           <div class="ch-progress-bar">
             <div class="ch-progress-fill" :style="`width:${project.completion}%;background:var(--${project.category});`"></div>
           </div>
           <span class="ch-progress-pct" :style="`color:var(--${project.category});`">{{ project.completion }}%</span>
         </div>
         <div v-if="timeProgress !== null" class="ch-progress-wrap" style="margin-top:8px;">
-          <div class="ch-progress-label">Χρόνος</div>
+          <div class="ch-progress-label">{{ t('pd.time') }}</div>
           <div class="ch-progress-bar">
             <div class="ch-progress-fill" :style="`width:${timeProgress}%;background:${smartStatus.color};opacity:0.8;`"></div>
           </div>
@@ -73,7 +73,7 @@
           <div class="mg-header" @click="toggleAcc(m.id)">
             <span class="mg-expand">{{ openAcc.has(m.id) ? '▼' : '▶' }}</span>
             <span class="mg-name">{{ m.name }}</span>
-            <button class="delete-mod-btn" @click.stop="confirmDeleteModule(m)" title="Διαγραφή module">🗑</button>
+            <button class="delete-mod-btn" @click.stop="confirmDeleteModule(m)" :title="t('pd.deleteModule')">🗑</button>
             <div class="mg-right">
               <div class="mg-bar-wrap"><div class="mg-bar"><div class="mg-bar-fill" :style="`width:${m.completion}%;background:var(--${m.color||project.category});`"></div></div></div>
               <span class="mg-pct" :style="`color:var(--${m.color||project.category});`">{{ m.completion }}%</span>
@@ -85,13 +85,13 @@
               <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
               <div style="flex:1;">
                 <div :class="`task-name ${t.isDone?'done':''}`">{{ t.name }}</div>
-                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" title="Διαγραφή task">🗑</button>
+                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" :title="t('pd.deleteTask')">🗑</button>
                 <div v-if="t.blockNote" class="task-note">⚠ {{ t.blockNote }}</div>
               </div>
               <span class="task-assignee">{{ t.assignee||'—' }}</span>
               <div class="task-pct-wrap">
                 <div class="task-bar"><div class="task-bar-fill" :style="`width:${displayProgress(t)}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
-                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" title="Πίσω από το πρόγραμμα!" style="color:var(--red);margin-left:4px;">⚠</span></div>
+                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" :title="t('pd.behindSchedule')" style="color:var(--red);margin-left:4px;">⚠</span></div>
               </div>
             </div>
           </div>
@@ -117,7 +117,7 @@
       </div>
 
       <div v-if="project.contractDesc" class="contract-desc-panel" style="margin-top:14px;">
-        <div class="cd-title">📄 Περιγραφή Σύμβασης</div>
+        <div class="cd-title">{{ t('pd.contractDesc') }}</div>
         <div class="cd-text">{{ project.contractDesc }}</div>
       </div>
 
@@ -127,11 +127,11 @@
           <div class="files-title">📎 Συμβόλαια & Αρχεία</div>
           <label v-if="permStore.isCEO() || permStore.can('uploadFiles')" class="files-upload-btn" :class="{uploading: uploading}">
             <input type="file" @change="uploadFile" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="uploading" />
-            {{ uploading ? "Ανέβασμα..." : "+ Ανέβασμα" }}
+            {{ uploading ? t('pd.uploading') : t('pd.upload') }}
           </label>
         </div>
         <div v-if="files.length" class="files-list">
-          <div v-for="f in files" :key="f.id" class="file-item" @click="openFile(f)" style="cursor:pointer;" title="Κλικ για άνοιγμα αρχείου">
+          <div v-for="f in files" :key="f.id" class="file-item" @click="openFile(f)" style="cursor:pointer;" :title="t('pd.clickToOpen')">
             <span class="file-icon">{{ fileIcon(f.contentType) }}</span>
             <div class="file-info">
               <div class="file-name">{{ f.fileName }}</div>
@@ -140,7 +140,7 @@
             <button class="file-del" @click.stop="deleteFile(f.id)" title="Διαγραφή">✕</button>
           </div>
         </div>
-        <div v-else-if="!uploading" class="files-empty">Δεν υπάρχουν αρχεία. Ανέβασε συμβόλαιο ή έγγραφο.</div>
+        <div v-else-if="!uploading" class="files-empty">{{ t('pd.noFiles') }}</div>
         <div v-if="uploadError" class="files-error">{{ uploadError }}</div>
         <div v-if="fileError" class="files-error">{{ fileError }}</div>
       </div>
@@ -181,13 +181,13 @@
       <div v-if="permStore.isCEO() || permStore.can('viewCeoNotes')" class="notes-panel" style="margin-top:14px;">
         <div class="notes-header">
           <div class="notes-title">🔒 CEO Notes <span class="notes-private">Private</span></div>
-          <button class="notes-add-btn" @click="showNoteInput=!showNoteInput">+ Νέα Σημείωση</button>
+          <button class="notes-add-btn" @click="showNoteInput=!showNoteInput">{{ t('pd.newNote') }}</button>
         </div>
         <div v-if="showNoteInput" class="note-input-wrap">
-          <textarea v-model="newNote" placeholder="Γράψε σημείωση..." class="note-textarea" rows="3"></textarea>
+          <textarea v-model="newNote" :placeholder="t('pd.notePlaceholder')" class="note-textarea" rows="3"></textarea>
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
-            <button class="note-cancel" @click="cancelNote">Ακύρωση</button>
-            <button class="note-save" @click="saveNote" :disabled="!newNote.trim()">Αποθήκευση</button>
+            <button class="note-cancel" @click="cancelNote">{{ t('pd.cancel') }}</button>
+            <button class="note-save" @click="saveNote" :disabled="!newNote.trim()">{{ t('pd.save') }}</button>
           </div>
         </div>
         <div v-if="notes.length" class="notes-list">
@@ -200,7 +200,7 @@
             </div>
           </div>
         </div>
-        <div v-else-if="!showNoteInput" class="notes-empty">Δεν υπάρχουν σημειώσεις.</div>
+        <div v-else-if="!showNoteInput" class="notes-empty">{{ t('pd.noNotes') }}</div>
       </div>
 
     </div>
@@ -211,21 +211,21 @@
     <div v-if="editingTask" class="modal-overlay" @click.self="closeTaskEdit">
       <div class="modal task-edit-modal">
         <div class="modal-header">
-          <div class="modal-title">✏️ Επεξεργασία Task</div>
+          <div class="modal-title">{{ t('pd.editTask') }}</div>
           <button class="modal-close" @click="closeTaskEdit" :disabled="editingTaskSaving">✕</button>
         </div>
         <div class="modal-body">
           <div v-if="editingTaskError" class="te-error">{{ editingTaskError }}</div>
 
           <div class="te-field">
-            <label>Όνομα</label>
+            <label>{{ t('pd.name') }}</label>
             <input type="text" v-model="editingTask.name" :disabled="editingTaskSaving" />
           </div>
 
           <div class="te-row">
             <div class="te-field">
               <label>Assignee</label>
-              <input type="text" v-model="editingTask.assignee" placeholder="π.χ. Νίκη" :disabled="editingTaskSaving" />
+              <input type="text" v-model="editingTask.assignee" :placeholder="t('pd.assigneePlaceholder')" :disabled="editingTaskSaving" />
             </div>
             <div class="te-field">
               <label>Module</label>
@@ -235,7 +235,7 @@
 
           <div class="te-field">
             <label>
-              Πρόοδος: <strong>{{ editingTask.progress || 0 }}%</strong>
+              {{ t('pd.progress') }}: <strong>{{ editingTask.progress || 0 }}%</strong>
             </label>
             <input
               type="range"
@@ -253,11 +253,11 @@
 
           <div class="te-row">
             <div class="te-field">
-              <label>Έναρξη</label>
+              <label>{{ t('pd.start') }}</label>
               <input type="date" v-model="editingTask.startDate" :disabled="editingTaskSaving" />
             </div>
             <div class="te-field">
-              <label>Λήξη</label>
+              <label>{{ t('pd.end') }}</label>
               <input type="date" v-model="editingTask.endDate" :disabled="editingTaskSaving" />
             </div>
           </div>
@@ -269,26 +269,26 @@
             </label>
             <label class="te-toggle">
               <input type="checkbox" v-model="editingTask.isBlocked" :disabled="editingTaskSaving" />
-              <span>⚠ Μπλοκαρισμένο</span>
+              <span>{{ t('pd.blocked') }}</span>
             </label>
           </div>
 
           <div v-if="editingTask.isBlocked" class="te-field">
-            <label>Σημείωση Blocking</label>
+            <label>{{ t('pd.blockNoteLabel') }}</label>
             <input
               type="text"
               v-model="editingTask.blockNote"
-              placeholder="Γιατί είναι μπλοκαρισμένο;"
+              :placeholder="t('pd.blockNotePlaceholder')"
               :disabled="editingTaskSaving"
             />
           </div>
 
           <div class="te-field">
-            <label>Σχόλιο</label>
+            <label>{{ t('pd.comment') }}</label>
             <textarea
               v-model="editingTask.comment"
               rows="3"
-              placeholder="Προαιρετικό σχόλιο..."
+              :placeholder="t('pd.commentPlaceholder')"
               :disabled="editingTaskSaving"
             ></textarea>
           </div>
@@ -302,7 +302,7 @@
             Άκυρο
           </button>
           <button class="te-btn te-btn-primary" @click="saveTaskEdit" :disabled="editingTaskSaving">
-            {{ editingTaskSaving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
+            {{ editingTaskSaving ? t('pd.saving') : t('pd.save') }}
           </button>
         </div>
       </div>
@@ -312,24 +312,24 @@
   <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal=false">
     <div class="modal modal-edit">
       <div class="modal-header">
-        <div class="modal-title">✎ Επεξεργασία Project</div>
+        <div class="modal-title">{{ t('pd.editProject') }}</div>
         <button class="modal-close" @click="showEditModal=false">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-section-title">ΒΑΣΙΚΑ ΣΤΟΙΧΕΙΑ</div>
+        <div class="form-section-title">{{ t('pd.basicInfo') }}</div>
         <div class="form-group">
-          <label>Τίτλος *</label>
-          <input v-model="editForm.title" type="text" class="form-input" placeholder="Τίτλος project" />
+          <label>{{ t('pd.titleReq') }}</label>
+          <input v-model="editForm.title" type="text" class="form-input" :placeholder="t('pd.titlePlaceholder')" />
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>Εταιρεία *</label>
+            <label>{{ t('pd.companyReq') }}</label>
             <select v-model="editForm.companyId" class="form-input">
               <option v-for="co in companies" :key="co.id" :value="co.id">{{ co.name }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Κατηγορία *</label>
+            <label>{{ t('pd.categoryReq') }}</label>
             <select v-model="editForm.category" class="form-input">
               <option value="finance">Finance</option>
               <option value="legal">Legal</option>
@@ -353,8 +353,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Περιγραφή Σύμβασης</label>
-          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" placeholder="Σύντομη περιγραφή..."></textarea>
+          <label>{{ t('pd.contractDescLabel') }}</label>
+          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" :placeholder="t('pd.briefDesc')"></textarea>
         </div>
         <div class="form-group">
           <label>Status</label>
@@ -406,14 +406,14 @@
           </button>
         </div>
         <div v-if="editForm.modules.length===0" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;">
-          Δεν υπάρχουν modules. Πάτα + Module για να προσθέσεις.
+          {{ t('pd.noModules') }}
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-cancel" @click="showEditModal=false">Ακύρωση</button>
+        <button class="btn-cancel" @click="showEditModal=false">{{ t('pd.cancel') }}</button>
         <button class="btn-submit" @click="saveEdit" :disabled="editSaving">
-          {{ editSaving ? "Αποθήκευση..." : "Αποθήκευση" }}
+          {{ editSaving ? t('pd.saving') : t('pd.save') }}
         </button>
       </div>
     </div>
@@ -456,8 +456,8 @@ const smartStatus = computed(() => {
 const timelineTooltip = computed(() => {
   if (!project.value) return ''
   const tp = timeProgress.value
-  if (tp === null) return 'Χρονικό εύρος project'
-  return `${tp}% του χρόνου έχει περάσει`
+  if (tp === null) return t('pd.timelineRange')
+  return t('pd.timeElapsed', {pct: tp})
 })
 
 const editingTask = ref(null)           // the task being edited (cloned)
@@ -540,7 +540,7 @@ async function saveTaskEdit() {
     closeTaskEdit()
     await loadProject()
   } catch (e) {
-    editingTaskError.value = 'Σφάλμα αποθήκευσης. Δοκιμάστε ξανά.'
+    editingTaskError.value = t('pd.err.saveFailed')
     // Revert by reloading
     await loadProject()
   } finally {
@@ -550,7 +550,7 @@ async function saveTaskEdit() {
 
 async function deleteTaskFromModal() {
   if (!editingTask.value || !editingTaskModule.value) return
-  if (!confirm('Διαγραφή του task "' + editingTask.value.name + '";')) return
+  if (!confirm(t('pd.confirmDeleteTask', {name: editingTask.value.name}))) return
   const modId = editingTaskModule.value.id
   const taskId = editingTask.value.id
   editingTaskSaving.value = true
@@ -591,7 +591,7 @@ async function deleteTaskFromModal() {
     closeTaskEdit()
     await loadProject()
   } catch (e) {
-    editingTaskError.value = 'Σφάλμα διαγραφής.'
+    editingTaskError.value = t('pd.err.deleteFailed')
     await loadProject()
   } finally {
     editingTaskSaving.value = false
@@ -601,11 +601,13 @@ async function deleteTaskFromModal() {
 
 
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
 
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useProjectStore()
@@ -690,7 +692,7 @@ async function openFile(f) {
     }
   } catch (e) {
     console.error("File open error:", e)
-    fileError.value = "Σφάλμα κατά το άνοιγμα του αρχείου."
+    fileError.value = t('pd.err.openFailed')
   }
 }
 
@@ -715,7 +717,7 @@ async function uploadFile(event) {
     })
     await loadFiles()
   } catch (e) {
-    uploadError.value = e.response?.data?.message || "Σφάλμα ανεβάσματος."
+    uploadError.value = e.response?.data?.message || t('pd.err.uploadFailed')
   } finally {
     uploading.value = false
     event.target.value = ""
@@ -723,7 +725,7 @@ async function uploadFile(event) {
 }
 
 async function deleteFile(fileId) {
-  if (!confirm("Διαγραφή αρχείου;")) return
+  if (!confirm(t('pd.confirmDeleteFile'))) return
   try {
     await api.delete(`/projects/${project.value.id}/files/${fileId}`)
     await loadFiles()
@@ -819,15 +821,15 @@ async function toggleSpec(s) {
 }
 
 async function confirmDeleteProject() {
-  if (!confirm('Διαγραφή του project "' + project.value.title + '"; Δεν μπορεί να αναιρεθεί.')) return
+  if (!confirm(t('pd.confirmDeleteProject', {name: project.value.title}))) return
   try {
     await api.delete('/projects/' + project.value.id)
     router.push('/projects')
-  } catch(e) { alert('Σφάλμα διαγραφής project.') }
+  } catch(e) { alert(t('pd.err.deleteProjectFailed')) }
 }
 
 async function confirmDeleteModule(m) {
-  if (!confirm('Διαγραφή του module "' + m.name + '" και όλων των tasks του;')) return
+  if (!confirm(t('pd.confirmDeleteModule', {name: m.name}))) return
   const idx = project.value.modules.findIndex(x => x.id === m.id)
   if (idx === -1) return
   project.value.modules.splice(idx, 1)
@@ -847,7 +849,7 @@ async function confirmDeleteModule(m) {
 }
 
 async function confirmDeleteTask(t, m) {
-  if (!confirm('Διαγραφή του task "' + t.name + '";')) return
+  if (!confirm(t('pd.confirmDeleteTask', {name: t.name}))) return
   const tidx = m.tasks.findIndex(x => x.id === t.id)
   if (tidx === -1) return
   m.tasks.splice(tidx, 1)
@@ -915,7 +917,7 @@ async function saveSpecDetail() {
     })
     showSpecModal.value = false
   } catch(e) {
-    specSaveError.value = 'Σφάλμα αποθήκευσης.'
+    specSaveError.value = t('pd.err.saveFailed')
   } finally { specSaving.value = false }
 }
 
@@ -968,7 +970,7 @@ async function openEditModal() {
 }
 
 async function saveEdit() {
-  if (!editForm.value.title.trim()) { editError.value = "Ο τίτλος είναι υποχρεωτικός."; return }
+  if (!editForm.value.title.trim()) { editError.value = t('pd.err.titleRequired'); return }
   editSaving.value = true
   editError.value = ""
   try {
@@ -999,7 +1001,7 @@ async function saveEdit() {
     showEditModal.value = false
     await loadProject()
   } catch (e) {
-    editError.value = e.response?.data?.message || "Σφάλμα αποθήκευσης."
+    editError.value = e.response?.data?.message || t('pd.err.saveFailed')
   } finally { editSaving.value = false }
 }
 
@@ -1063,7 +1065,7 @@ function toggleAcc(id) {
 // ════ GANTT LOGIC ════
 const ganttWeeks = computed(() => {
   const weeks = []
-  const months = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"]
+  const months = t('months.short')
   for (let i = 0; i < GANTT_WEEKS; i++) {
     const d = new Date(ganttStart.value)
     d.setDate(d.getDate() + i * 7)
