@@ -219,5 +219,11 @@
       "pinchZoom": "Touch: pinch to zoom",
       "hoverBars": "Hover bars for details"
     }
+  },
+  "pwa": {
+    "title": "Install Next2View",
+    "subtitle": "Access from your desktop",
+    "install": "Install",
+    "notNow": "Not now"
   }
 }

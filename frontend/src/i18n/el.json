@@ -219,5 +219,11 @@
       "pinchZoom": "Touch: pinch to zoom",
       "hoverBars": "Hover bars για λεπτομέρειες"
     }
+  },
+  "pwa": {
+    "title": "Εγκατάσταση Next2View",
+    "subtitle": "Πρόσβαση από την επιφάνεια εργασίας σας",
+    "install": "Εγκατάσταση",
+    "notNow": "Όχι τώρα"
   }
 }
