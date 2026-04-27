@@ -258,5 +258,34 @@
       "dev": "Developing",
       "marketing": "Marketing"
     }
+  },
+  "profile": {
+    "user": "User",
+    "security": "🔐 Security",
+    "mfaLabel": "Identity Verification (MFA)",
+    "mfaDesc": "Second factor authentication with TOTP app",
+    "inactive": "⚠ Inactive",
+    "active": "✅ Active",
+    "enableMfa": "Enable MFA",
+    "disableMfa": "Disable",
+    "scanQrDesc": "Scan the QR code with your TOTP app (e.g. Google Authenticator, Authy)",
+    "manualEntry": "Alternatively, manual entry:",
+    "copy": "Copy",
+    "verifyLabel": "Verification code (6 digits):",
+    "cancel": "Cancel",
+    "verifying": "Verifying...",
+    "verify": "Verify",
+    "dangerTitle": "⚠️ Dangerous action",
+    "dangerDesc": "Disabling MFA reduces the security of your account.",
+    "disableCodeLabel": "Enter MFA code to confirm:",
+    "disabling": "Disabling...",
+    "confirmDisable": "Confirm Disable",
+    "whyMfaTitle": "👤 Why MFA?",
+    "whyMfaDesc": "Two-factor authentication protects your account even if someone learns your password. Required for accessing high-confidentiality legal documents.",
+    "setupError": "Failed to create MFA setup",
+    "mfaEnabledSuccess": "MFA enabled successfully! 🎉",
+    "invalidCode": "Invalid verification code",
+    "mfaDisabledSuccess": "MFA disabled.",
+    "copied": "Copied!"
   }
 }
