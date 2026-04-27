@@ -47,7 +47,7 @@
         </button>
       </form>
 
-      <div class="forgot-link" @click="router.push('/forgot-password')">Ξέχασες τον κωδικό;</div>
+      <div class="forgot-link" @click="router.push('/forgot-password')">{{ t('auth.forgotPassword') }}</div>
       <div class="login-footer">
         Next2View v1.0 · Next2me Group · Private
       </div>
@@ -59,9 +59,11 @@
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
 const auth = useAuthStore();
+const { t } = useI18n();
 
 const email = ref("");
 const password = ref("");

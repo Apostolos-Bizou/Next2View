@@ -142,5 +142,8 @@
     "allCompanies": "All companies",
     "category": "Category",
     "noProjects": "No projects found."
+  },
+  "auth": {
+    "forgotPassword": "Forgot your password?"
   }
 }

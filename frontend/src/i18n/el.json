@@ -142,5 +142,8 @@
     "allCompanies": "Όλες εταιρείες",
     "category": "Κατηγορία",
     "noProjects": "Δεν υπάρχουν projects."
+  },
+  "auth": {
+    "forgotPassword": "Ξέχασες τον κωδικό;"
   }
 }
