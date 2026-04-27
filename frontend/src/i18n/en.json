@@ -287,5 +287,57 @@
     "invalidCode": "Invalid verification code",
     "mfaDisabledSuccess": "MFA disabled.",
     "copied": "Copied!"
+  },
+  "admin": {
+    "usersTab": "Users",
+    "companiesTab": "Companies",
+    "manageUsers": "👤 Manage Users",
+    "newUser": "+ New User",
+    "editUser": "Edit User",
+    "manageCompanies": "🏢 Manage Companies",
+    "newCompany": "+ New Company",
+    "editCompany": "Edit Company",
+    "loading": "Loading...",
+    "nameReq": "Name *",
+    "companyLabel": "Company",
+    "description": "Description",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "th": {
+      "name": "Name",
+      "company": "Company",
+      "department": "Department",
+      "status": "Status",
+      "color": "Color"
+    },
+    "perm": {
+      "visibility": "🔐 Category Visibility",
+      "actions": "⚙ Actions",
+      "management": "👥 Management",
+      "enableAll": "✅ Enable All",
+      "disableAll": "✖ Disable All",
+      "viewFinance": "View Finance",
+      "viewLegal": "View Legal",
+      "viewDev": "View Developing",
+      "viewMarketing": "View Marketing",
+      "viewFinancials": "View Financial data",
+      "viewCeoNotes": "View CEO Notes",
+      "createProject": "Create Project",
+      "editProject": "Edit Project"
+    },
+    "err": {
+      "nameEmailRole": "Name, Email and Role are required.",
+      "passwordRequired": "Password is required for new users.",
+      "nameCodeRequired": "Name and Code are required.",
+      "saveError": "Save failed.",
+      "deleteError": "Delete failed.",
+      "codeMismatch": "Code does not match. Delete cancelled.",
+      "unknown": "Unknown error",
+      "deleteErrorMsg": "Delete error: {msg}"
+    },
+    "confirmDeleteUser": "Delete user \"{name}\"? This action cannot be undone.",
+    "companyDeleted": "Company \"{name}\" deleted successfully."
   }
 }

@@ -287,5 +287,57 @@
     "invalidCode": "Μη έγκυρος κωδικας επαλήθευσης",
     "mfaDisabledSuccess": "MFA απενεργοποιήθηκε.",
     "copied": "Αντιγράφηκε!"
+  },
+  "admin": {
+    "usersTab": "Χρήστες",
+    "companiesTab": "Εταιρείες",
+    "manageUsers": "👤 Διαχείριση Χρηστών",
+    "newUser": "+ Νέος Χρήστης",
+    "editUser": "Επεξεργασία Χρήστη",
+    "manageCompanies": "🏢 Διαχείριση Εταιρειών",
+    "newCompany": "+ Νέα Εταιρεία",
+    "editCompany": "Επεξεργασία Εταιρείας",
+    "loading": "Φόρτωση...",
+    "nameReq": "Όνομα *",
+    "companyLabel": "Εταιρεία",
+    "description": "Περιγραφή",
+    "cancel": "Ακύρωση",
+    "save": "Αποθήκευση",
+    "saving": "Αποθήκευση...",
+    "delete": "Διαγραφή",
+    "th": {
+      "name": "Όνομα",
+      "company": "Εταιρεία",
+      "department": "Department",
+      "status": "Status",
+      "color": "Χρώμα"
+    },
+    "perm": {
+      "visibility": "🔐 Ορατότητα Κατηγοριών",
+      "actions": "⚙ Ενέργειες",
+      "management": "👥 Διαχείριση",
+      "enableAll": "✅ Ενεργοποίηση Όλων",
+      "disableAll": "✖ Απενεργοποίηση Όλων",
+      "viewFinance": "Βλέπει Finance",
+      "viewLegal": "Βλέπει Legal",
+      "viewDev": "Βλέπει Developing",
+      "viewMarketing": "Βλέπει Marketing",
+      "viewFinancials": "Βλέπει Financial data",
+      "viewCeoNotes": "Βλέπει CEO Notes",
+      "createProject": "Δημιουργία Project",
+      "editProject": "Επεξεργασία Project"
+    },
+    "err": {
+      "nameEmailRole": "Όνομα, Email και Role είναι υποχρεωτικά.",
+      "passwordRequired": "Password είναι υποχρεωτικό για νέο χρήστη.",
+      "nameCodeRequired": "Όνομα και Code είναι υποχρεωτικά.",
+      "saveError": "Σφάλμα αποθήκευσης.",
+      "deleteError": "Σφάλμα διαγραφής.",
+      "codeMismatch": "Ο κωδικός δεν ταιριάζει. Η διαγραφή ακυρώθηκε.",
+      "unknown": "Άγνωστο σφάλμα",
+      "deleteErrorMsg": "Σφάλμα διαγραφής: {msg}"
+    },
+    "confirmDeleteUser": "Διαγραφή χρήστη \"{name}\"; Αυτή η ενέργεια δεν αναιρείται.",
+    "companyDeleted": "Η εταιρεία \"{name}\" διαγράφηκε επιτυχώς."
   }
 }

@@ -11,13 +11,13 @@
     <!-- ── USERS ── -->
     <div v-if="activeTab === 'users'" class="admin-panel">
       <div class="ap-header">
-        <div class="ap-title">👤 Διαχείριση Χρηστών</div>
-        <button class="ap-btn" @click="openUserModal()">+ Νέος Χρήστης</button>
+        <div class="ap-title">{{ t('admin.manageUsers') }}</div>
+        <button class="ap-btn" @click="openUserModal()">{{ t('admin.newUser') }}</button>
       </div>
-      <div v-if="loadingUsers" class="ap-loading">Φόρτωση...</div>
+      <div v-if="loadingUsers" class="ap-loading">{{ t('admin.loading') }}</div>
       <table v-else class="admin-tbl">
         <thead><tr>
-          <th>Όνομα</th><th>Email</th><th>Role</th><th>Εταιρεία</th><th>Department</th><th>Status</th><th></th>
+          <th>{{ t('admin.th.name') }}</th><th>Email</th><th>Role</th><th>{{ t('admin.th.company') }}</th><th>{{ t('admin.th.department') }}</th><th>{{ t('admin.th.status') }}</th><th></th>
         </tr></thead>
         <tbody>
           <tr v-for="u in users" :key="u.id">
@@ -41,13 +41,13 @@
     <!-- ── COMPANIES ── -->
     <div v-if="activeTab === 'companies'" class="admin-panel">
       <div class="ap-header">
-        <div class="ap-title">🏢 Διαχείριση Εταιρειών</div>
-        <button class="ap-btn" @click="openCoModal()">+ Νέα Εταιρεία</button>
+        <div class="ap-title">{{ t('admin.manageCompanies') }}</div>
+        <button class="ap-btn" @click="openCoModal()">{{ t('admin.newCompany') }}</button>
       </div>
       <div v-if="loadingCos" class="ap-loading">Φόρτωση...</div>
       <table v-else class="admin-tbl">
         <thead><tr>
-          <th>Εταιρεία</th><th>Code</th><th>Χρώμα</th><th>Projects</th><th>Avg %</th><th>Status</th><th></th>
+          <th>{{ t('admin.th.company') }}</th><th>Code</th><th>{{ t('admin.th.color') }}</th><th>Projects</th><th>Avg %</th><th>Status</th><th></th>
         </tr></thead>
         <tbody>
           <tr v-for="co in companies" :key="co.id">
@@ -64,7 +64,7 @@
             <td><span class="status-dot active">Active</span></td>
             <td>
               <button class="icon-btn" @click="openCoModal(co)" title="Edit">✎</button>
-              <button v-if="permStore.isCEO()" class="icon-btn red" @click="deleteCompany(co)" :disabled="deletingCoId===co.id" title="Διαγραφή">
+              <button v-if="permStore.isCEO()" class="icon-btn red" @click="deleteCompany(co)" :disabled="deletingCoId===co.id" :title="t('admin.delete')">
                 <span v-if="deletingCoId===co.id">⏳</span><span v-else>🗑</span>
               </button>
             </td>
@@ -77,7 +77,7 @@
     <div v-if="showUserModal" class="modal-overlay" @click.self="showUserModal=false">
       <div class="modal">
         <div class="modal-header">
-          <div class="modal-title">{{ editUser?.id ? 'Επεξεργασία Χρήστη' : 'Νέος Χρήστης' }}</div>
+          <div class="modal-title">{{ editUser?.id ? t('admin.editUser') : t('admin.newUser') }}</div>
           <button class="modal-close" @click="showUserModal=false">✕</button>
         </div>
         <div class="modal-body">
@@ -106,7 +106,7 @@
               </select>
             </div>
           </div>
-          <div class="form-group"><label>Εταιρεία</label>
+          <div class="form-group"><label>{{ t('admin.companyLabel') }}</label>
             <select v-model="userForm.companyId" class="form-input">
               <option value="">—</option>
               <option v-for="co in companies" :key="co.id" :value="co.id">{{ co.name }}</option>
@@ -115,9 +115,9 @@
           <div v-if="modalError" class="form-error">{{ modalError }}</div>
         </div>
         <div class="modal-footer">
-          <button class="btn-cancel" @click="showUserModal=false">Ακύρωση</button>
+          <button class="btn-cancel" @click="showUserModal=false">{{ t('admin.cancel') }}</button>
           <button class="btn-submit" :disabled="modalSaving" @click="saveUser">
-            {{ modalSaving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
+            {{ modalSaving ? t('admin.saving') : t('admin.save') }}
           </button>
         </div>
       </div>
@@ -127,26 +127,26 @@
     <div v-if="showCoModal" class="modal-overlay" @click.self="showCoModal=false">
       <div class="modal">
         <div class="modal-header">
-          <div class="modal-title">{{ editCo?.id ? 'Επεξεργασία Εταιρείας' : 'Νέα Εταιρεία' }}</div>
+          <div class="modal-title">{{ editCo?.id ? t('admin.editCompany') : t('admin.newCompany') }}</div>
           <button class="modal-close" @click="showCoModal=false">✕</button>
         </div>
         <div class="modal-body">
-          <div class="form-group"><label>Όνομα *</label>
+          <div class="form-group"><label>{{ t('admin.nameReq') }}</label>
             <input v-model="coForm.name" class="form-input" placeholder="Polaris Financial Services" /></div>
           <div class="form-row">
             <div class="form-group"><label>Code * (2-5 chars)</label>
               <input v-model="coForm.code" class="form-input" placeholder="PF" maxlength="5" /></div>
-            <div class="form-group"><label>Χρώμα</label>
+            <div class="form-group"><label>{{ t('admin.th.color') }}</label>
               <input v-model="coForm.color" type="color" class="form-input color-input" /></div>
           </div>
-          <div class="form-group"><label>Περιγραφή</label>
+          <div class="form-group"><label>{{ t('admin.description') }}</label>
             <input v-model="coForm.description" class="form-input" placeholder="TPA maritime healthcare..." /></div>
           <div v-if="modalError" class="form-error">{{ modalError }}</div>
         </div>
         <div class="modal-footer">
-          <button class="btn-cancel" @click="showCoModal=false">Ακύρωση</button>
+          <button class="btn-cancel" @click="showCoModal=false">{{ t('admin.cancel') }}</button>
           <button class="btn-submit" :disabled="modalSaving" @click="saveCompany">
-            {{ modalSaving ? 'Αποθήκευση...' : 'Αποθήκευση' }}
+            {{ modalSaving ? t('admin.saving') : t('admin.save') }}
           </button>
         </div>
       </div>
@@ -181,7 +181,7 @@
           </div>
         </div>
         <div class="perm-section">
-          <div class="perm-section-title">👥 Διαχείριση</div>
+          <div class="perm-section-title">{{ t('admin.perm.management') }}</div>
           <div class="perm-grid">
             <label class="perm-item" v-for="p in managementPerms" :key="p.key">
               <input type="checkbox" v-model="permForm[p.key]" class="perm-check" />
@@ -212,15 +212,15 @@
           </div>
         </div>
         <div class="perm-shortcuts">
-          <button class="perm-shortcut" @click="setAll(true)">✅ Ενεργοποίηση Όλων</button>
+          <button class="perm-shortcut" @click="setAll(true)">{{ t('admin.perm.enableAll') }}</button>
           <button class="perm-shortcut" @click="setAll(false)">❌ Απενεργοποίηση Όλων</button>
         </div>
         <div v-if="permError" class="form-error">{{ permError }}</div>
       </div>
       <div class="modal-footer">
-        <button class="btn-cancel" @click="showPermModal=false">Ακύρωση</button>
+        <button class="btn-cancel" @click="showPermModal=false">{{ t('admin.cancel') }}</button>
         <button class="btn-submit" @click="savePermissions" :disabled="permSaving">
-          {{ permSaving ? "Αποθήκευση..." : "Αποθήκευση" }}
+          {{ permSaving ? t('admin.saving') : t('admin.save') }}
         </button>
       </div>
     </div>
@@ -232,16 +232,18 @@
 <script setup>
 // === PHASE 2A — Security Documentation === // built 2026-04-21T13:41:47.331Z
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
 
+const { t } = useI18n()
 const store = useProjectStore()
 const permStore = usePermissionStore()
 const activeTab = ref('users')
 const tabs = [
-  { id: 'users',     label: 'Χρήστες',   icon: '👤' },
-  { id: 'companies', label: 'Εταιρείες', icon: '🏢' },
+  { id: 'users',     label: t('admin.usersTab'),   icon: '👤' },
+  { id: 'companies', label: t('admin.companiesTab'), icon: '🏢' },
 ]
 
 const users = ref([])
@@ -296,11 +298,11 @@ function openUserModal(u = null) {
 async function saveUser() {
   modalError.value = ''
   if (!userForm.value.fullName || !userForm.value.email || !userForm.value.role) {
-    modalError.value = 'Όνομα, Email και Role είναι υποχρεωτικά.'
+    modalError.value = t('admin.err.nameEmailRole')
     return
   }
   if (!editUser.value?.id && !userForm.value.password) {
-    modalError.value = 'Password είναι υποχρεωτικό για νέο χρήστη.'
+    modalError.value = t('admin.err.passwordRequired')
     return
   }
   modalSaving.value = true
@@ -322,7 +324,7 @@ async function saveUser() {
     showUserModal.value = false
     await loadUsers()
   } catch (e) {
-    modalError.value = e.response?.data?.message || 'Σφάλμα αποθήκευσης.'
+    modalError.value = e.response?.data?.message || t('admin.err.saveError')
   } finally { modalSaving.value = false }
 }
 async function toggleUser(u) {
@@ -333,12 +335,12 @@ async function toggleUser(u) {
 }
 
 async function confirmDelete(u) {
-  if (!confirm(`Διαγραφή χρήστη "${u.fullName}"; Αυτή η ενέργεια δεν αναιρείται.`)) return
+  if (!confirm(t('admin.confirmDeleteUser', {name: u.fullName}))) return
   try {
     await api.delete(`/admin/users/${u.id}`)
     await loadUsers()
   } catch (e) {
-    alert(e.response?.data?.message || "Σφάλμα διαγραφής.")
+    alert(e.response?.data?.message || t('admin.err.deleteError'))
   }
 }
 
@@ -354,7 +356,7 @@ function openCoModal(co = null) {
 async function saveCompany() {
   modalError.value = ''
   if (!coForm.value.name || !coForm.value.code) {
-    modalError.value = 'Όνομα και Code είναι υποχρεωτικά.'
+    modalError.value = t('admin.err.nameCodeRequired')
     return
   }
   modalSaving.value = true
@@ -367,7 +369,7 @@ async function saveCompany() {
     showCoModal.value = false
     await loadCompanies()
   } catch (e) {
-    modalError.value = e.response?.data?.message || 'Σφάλμα αποθήκευσης.'
+    modalError.value = e.response?.data?.message || t('admin.err.saveError')
   } finally { modalSaving.value = false }
 }
 
@@ -389,7 +391,7 @@ async function deleteCompany(co) {
   )
   if (typed === null) return // πάτησε cancel
   if (typed.trim().toUpperCase() !== co.code.toUpperCase()) {
-    alert('Ο κωδικός δεν ταιριάζει. Η διαγραφή ακυρώθηκε.')
+    alert(t('admin.err.codeMismatch'))
     return
   }
 
@@ -402,7 +404,7 @@ async function deleteCompany(co) {
     if (store && typeof store.loadCompanies === 'function') {
       await store.loadCompanies()
     }
-    alert(`Η εταιρεία "${co.name}" διαγράφηκε επιτυχώς.`)
+    alert(t('admin.companyDeleted', {name: co.name}))
   } catch (e) {
     const msg = e?.response?.data?.message || e?.response?.data?.error || e.message || 'Άγνωστο σφάλμα'
     alert(`Σφάλμα διαγραφής: ${msg}`)
@@ -420,18 +422,18 @@ const permError = ref('')
 const permSaving = ref(false)
 
 const visibilityPerms = [
-  { key: 'viewFinance',    icon: '$', label: 'Βλέπει Finance' },
-  { key: 'viewLegal',      icon: '⚖', label: 'Βλέπει Legal' },
-  { key: 'viewDev',        icon: '⌨', label: 'Βλέπει Developing' },
-  { key: 'viewMarketing',  icon: '◈', label: 'Βλέπει Marketing' },
-  { key: 'viewFinancials', icon: '💰', label: 'Βλέπει Financial data' },
-  { key: 'viewCeoNotes',   icon: '🔒', label: 'Βλέπει CEO Notes' },
+  { key: 'viewFinance',    icon: '$', label: t('admin.perm.viewFinance') },
+  { key: 'viewLegal',      icon: '⚖', label: t('admin.perm.viewLegal') },
+  { key: 'viewDev',        icon: '⌨', label: t('admin.perm.viewDev') },
+  { key: 'viewMarketing',  icon: '◈', label: t('admin.perm.viewMarketing') },
+  { key: 'viewFinancials', icon: '💰', label: t('admin.perm.viewFinancials') },
+  { key: 'viewCeoNotes',   icon: '🔒', label: t('admin.perm.viewCeoNotes') },
 ]
 const actionPerms = [
   { key: 'updateTasks',   icon: '✏', label: 'Update Tasks' },
   { key: 'uploadFiles',   icon: '📎', label: 'Upload Files' },
-  { key: 'createProject', icon: '+', label: 'Δημιουργία Project' },
-  { key: 'editProject',   icon: '✎', label: 'Επεξεργασία Project' },
+  { key: 'createProject', icon: '+', label: t('admin.perm.createProject') },
+  { key: 'editProject',   icon: '✎', label: t('admin.perm.editProject') },
 ]
 const managementPerms = [
   { key: 'manageUsers',     icon: '👤', label: 'Manage Users' },
@@ -475,7 +477,7 @@ async function savePermissions() {
     await api.put(`/permissions/users/${permUser.value.id}`, permForm.value)
     showPermModal.value = false
   } catch (e) {
-    permError.value = e.response?.data?.message || 'Σφάλμα αποθήκευσης.'
+    permError.value = e.response?.data?.message || t('admin.err.saveError')
   } finally { permSaving.value = false }
 }
 
