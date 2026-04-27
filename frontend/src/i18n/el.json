@@ -35,7 +35,11 @@
     "needAction": "need action",
     "timeline": "Project Timeline — All Active",
     "noProjectsDeadline": "Δεν υπάρχουν projects με deadline.",
-    "needsAttention": "χρειάζονται προσοχή"
+    "needsAttention": "χρειάζονται προσοχή",
+    "companiesPanel": "Εταιρείες",
+    "byCategory": "Ανά Κατηγορία",
+    "noDeadlines": "Δεν υπάρχουν deadlines.",
+    "noActivity": "Δεν υπάρχει activity."
   },
   "form": {
     "basicInfo": "Βασικά Στοιχεία",
@@ -103,5 +107,34 @@
     "reportFailed": "Δεν ήταν δυνατή η δημιουργία αναφοράς.",
     "close": "Κλείσιμο",
     "refresh": "Ανανέωση"
+  },
+  "gantt": {
+    "back": "Πίσω",
+    "today": "Σήμερα",
+    "forward": "Μπροστά",
+    "search": "Αναζήτηση project...",
+    "allCategories": "Όλες κατηγορίες",
+    "timeline": "Project Timeline — All Active",
+    "noProjects": "Δεν υπάρχουν projects με deadline.",
+    "week": "Εβδομάδα",
+    "month": "Μήνας",
+    "quarter": "Τρίμηνο",
+    "year": "Έτος"
+  },
+  "months": {
+    "short": [
+      "Ιαν",
+      "Φεβ",
+      "Μαρ",
+      "Απρ",
+      "Μαι",
+      "Ιουν",
+      "Ιουλ",
+      "Αυγ",
+      "Σεπ",
+      "Οκτ",
+      "Νοε",
+      "Δεκ"
+    ]
   }
 }

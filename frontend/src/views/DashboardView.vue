@@ -5,7 +5,7 @@
     <div v-if="store.atRisk.length" class="stale-banner">
       <span>⚠</span>
       <span class="stale-txt">
-        <strong>{{ store.atRisk.length }} projects</strong> χρειάζονται προσοχή —
+        <strong>{{ store.atRisk.length }} projects</strong> {{ t('dashboard.needsAttention') }} —
         {{ store.atRisk.map(p => p.title).join(", ") }}
       </span>
     </div>
@@ -43,13 +43,13 @@
           </div>
           <!-- Navigation arrows -->
           <div class="gantt-nav-group">
-            <button class="gantt-nav-btn" @click="navigateGantt(-1)" title="Πίσω">◀</button>
-            <button class="gantt-nav-btn gantt-today-btn" @click="navigateGanttToday" title="Σήμερα">Σήμερα</button>
-            <button class="gantt-nav-btn" @click="navigateGantt(1)" title="Μπροστά">▶</button>
+            <button class="gantt-nav-btn" @click="navigateGantt(-1)" :title="t('gantt.back')">◀</button>
+            <button class="gantt-nav-btn gantt-today-btn" @click="navigateGanttToday" :title="t('gantt.today')">{{ t('gantt.today') }}</button>
+            <button class="gantt-nav-btn" @click="navigateGantt(1)" :title="t('gantt.forward')">▶</button>
           </div>
-          <input v-model="ganttSearch" type="search" placeholder="Αναζήτηση project..." class="gantt-search" />
+          <input v-model="ganttSearch" type="search" :placeholder="t('gantt.search')" class="gantt-search" />
           <select v-model="ganttFilter" class="gantt-select">
-            <option value="">Όλες κατηγορίες</option>
+            <option value="">{{ t('gantt.allCategories') }}</option>
             <option value="finance">$ Finance</option>
             <option value="legal">⚖ Legal</option>
             <option value="dev">⌨ Developing</option>
@@ -72,7 +72,7 @@
           </div>
         </div>
         <!-- PROJECT ROWS -->
-        <div v-if="!ganttProjects.length" class="gantt-empty">Δεν υπάρχουν projects με deadline.</div>
+        <div v-if="!ganttProjects.length" class="gantt-empty">{{ t('gantt.noProjects') }}</div>
         <div v-for="p in ganttProjects" :key="p.id" class="gantt-proj-row gantt-proj-row-click"
           @click="router.push(`/projects/${p.id}`)">
           <div class="gantt-proj-lbl">
@@ -101,7 +101,7 @@
       <!-- COMPANIES -->
       <div class="panel">
         <div class="ph">
-          <div class="ph-title">Εταιρείες</div>
+          <div class="ph-title">{{ t('dashboard.companiesPanel') }}</div>
           <div class="ph-badge badge blue">{{ store.companies.filter(co => visibleProjects.some(p => p.companyId === co.id)).length }} entities</div>
         </div>
         <div class="pb">
@@ -126,7 +126,7 @@
       <div>
         <!-- CAT BREAKDOWN -->
         <div class="panel" style="margin-bottom:14px;">
-          <div class="ph"><div class="ph-title">Ανά Κατηγορία</div></div>
+          <div class="ph"><div class="ph-title">{{ t('dashboard.byCategory') }}</div></div>
           <div class="pb">
             <div class="g4">
               <div v-for="cat in visibleCategories" :key="cat.key" class="cat-blk">
@@ -161,7 +161,7 @@
                 </div>
                 <div :class="`dl-days ${daysClass(p.deadline)}`" :title="dashSmartStatus(p).label">{{ dashSmartStatus(p).icon }} {{ daysLeft(p.deadline) }}d</div>
               </div>
-              <div v-if="!upcomingDeadlines.length" class="empty-mini">Δεν υπάρχουν deadlines.</div>
+              <div v-if="!upcomingDeadlines.length" class="empty-mini">{{ t('dashboard.noDeadlines') }}</div>
             </div>
           </div>
 
@@ -176,7 +176,7 @@
                 </div>
                 <div class="act-time">{{ formatAgo(p.updatedAgo) }}</div>
               </div>
-              <div v-if="!recentActivity.length" class="empty-mini">Δεν υπάρχει activity.</div>
+              <div v-if="!recentActivity.length" class="empty-mini">{{ t('dashboard.noActivity') }}</div>
             </div>
           </div>
         </div>
@@ -191,10 +191,12 @@ import { useRouter } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
 import { usePermissionStore } from "@/stores/permissions";
 import { getTimeProgress, getDaysRemaining, getSmartStatus, formatDaysRemaining } from '@/utils/projectMetrics'
+import { useI18n } from 'vue-i18n'
 
 const store = useProjectStore();
 const permStore = usePermissionStore();
 const router = useRouter();
+const { t } = useI18n();
 
 // ══ Smart status helper ══
 function dashSmartStatus(p) {
@@ -240,10 +242,10 @@ const recentActivity = computed(() =>
 // ════ GANTT ════
 // ──── GANTT ZOOM SYSTEM ────
 const GANTT_ZOOM_LEVELS = [
-  { key: "WEEK",    label: "Εβδομάδα", columns: 12, columnDays: 7,  navDays: 7  },
-  { key: "MONTH",   label: "Μήνας",    columns: 6,  columnDays: 30, navDays: 30 },
-  { key: "QUARTER", label: "Τρίμηνο",  columns: 4,  columnDays: 90, navDays: 90 },
-  { key: "YEAR",    label: "Έτος",     columns: 12, columnDays: 30, navDays: 365 },
+  { key: "WEEK",    label: t("gantt.week"), columns: 12, columnDays: 7,  navDays: 7  },
+  { key: "MONTH",   label: t("gantt.month"),    columns: 6,  columnDays: 30, navDays: 30 },
+  { key: "QUARTER", label: t("gantt.quarter"),  columns: 4,  columnDays: 90, navDays: 90 },
+  { key: "YEAR",    label: t("gantt.year"),     columns: 12, columnDays: 30, navDays: 365 },
 ];
 
 // Load persisted state από localStorage (default: MONTH, σήμερα)
@@ -322,16 +324,16 @@ const ganttColumns = computed(() => {
     let topLabel, subLabel;
     if (ganttZoom.value === "WEEK") {
       topLabel = "W" + (i + 1);
-      subLabel = colStart.getDate() + " " + GR_MONTHS[colStart.getMonth()];
+      subLabel = colStart.getDate() + " " + GR_MONTHS.value[colStart.getMonth()];
     } else if (ganttZoom.value === "MONTH") {
-      topLabel = GR_MONTHS[colStart.getMonth()];
+      topLabel = GR_MONTHS.value[colStart.getMonth()];
       subLabel = String(colStart.getFullYear()).slice(-2);
     } else if (ganttZoom.value === "QUARTER") {
       const q = Math.floor(colStart.getMonth() / 3) + 1;
       topLabel = "Q" + q;
       subLabel = String(colStart.getFullYear());
     } else { // YEAR
-      topLabel = GR_MONTHS[colStart.getMonth()];
+      topLabel = GR_MONTHS.value[colStart.getMonth()];
       subLabel = String(colStart.getFullYear()).slice(-2);
     }
     cols.push({ topLabel, subLabel, isCurrent, start: colStart, end: colEnd });
@@ -470,7 +472,7 @@ function daysClass(deadline) {
 function formatDate(iso) {
   if (!iso) return "—"
   const d = new Date(iso)
-  const m = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"]
+  const m = t("months.short")
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`
 }
 function formatAgo(mins) {

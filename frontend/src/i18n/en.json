@@ -35,7 +35,11 @@
     "needAction": "need action",
     "timeline": "Project Timeline — All Active",
     "noProjectsDeadline": "No projects with deadlines found.",
-    "needsAttention": "need attention"
+    "needsAttention": "need attention",
+    "companiesPanel": "Companies",
+    "byCategory": "By Category",
+    "noDeadlines": "No deadlines.",
+    "noActivity": "No recent activity."
   },
   "form": {
     "basicInfo": "Basic Info",
@@ -103,5 +107,34 @@
     "reportFailed": "Could not generate the report.",
     "close": "Close",
     "refresh": "Refresh"
+  },
+  "gantt": {
+    "back": "Back",
+    "today": "Today",
+    "forward": "Forward",
+    "search": "Search project...",
+    "allCategories": "All categories",
+    "timeline": "Project Timeline — All Active",
+    "noProjects": "No projects with deadlines found.",
+    "week": "Week",
+    "month": "Month",
+    "quarter": "Quarter",
+    "year": "Year"
+  },
+  "months": {
+    "short": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ]
   }
 }
