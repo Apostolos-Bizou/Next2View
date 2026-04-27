@@ -12,6 +12,7 @@ public record AuthResponse(
         String fullName,
         String email,
         String role,
-        String department
+        String department,
+        boolean mfaEnabled
     ) {}
 }

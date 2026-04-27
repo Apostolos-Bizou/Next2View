@@ -30,6 +30,7 @@ export const useAuthStore = defineStore("auth", () => {
           email: res.data.email,
           role: res.data.role,
           department: res.data.department,
+            mfaEnabled: res.data.mfaEnabled || false,
         };
       }
     } catch {

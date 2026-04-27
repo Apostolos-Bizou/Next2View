@@ -217,7 +217,8 @@ public class AuthService {
                 user.getFullName(),
                 user.getEmail(),
                 user.getRole().name(),
-                user.getDepartment() != null ? user.getDepartment().name() : null
+                user.getDepartment() != null ? user.getDepartment().name() : null,
+                user.getMfaEnabled() != null && user.getMfaEnabled()
         );
     }
 }
