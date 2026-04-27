@@ -173,5 +173,51 @@
     "aiThinking": "Thinking...",
     "aiAsk": "ask",
     "aiAnalyzing": "Analyzing your data..."
+  },
+  "ganttv2": {
+    "title": "Project Timeline",
+    "moduleTask": "MODULE / TASK",
+    "specifications": "Specifications",
+    "monthsFull": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ],
+    "daysShort": [
+      "Su",
+      "Mo",
+      "Tu",
+      "We",
+      "Th",
+      "Fr",
+      "Sa"
+    ],
+    "zoom": {
+      "day": "Day",
+      "week": "Week",
+      "month": "Month",
+      "fit": "Fit"
+    },
+    "zoomTip": "Zoom",
+    "zoomFitTip": "Auto-fit to project range",
+    "legend": {
+      "dev": "Dev",
+      "finance": "Finance",
+      "legal": "Legal",
+      "marketing": "Marketing",
+      "blocked": "Blocked",
+      "scrollZoom": "+scroll: zoom",
+      "pinchZoom": "Touch: pinch to zoom",
+      "hoverBars": "Hover bars for details"
+    }
   }
 }

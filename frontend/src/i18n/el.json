@@ -173,5 +173,51 @@
     "aiThinking": "Σκέφτομαι...",
     "aiAsk": "ρώτα",
     "aiAnalyzing": "Αναλύω τα δεδομένα σου..."
+  },
+  "ganttv2": {
+    "title": "Project Timeline",
+    "moduleTask": "MODULE / TASK",
+    "specifications": "Specifications",
+    "monthsFull": [
+      "Ιανουάριος",
+      "Φεβρουάριος",
+      "Μάρτιος",
+      "Απρίλιος",
+      "Μάιος",
+      "Ιούνιος",
+      "Ιούλιος",
+      "Αύγουστος",
+      "Σεπτέμβριος",
+      "Οκτώβριος",
+      "Νοέμβριος",
+      "Δεκέμβριος"
+    ],
+    "daysShort": [
+      "Κυ",
+      "Δε",
+      "Τρ",
+      "Τε",
+      "Πε",
+      "Πα",
+      "Σα"
+    ],
+    "zoom": {
+      "day": "Ημέρα",
+      "week": "Εβδομάδα",
+      "month": "Μήνας",
+      "fit": "Auto"
+    },
+    "zoomTip": "Zoom",
+    "zoomFitTip": "Αυτόματη προσαρμογή στο εύρος project",
+    "legend": {
+      "dev": "Dev",
+      "finance": "Finance",
+      "legal": "Legal",
+      "marketing": "Marketing",
+      "blocked": "Blocked",
+      "scrollZoom": "+scroll: zoom",
+      "pinchZoom": "Touch: pinch to zoom",
+      "hoverBars": "Hover bars για λεπτομέρειες"
+    }
   }
 }

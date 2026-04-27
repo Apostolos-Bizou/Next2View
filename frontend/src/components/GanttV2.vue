@@ -5,7 +5,7 @@
       <div>
         <div class="ganttv2-ph-title">📊 Project Timeline</div>
         <div class="ganttv2-ph-sub">
-          {{ project.title }} · {{ rangeLabel }} · {{ resolvedZoom.toUpperCase() }} view
+          {{ project.title }} · {{ rangeLabel }} · {{ t('ganttv2.zoom.' + resolvedZoom) }}
         </div>
       </div>
       <div class="ganttv2-zoom-controls" role="tablist" aria-label="Zoom level">
@@ -14,8 +14,8 @@
           :key="z"
           :class="['ganttv2-zoom-btn', { active: zoom === z }]"
           @click="zoom = z"
-          :title="z === 'fit' ? 'Auto-fit to project range' : 'Zoom: ' + z"
-        >{{ z === 'fit' ? 'Fit' : z.charAt(0).toUpperCase() + z.slice(1) }}</button>
+          :title="z === 'fit' ? t('ganttv2.zoomFitTip') : t('ganttv2.zoomTip') + ': ' + t('ganttv2.zoom.' + z)"
+        >{{ t('ganttv2.zoom.' + z) }}</button>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
 
         <!-- HEADER ROW (sticky top) -->
         <div class="ganttv2-header">
-          <div class="ganttv2-header-label">MODULE / TASK</div>
+          <div class="ganttv2-header-label">{{ t('ganttv2.moduleTask') }}</div>
           <div class="ganttv2-header-cells" :style="{ minWidth: totalWidth + 'px' }">
             <!-- Top row (months or year) -->
             <div class="ganttv2-header-row top">
@@ -85,7 +85,7 @@
           <div class="ganttv2-row module-row" :style="{ minWidth: (labelColWidth + totalWidth) + 'px' }">
             <div class="ganttv2-label indent-1">
               <span class="mod-dot" style="background: var(--legal);"></span>
-              <span class="label-text">📋 Specifications</span>
+              <span class="label-text">📋 {{ t('ganttv2.specifications') }}</span>
               <span class="ganttv2-pct-pill">{{ specsCompletion }}%</span>
             </div>
             <div class="ganttv2-timeline" :style="{ minWidth: totalWidth + 'px' }">
@@ -211,26 +211,28 @@
 
     <!-- Legend strip -->
     <div class="ganttv2-strip">
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--dev);"></div>Dev</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--finance);"></div>Finance</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--legal);"></div>Legal</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--marketing);"></div>Marketing</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--red);"></div>Blocked</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--dev);"></div>{{ t('ganttv2.legend.dev') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--finance);"></div>{{ t('ganttv2.legend.finance') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--legal);"></div>{{ t('ganttv2.legend.legal') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--marketing);"></div>{{ t('ganttv2.legend.marketing') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--red);"></div>{{ t('ganttv2.legend.blocked') }}</div>
       <div class="strip-divider"></div>
-      <div class="strip-item"><span class="kbd">Ctrl</span>+scroll: zoom</div>
-      <div class="strip-item">Touch: pinch to zoom</div>
-      <div class="strip-item">Hover bars for details</div>
+      <div class="strip-item"><span class="kbd">Ctrl</span>{{ t('ganttv2.legend.scrollZoom') }}</div>
+      <div class="strip-item">{{ t('ganttv2.legend.pinchZoom') }}</div>
+      <div class="strip-item">{{ t('ganttv2.legend.hoverBars') }}</div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   project: { type: Object, required: true }
 })
 const emit = defineEmits(['task-click'])
+const { t } = useI18n()
 
 // ═══════════════════ STATE ═══════════════════
 const zoom = ref('fit')
@@ -243,9 +245,9 @@ const labelColWidth = computed(() => window.innerWidth < 768 ? LABEL_W_MOBILE : 
 
 const CELL_W = { day: 40, week: 80, month: 120 }
 
-const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-const MONTH_FULL_EL = ['Ιανουάριος','Φεβρουάριος','Μάρτιος','Απρίλιος','Μάιος','Ιούνιος','Ιούλιος','Αύγουστος','Σεπτέμβριος','Οκτώβριος','Νοέμβριος','Δεκέμβριος']
-const DAY_SHORT_EL = ['Κυ','Δε','Τρ','Τε','Πε','Πα','Σα']
+const MONTH_SHORT = computed(() => t('months.short'))
+const MONTH_FULL_EL = computed(() => t('ganttv2.monthsFull'))
+const DAY_SHORT_EL = computed(() => t('ganttv2.daysShort'))
 
 // ═══════════════════ HELPERS ═══════════════════
 const MS_DAY = 86400000
@@ -266,8 +268,8 @@ const today = () => { const t = new Date(); t.setHours(0,0,0,0); return t }
 
 const catIcon = (c) => ({ finance:'$', legal:'⚖', dev:'⌨', marketing:'◈' }[c] || '·')
 
-const fmtShort = (d) => d.getDate() + ' ' + MONTH_SHORT[d.getMonth()]
-const fmtLong = (d) => d.getDate() + ' ' + MONTH_SHORT[d.getMonth()] + ' ' + d.getFullYear()
+const fmtShort = (d) => d.getDate() + ' ' + MONTH_SHORT.value[d.getMonth()]
+const fmtLong = (d) => d.getDate() + ' ' + MONTH_SHORT.value[d.getMonth()] + ' ' + d.getFullYear()
 
 // ═══════════════════ COMPUTED ═══════════════════
 const hasContent = computed(() => {
@@ -409,7 +411,7 @@ const headerTop = computed(() => {
       if (lastOfMonth) {
         const days = daysBetween(monthStart, next)
         cells.push({
-          label: MONTH_FULL_EL[monthStart.getMonth()] + ' ' + monthStart.getFullYear(),
+          label: MONTH_FULL_EL.value[monthStart.getMonth()] + ' ' + monthStart.getFullYear(),
           width: days * CELL_W.day
         })
         monthStart = next
@@ -425,7 +427,7 @@ const headerTop = computed(() => {
       if (lastOfMonth) {
         const weeks = Math.ceil(daysBetween(monthStart, next) / 7)
         cells.push({
-          label: MONTH_FULL_EL[monthStart.getMonth()] + ' ' + monthStart.getFullYear(),
+          label: MONTH_FULL_EL.value[monthStart.getMonth()] + ' ' + monthStart.getFullYear(),
           width: weeks * CELL_W.week
         })
         monthStart = next
@@ -465,7 +467,7 @@ const headerBottom = computed(() => {
       const isToday = cursor.getTime() === t.getTime()
       cells.push({
         label: cursor.getDate(),
-        sub: DAY_SHORT_EL[cursor.getDay()],
+        sub: DAY_SHORT_EL.value[cursor.getDay()],
         width: CELL_W.day,
         weekend: isWeekend,
         today: isToday
@@ -478,7 +480,7 @@ const headerBottom = computed(() => {
       const weekEnd = addDays(cursor, 6)
       const isToday = t >= cursor && t <= weekEnd
       cells.push({
-        label: cursor.getDate() + ' ' + MONTH_SHORT[cursor.getMonth()],
+        label: cursor.getDate() + ' ' + MONTH_SHORT.value[cursor.getMonth()],
         sub: 'W' + getWeekNum(cursor),
         width: CELL_W.week,
         today: isToday
@@ -490,7 +492,7 @@ const headerBottom = computed(() => {
     while (cursor < re) {
       const isToday = t.getMonth() === cursor.getMonth() && t.getFullYear() === cursor.getFullYear()
       cells.push({
-        label: MONTH_SHORT[cursor.getMonth()],
+        label: MONTH_SHORT.value[cursor.getMonth()],
         width: CELL_W.month,
         today: isToday
       })
