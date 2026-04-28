@@ -156,49 +156,49 @@
           <!-- Task rows -->
           <template v-if="!collapsedMods.has(m.id)">
             <div
-              v-for="t in m.tasks"
-              :key="t.id"
+              v-for="tk in m.tasks"
+              :key="tk.id"
               class="ganttv2-row task-row"
               :style="{ minWidth: (labelColWidth + totalWidth) + 'px' }"
             >
               <div class="ganttv2-label indent-2">
-                <div :class="['task-check', { done: t.isDone, blocked: t.isBlocked }]">
-                  {{ t.isDone ? '✓' : '' }}
+                <div :class="['task-check', { done: tk.isDone, blocked: tk.isBlocked }]">
+                  {{ tk.isDone ? '✓' : '' }}
                 </div>
-                <span :class="['label-text', { done: t.isDone }]">{{ t.name }}</span>
-                <span v-if="t.isBlocked" class="task-warn">⚠</span>
+                <span :class="['label-text', { done: tk.isDone }]">{{ tk.name }}</span>
+                <span v-if="tk.isBlocked" class="task-warn">⚠</span>
               </div>
               <div class="ganttv2-timeline" :style="{ minWidth: totalWidth + 'px' }">
                 <div v-if="todayX !== null" class="ganttv2-today-line faded" :style="{ left: todayX + 'px' }"></div>
-                <template v-if="taskBar(t).show">
+                <template v-if="taskBar(tk).show">
                   <div
                     :class="[
                       'ganttv2-task-bar',
                       m.color || project.category,
-                      { done: t.isDone, blocked: t.isBlocked }
+                      { done: tk.isDone, blocked: tk.isBlocked }
                     ]"
-                    :title="`${t.name} — ${t.progress || 0}%${t.startDate ? ' (' + t.startDate + (t.endDate ? ' → ' + t.endDate : '') + ')' : ''}${t.assignee ? ' — ' + t.assignee : ''}${t.blockNote ? ' — BLOCKED: ' + t.blockNote : ''}`"
-                    @click.stop="emit('task-click', t.id)"
-                    :style="{ left: taskBar(t).left + 'px', width: taskBar(t).width + 'px' }"
+                    :title="`${tk.name} — ${tk.progress || 0}%${tk.startDate ? ' (' + tk.startDate + (tk.endDate ? ' → ' + tk.endDate : '') + ')' : ''}${tk.assignee ? ' — ' + tk.assignee : ''}${tk.blockNote ? ' — BLOCKED: ' + tk.blockNote : ''}`"
+                    @click.stop="emit('task-click', tk.id)"
+                    :style="{ left: taskBar(tk).left + 'px', width: taskBar(tk).width + 'px' }"
                   >
-                    <div class="bar-progress" :style="{ width: (t.progress || 0) + '%' }"></div>
+                    <div class="bar-progress" :style="{ width: (tk.progress || 0) + '%' }"></div>
                     <div
-                      v-if="barPastOverlay(t).show"
+                      v-if="barPastOverlay(tk).show"
                       class="bar-past-overlay"
-                      :style="{ width: barPastOverlay(t).width + '%' }"
+                      :style="{ width: barPastOverlay(tk).width + '%' }"
                     ></div>
-                    <span v-if="t.isBlocked" class="bar-warn">⚠</span>
-                    <template v-if="taskBar(t).nameFits">
-                      <span class="bar-text">{{ t.name }}</span>
-                      <span class="bar-pct">{{ t.progress || 0 }}%</span>
+                    <span v-if="tk.isBlocked" class="bar-warn">⚠</span>
+                    <template v-if="taskBar(tk).nameFits">
+                      <span class="bar-text">{{ tk.name }}</span>
+                      <span class="bar-pct">{{ tk.progress || 0 }}%</span>
                     </template>
                   </div>
                   <span
-                    v-if="!taskBar(t).nameFits"
+                    v-if="!taskBar(tk).nameFits"
                     class="ganttv2-bar-overflow"
-                    :style="{ left: (taskBar(t).left + taskBar(t).width) + 'px' }"
+                    :style="{ left: (taskBar(tk).left + taskBar(tk).width) + 'px' }"
                   >
-                    {{ t.name }} <span class="ovf-pct">· {{ t.progress || 0 }}%</span>
+                    {{ tk.name }} <span class="ovf-pct">· {{ tk.progress || 0 }}%</span>
                   </span>
                 </template>
               </div>
@@ -299,16 +299,16 @@ const allDates = computed(() => {
 
   ;(p.modules || []).forEach(m => {
     (m.tasks || []).forEach(t => {
-      if (t.startDate) dates.push(new Date(t.startDate))
-      if (t.endDate) dates.push(new Date(t.endDate))
+      if (tk.startDate) dates.push(new Date(tk.startDate))
+      if (tk.endDate) dates.push(new Date(tk.endDate))
       // Legacy: startDay / durationDays
-      if (!t.startDate && t.startDay != null && p.startDate) {
+      if (!tk.startDate && t.startDay != null && p.startDate) {
         const ps = new Date(p.startDate)
         dates.push(addDays(ps, t.startDay))
         dates.push(addDays(ps, t.startDay + (t.durationDays || 1)))
       }
       // Legacy: startWeek / durationWeeks
-      if (!t.startDate && t.startWeek != null && p.startDate) {
+      if (!tk.startDate && t.startWeek != null && p.startDate) {
         const ps = new Date(p.startDate)
         dates.push(addDays(ps, (t.startWeek - 1) * 7))
         dates.push(addDays(ps, (t.startWeek - 1) * 7 + (t.durationWeeks || 1) * 7))
@@ -507,7 +507,7 @@ const MIN_BAR_PX = 32
 
 
 // ─── Past overlay: compute how much of this task's bar is in the past ───
-function barPastOverlay(t) {
+function barPastOverlay(tk) {
   const dates = resolveTaskDates(t)
   if (!dates) return { show: false }
   const todayMs = today().getTime()
@@ -539,26 +539,26 @@ function computeBar(taskStartMs, taskEndMs, nameText) {
 }
 
 function resolveTaskDates(t) {
-  if (t.startDate) {
-    const s = parseDate(t.startDate).getTime()
-    const e = t.endDate ? parseDate(t.endDate).getTime() : s + 7 * MS_DAY
+  if (tk.startDate) {
+    const s = parseDate(tk.startDate).getTime()
+    const e = tk.endDate ? parseDate(tk.endDate).getTime() : s + 7 * MS_DAY
     return { s, e }
   }
   if (t.startDay != null && t.durationDays != null && props.project?.startDate) {
-    const ps = parseDate(props.project.startDate).getTime()
+    const ps = parseDate(props.projectk.startDate).getTime()
     return { s: ps + t.startDay * MS_DAY, e: ps + (t.startDay + (t.durationDays || 1)) * MS_DAY }
   }
   if (t.startWeek != null && props.project?.startDate) {
-    const ps = parseDate(props.project.startDate).getTime()
+    const ps = parseDate(props.projectk.startDate).getTime()
     return { s: ps + (t.startWeek - 1) * 7 * MS_DAY, e: ps + ((t.startWeek - 1) + (t.durationWeeks || 1)) * 7 * MS_DAY }
   }
   return null
 }
 
-function taskBar(t) {
+function taskBar(tk) {
   const dates = resolveTaskDates(t)
   if (!dates) return { show: false }
-  return computeBar(dates.s, dates.e, t.name)
+  return computeBar(dates.s, dates.e, tk.name)
 }
 
 function specBar(s) {
