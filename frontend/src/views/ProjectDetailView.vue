@@ -77,21 +77,21 @@
             <div class="mg-right">
               <div class="mg-bar-wrap"><div class="mg-bar"><div class="mg-bar-fill" :style="`width:${m.completion}%;background:var(--${m.color||project.category});`"></div></div></div>
               <span class="mg-pct" :style="`color:var(--${m.color||project.category});`">{{ m.completion }}%</span>
-              <span class="mg-tasks">{{ m.tasks.filter(tk=>tk.isDone).length }}/{{ m.tasks.length }}</span>
+              <span class="mg-tasks">{{ m.tasks.filter(t=>t.isDone).length }}/{{ m.tasks.length }}</span>
             </div>
           </div>
           <div v-if="openAcc.has(m.id)" class="task-list">
-            <div v-for="tk in m.tasks" :key="tk.id+'acc'" class="task-item">
-              <div :class="`task-check ${tk.isDone?'done':tk.isBlocked?'block':''}`" @click.stop="toggleTask(tk)" style="cursor:pointer;">{{ tk.isDone?'✓':'' }}</div>
+            <div v-for="t in m.tasks" :key="t.id+'acc'" class="task-item">
+              <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
               <div style="flex:1;">
-                <div :class="`task-name ${tk.isDone?'done':''}`">{{ tk.name }}</div>
-                <button class="delete-task-btn" @click.stop="confirmDeleteTask(tk, m)" :title="t('pd.deleteTask')">🗑</button>
-                <div v-if="tk.blockNote" class="task-note">⚠ {{ tk.blockNote }}</div>
+                <div :class="`task-name ${t.isDone?'done':''}`">{{ t.name }}</div>
+                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" :title="t('pd.deleteTask')">🗑</button>
+                <div v-if="t.blockNote" class="task-note">⚠ {{ t.blockNote }}</div>
               </div>
-              <span class="task-assignee">{{ tk.assignee||'—' }}</span>
+              <span class="task-assignee">{{ t.assignee||'—' }}</span>
               <div class="task-pct-wrap">
-                <div class="task-bar"><div class="task-bar-fill" :style="`width:${displayProgress(tk)}%;background:${tk.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
-                <div class="task-pct" :style="`color:${tk.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(tk) }}%<span v-if="mismatchAlert(tk)" :title="t('pd.behindSchedule')" style="color:var(--red);margin-left:4px;">⚠</span></div>
+                <div class="task-bar"><div class="task-bar-fill" :style="`width:${displayProgress(t)}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
+                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" :title="t('pd.behindSchedule')" style="color:var(--red);margin-left:4px;">⚠</span></div>
               </div>
             </div>
           </div>
@@ -384,19 +384,19 @@
             </select>
             <button @click="editForm.modules.splice(mi,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 8px;cursor:pointer;">✕</button>
           </div>
-          <div v-for="(tk, ti) in m.tasks" :key="ti" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;padding-left:12px;">
+          <div v-for="(t, ti) in m.tasks" :key="ti" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;padding-left:12px;">
             <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
               <div style="display:flex;gap:6px;align-items:center;">
-                <input v-model="tk.name" type="text" class="form-input" style="flex:2;" placeholder="Task name" />
-                <input v-model="tk.assignee" type="text" class="form-input" style="flex:1;" placeholder="Assignee" />
-                <input v-model.number="tk.progress" type="number" class="form-input" style="width:65px;" min="0" max="100" placeholder="%" />
+                <input v-model="t.name" type="text" class="form-input" style="flex:2;" placeholder="Task name" />
+                <input v-model="t.assignee" type="text" class="form-input" style="flex:1;" placeholder="Assignee" />
+                <input v-model.number="t.progress" type="number" class="form-input" style="width:65px;" min="0" max="100" placeholder="%" />
                 <button @click="m.tasks.splice(ti,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 6px;cursor:pointer;">✕</button>
               </div>
               <div style="display:flex;gap:6px;align-items:center;padding-left:4px;">
                 <label style="font-size:10px;color:var(--text-dim);min-width:55px;">{{ t('pd.start') }}</label>
-                <input v-model="tk.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
+                <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
                 <label style="font-size:10px;color:var(--text-dim);min-width:35px;">{{ t('pd.end') }}</label>
-                <input v-model="tk.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
+                <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
               </div>
             </div>
           </div>
