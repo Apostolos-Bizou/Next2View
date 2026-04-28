@@ -96,6 +96,12 @@
         </div>
       </div>
 
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button :class="['lang-btn', { active: locale === 'el' }]" @click.stop="switchLang('el')"><img src="https://flagcdn.com/w20/gr.png" width="14" height="10" alt="GR" style="vertical-align:middle;margin-right:4px;border-radius:1px;">EL</button>
+        <button :class="['lang-btn', { active: locale === 'en' }]" @click.stop="switchLang('en')"><img src="https://flagcdn.com/w20/gb.png" width="14" height="10" alt="EN" style="vertical-align:middle;margin-right:4px;border-radius:1px;">EN</button>
+      </div>
+
       <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" :title="tt('tooltips.profile')">
         <div class="avatar">{{ initials }}</div>
         <div>
@@ -514,6 +520,14 @@ async function saveNewUser() {
   } finally { userSaving.value = false }
 }
 const sidebarOpen = ref(false)
+const showMfaModal = ref(false)
+
+// Language switcher
+const { locale } = useI18n()
+function switchLang(lang) {
+  locale.value = lang
+  localStorage.setItem('n2v_locale', lang)
+}
 
 // Close sidebar on route change
 watch(route, () => { sidebarOpen.value = false })
@@ -935,4 +949,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
   color: var(--text-dim); cursor: pointer; font-family: 'Nunito', sans-serif;
 }
 .mfa-nudge-dismiss:hover { border-color: var(--text-mid); color: var(--text-mid); }
+
+.lang-switcher { display: flex; gap: 4px; padding: 8px 14px; border-top: 1px solid var(--sidebar-border); }
+.lang-btn { flex: 1; padding: 5px 0; border: 1px solid var(--sidebar-border); border-radius: 6px; background: transparent; color: var(--sidebar-text-dim); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: 'Nunito', sans-serif; }
+.lang-btn:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text); }
+.lang-btn.active { background: var(--sidebar-active-bg); color: #fff; border-color: var(--sidebar-active-border); }
+
 </style>

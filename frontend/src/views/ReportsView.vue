@@ -262,7 +262,7 @@ function renderMarkdown(text) {
 function formatDate(dt) {
   if (!dt) return '—'
   const d = new Date(dt)
-  return d.toLocaleDateString(t('months.short') ? 'el' : 'en', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString(Array.from({length:12}, (_, mi) => t('months.' + mi)) ? 'el' : 'en', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 function formatKey(key) {

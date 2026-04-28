@@ -245,9 +245,9 @@ const labelColWidth = computed(() => window.innerWidth < 768 ? LABEL_W_MOBILE : 
 
 const CELL_W = { day: 40, week: 80, month: 120 }
 
-const MONTH_SHORT = computed(() => tt('months.short'))
-const MONTH_FULL_EL = computed(() => tt('ganttv2.monthsFull'))
-const DAY_SHORT_EL = computed(() => tt('ganttv2.daysShort'))
+const MONTH_SHORT = computed(() => Array.from({length:12}, (_, mi) => tt('months.' + mi)))
+const MONTH_FULL_EL = computed(() => Array.from({length:12}, (_, mi) => tt('ganttv2.monthsFull.' + mi)))
+const DAY_SHORT_EL = computed(() => Array.from({length:7}, (_, di) => tt('ganttv2.daysShort.' + di)))
 
 // ═══════════════════ HELPERS ═══════════════════
 const MS_DAY = 86400000

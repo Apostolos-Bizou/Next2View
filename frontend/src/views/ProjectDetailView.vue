@@ -14,8 +14,6 @@
 
       <!-- CONTRACT HEADER -->
       <div :class="`contract-header ${project.category}`" style="position:relative;">
-        <button v-if="permStore.isCEO() || permStore.can('editProject')" class="edit-project-btn" @click="openEditModal" :title="tt('pd.edit')">{{ tt('pd.editBtn') }}</button>
-        <button v-if="permStore.isCEO()" class="delete-project-btn" @click="confirmDeleteProject" :title="tt('pd.deleteProject')">🗑 {{ tt('pd.delete') }}</button>
         <div class="ch-top">
           <div>
             <div class="ch-title">{{ project.title }}</div>
@@ -27,7 +25,11 @@
               <span v-if="project.budget">Budget: €{{ Number(project.budget).toLocaleString() }}</span>
             </div>
           </div>
-          <span :class="`ch-badge ${project.category}`">{{ catLabel(project.category) }}</span>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span :class="`ch-badge ${project.category}`">{{ catLabel(project.category) }}</span>
+              <button v-if="permStore.isCEO()" class="delete-project-btn" @click="confirmDeleteProject" :title="tt('pd.deleteProject')">🗑 {{ tt('pd.delete') }}</button>
+              <button v-if="permStore.isCEO() || permStore.can('editProject')" class="edit-project-btn" @click="openEditModal" :title="tt('pd.edit')">✏️ {{ tt('pd.editBtn') }}</button>
+            </div>
         </div>
         <div class="contract-stats">
           <div class="cs-item">
@@ -295,7 +297,7 @@
         </div>
         <div class="modal-footer te-footer">
           <button class="te-btn te-btn-danger" @click="deleteTaskFromModal" :disabled="editingTaskSaving">
-            🗑 Διαγραφή
+            🗑 {{ tt('pd.delete') }}
           </button>
           <div style="flex:1"></div>
           <button class="te-btn te-btn-ghost" @click="closeTaskEdit" :disabled="editingTaskSaving">
@@ -1047,7 +1049,7 @@ function budgetPct(amount, budget) {
 function formatInstant(instant) {
   if (!instant) return ""
   const d = new Date(instant)
-  const m = tt('months.short')
+  const m = Array.from({length:12}, (_, mi) => tt('months.' + mi))
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}, ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`
 }
 
@@ -1065,7 +1067,7 @@ function toggleAcc(id) {
 // ════ GANTT LOGIC ════
 const ganttWeeks = computed(() => {
   const weeks = []
-  const months = tt('months.short')
+  const months = Array.from({length:12}, (_, mi) => tt('months.' + mi))
   for (let i = 0; i < GANTT_WEEKS; i++) {
     const d = new Date(ganttStart.value)
     d.setDate(d.getDate() + i * 7)
@@ -1208,7 +1210,7 @@ const statusLabel = (s) => ({ on_track:'On Track', delayed:'Delayed', at_risk:'A
 function formatDate(iso) {
   if (!iso) return '—'
   const d = new Date(iso)
-  const m = tt('months.short')
+  const m = Array.from({length:12}, (_, mi) => tt('months.' + mi))
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`
 }
 </script>
@@ -1226,7 +1228,7 @@ function formatDate(iso) {
 .contract-header.legal::before    { background: var(--legal); }
 .contract-header.dev::before      { background: var(--dev); }
 .contract-header.marketing::before{ background: var(--marketing); }
-.ch-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.ch-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
 .ch-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
 .ch-meta { font-size: 11px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; display: flex; gap: 14px; flex-wrap: wrap; }
 .ch-badge { font-size: 9px; font-weight: 700; padding: 4px 12px; border-radius: 6px; letter-spacing: 1px; }
@@ -1387,15 +1389,15 @@ function formatDate(iso) {
 .note-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 6px; border-radius: 4px; margin-left: auto; }
 .note-del:hover { color: var(--red); background: var(--red-dim); }
 .notes-empty { padding: 24px 20px; color: var(--text-dim); font-size: 12px; text-align: center; font-family: "Nunito Sans", sans-serif; }
-.delete-project-btn { position: absolute; top: 14px; right: 130px; font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: rgba(220,38,38,0.2); border: 1px solid rgba(220,38,38,0.4); border-radius: 6px; color: #fca5a5; cursor: pointer; transition: background 0.2s; }
-.delete-project-btn:hover { background: rgba(220,38,38,0.35); }
+.delete-project-btn { font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: #dc2626; border: 1px solid #b91c1c; border-radius: 6px; color: #fff; cursor: pointer; transition: background 0.2s; }
+.delete-project-btn:hover { background: #b91c1c; }
 .delete-mod-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 4px; opacity: 0.5; transition: opacity 0.2s; margin-left: auto; }
 .delete-mod-btn:hover { opacity: 1; color: var(--red); }
 .delete-task-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 2px 4px; border-radius: 4px; opacity: 0; transition: opacity 0.2s; margin-left: 4px; }
 .task-row:hover .delete-task-btn { opacity: 0.6; }
 .delete-task-btn:hover { opacity: 1 !important; color: var(--red); }
-.edit-project-btn { position: absolute; top: 14px; right: 16px; font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; color: #fff; cursor: pointer; transition: background 0.2s; }
-.edit-project-btn:hover { background: rgba(255,255,255,0.25); }
+.edit-project-btn { font-family: "Nunito", sans-serif; font-size: 11px; font-weight: 700; padding: 6px 14px; background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 6px; color: var(--text); cursor: pointer; transition: all 0.2s; }
+.edit-project-btn:hover { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal { background: var(--surface); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); display: flex; flex-direction: column; overflow: hidden; }
 .modal-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--surface2); }

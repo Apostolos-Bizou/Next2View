@@ -1,0 +1,187 @@
+{
+  "app": {
+    "title": "Next2View Command Center — Next2me Group",
+    "subtitle": "Next2View — Command Center",
+    "ceoView": "All companies · All categories · CEO view"
+  },
+
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "projects": "Projects",
+    "timeline": "Timeline",
+    "manage": "Manage",
+    "guide": "Guide",
+    "allProjects": "All Projects",
+    "companies": "Εταιρείες",
+    "logout": "Logout"
+  },
+
+  "categories": {
+    "finance": "Finance",
+    "legal": "Legal",
+    "dev": "Developing",
+    "marketing": "Marketing"
+  },
+
+  "dashboard": {
+    "totalProjects": "Σύνολο Projects",
+    "completed": "Completed",
+    "onTrack": "On Track",
+    "atRisk": "At Risk",
+    "blocked": "Blocked",
+    "recentActivity": "Πρόσφατη Δραστηριότητα",
+    "noActivity": "Καμία δραστηριότητα.",
+    "ganttTitle": "Gantt Timeline",
+    "ceoNote": "CEO Note"
+  },
+
+  "projects": {
+    "title": "Projects",
+    "noProjects": "Δεν υπάρχουν projects.",
+    "allCompanies": "Όλες εταιρείες",
+    "allCategories": "Όλες κατηγορίες",
+    "newProject": "Νέο Project",
+    "editProject": "Επεξεργασία Project",
+    "budget": "Budget / Contract (€)",
+    "deadline": "Deadline",
+    "progress": "Πρόοδος",
+    "status": "Status"
+  },
+
+  "detail": {
+    "modules": "Modules",
+    "tasks": "Tasks",
+    "specifications": "Specifications",
+    "noModules": "Δεν υπάρχουν modules.",
+    "notes": "Σημειώσεις",
+    "ceoNotes": "CEO Notes"
+  },
+
+  "contract": {
+    "title": "Στοιχεία Σύμβασης",
+    "subject": "Αντικείμενο Σύμβασης",
+    "parties": "Συμβαλλόμενα Μέρη",
+    "value": "Αξία Σύμβασης",
+    "paymentTerms": "Όροι Πληρωμής",
+    "startDate": "Ημερομηνία Έναρξης",
+    "endDate": "Ημερομηνία Λήξης",
+    "obligations": "Κύριες Υποχρεώσεις",
+    "penalties": "Ρήτρες / Ποινές",
+    "noPenalties": "Δεν αναφέρονται",
+    "governingLaw": "Εφαρμοστέο Δίκαιο",
+    "specialTerms": "Ιδιαίτεροι Όροι",
+    "signed": "Υπογεγραμμένη",
+    "unsigned": "Μη υπογεγραμμένη",
+    "removeContract": "Αφαίρεση σύμβασης;",
+    "description": "Σύντομη περιγραφή σύμβασης..."
+  },
+
+  "actions": {
+    "save": "Αποθήκευση",
+    "cancel": "Ακύρωση",
+    "delete": "Διαγραφή",
+    "close": "Κλείσιμο",
+    "export": "Export / Print",
+    "refresh": "Ανανέωση",
+    "upload": "Ανέβασε τώρα",
+    "uploadContract": "Υπογεγραμμένη Σύμβαση",
+    "print": "Εκτύπωση / Αποθήκευση ως PDF",
+    "goToProject": "Πήγαινε στο project",
+    "openPanel": "Άνοιγμα panel",
+    "aiReport": "AI Report",
+    "aiAnalysis": "AI Ανάλυση Σύμβασης",
+    "aiExtract": "AI Εξαγωγή Στοιχείων",
+    "addComment": "Πρόσθεσε σχόλιο για αυτή την εργασία...",
+    "saveComment": "Αποθήκευση",
+    "comment": "Σχόλιο"
+  },
+
+  "manage": {
+    "companies": "Companies",
+    "users": "Users",
+    "noCompanies": "Καμία εταιρεία.",
+    "noUsers": "Κανένας χρήστης.",
+    "deleteCompany": "Διαγραφή εταιρείας;",
+    "companyName": "Όνομα εταιρείας",
+    "companyCode": "Short Code",
+    "addCompany": "Προσθήκη Εταιρείας",
+    "addUser": "Προσθήκη Χρήστη",
+    "selectCompany": "— Επίλεξε —",
+    "fillNameCode": "Συμπλήρωσε όνομα & code.",
+    "fillName": "Συμπλήρωσε όνομα.",
+    "fillTitle": "Συμπλήρωσε τίτλο."
+  },
+
+  "guide": {
+    "title": "Οδηγός χρήσης Next2View",
+    "overview": "Επισκόπηση",
+    "gettingStarted": "Ξεκίνημα",
+    "dashboardGuide": "Dashboard",
+    "projectsGuide": "Projects",
+    "contractsGuide": "Συμβάσεις",
+    "aiFeatures": "AI Features — Powered by Claude",
+    "notifications": "Ειδοποιήσεις",
+    "roles": "Ρόλοι",
+    "tips": "Tips"
+  },
+
+  "status": {
+    "onTrack": "On Track",
+    "atRisk": "At Risk",
+    "delayed": "Delayed",
+    "completed": "Completed",
+    "blocked": "Blocked",
+    "stale": "Stale",
+    "needsAttention": "χρειάζονται προσοχή"
+  },
+
+  "months": {
+    "short": ["Ιαν", "Φεβ", "Μαρ", "Απρ", "Μαι", "Ιουν", "Ιουλ", "Αυγ", "Σεπ", "Οκτ", "Νοε", "Δεκ"]
+  },
+
+  "placeholders": {
+    "projectTitle": "π.χ. IMO CII Compliance 2026",
+    "companyName": "π.χ. Polaris Financial Services",
+    "description": "π.χ. TPA maritime healthcare",
+    "role": "π.χ. COO",
+    "userName": "π.χ. Makram Yousef"
+  },
+
+  "errors": {
+    "invalidApiKey": "Βάλε ένα valid API key.",
+    "apiKeyWarning": "Το key δεν αρχίζει με sk-ant-. Είσαι σίγουρος;",
+    "fileTooLarge": "Το αρχείο είναι μεγαλύτερο από 10MB.",
+    "noTextReturned": "Δεν επιστράφηκε κείμενο",
+    "error": "Σφάλμα"
+  },
+
+  "labels": {
+    "analyzed": "Αναλύθηκε",
+    "created": "Δημιουργήθηκε",
+    "apiKeySet": "API Key",
+    "apiKeyMissing": "API Key",
+    "underBilled": "Under-billed",
+    "aligned": "Aligned",
+    "inContract": "ΕΝΤΟΣ ΣΥΜΒΑΣΗΣ",
+    "outOfContract": "ΕΚΤΟΣ ΣΥΜΒΑΣΗΣ",
+    "inShort": "ΕΝΤΟΣ",
+    "outShort": "ΕΚΤΟΣ",
+    "risk": "ΚΙΝΔΥΝΟ",
+    "critical": "ΚΡΙΣΙΜΟ",
+    "atRiskShort": "ΣΕ ΚΙΝΔΥΝΟ",
+    "done": "ΟΛΟΚΛΗΡΩΘΗΚΕ",
+    "uploaded": "Ανεβάστηκε",
+    "pdfDocument": "PDF Document"
+  },
+
+  "warnings": {
+    "staleProject": "Το project δεν έχει ενημερωθεί για περισσότερο από 5 ημέρες.",
+    "atRiskProject": "Το project κινδυνεύει να μην παραδοθεί εγκαίρως. Απαιτείται άμεση δράση.",
+    "deadlineClose": "Λιγότερες από 7 ημέρες στο deadline και πρόοδος κάτω από 80%.",
+    "paceIssue": "Ο ρυθμός ανάπτυξης δεν φτάνει για να τελειώσει εγκαίρως. Χρειάζεται επιτάχυνση.",
+    "noProgress": "Το αρμόδιο τμήμα δεν αναφέρει πρόοδο. Κάποιος δεν κάνει τη δουλειά του.",
+    "blocked": "Κάτι εξωτερικό μπλοκάρει την εξέλιξη. Χρειάζεται παρέμβαση από τον CEO.",
+    "overBilled": "Η πρόοδος του project ξεπερνά κατά 30%+ αυτό που έχεις χρεώσει.",
+    "underBilled": "Δουλεύεις αλλά δεν χρεώνεις. Κίνδυνος απώλειας εσόδων — έλεγξε τις πληρωμές."
+  }
+}
