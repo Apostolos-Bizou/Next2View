@@ -43,7 +43,7 @@
           <span class="nav-ico" style="color:var(--accent);">📊</span>Reports
         </router-link>
 
-        <div v-if="['finance','legal','dev','marketing'].some(cat => permStore.canViewCategory(cat))" class="nav-section" style="margin-top:6px;">{{ t('sidebar.categories') }}</div>
+        <div v-if="['finance','legal','dev','marketing'].some(cat => permStore.canViewCategory(cat))" class="nav-section" style="margin-top:6px;">{{ tt('sidebar.categories') }}</div>
         <div v-if="permStore.canViewCategory('finance')" :class="['nav-item', route.query.category==='finance' ? 'active' : '']"
           @click="router.push('/projects?category=finance')">
           <span class="nav-ico" style="color:var(--finance);">$</span>Finance
@@ -65,7 +65,7 @@
           <span class="nav-count">{{ store.byCategory('marketing').length }}</span>
         </div>
 
-        <div class="nav-section" style="margin-top:6px;">{{ t('sidebar.companies') }}</div>
+        <div class="nav-section" style="margin-top:6px;">{{ tt('sidebar.companies') }}</div>
         <div
           v-for="co in store.companies" :key="co.id"
           :class="['nav-item', route.query.companyId===co.id ? 'active' : '']"
@@ -81,22 +81,28 @@
         <div class="notif-label">Notifications</div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span v-if="store.atRisk.length" class="notif-badge">{{ store.atRisk.length }}</span>
-          <span class="notif-bell" :title="t('nav.notifTooltip')">🔔</span>
+          <span class="notif-bell" :title="tt('nav.notifTooltip')">🔔</span>
         </div>
       </div>
 
       <div class="sidebar-actions">
-        <button v-if="permStore.isCEO() || permStore.can('aiCeoReport')" class="btn-sidebar btn-ai" @click="openAiReport" :title="t('tooltips.aiReport')">
+        <button v-if="permStore.isCEO() || permStore.can('aiCeoReport')" class="btn-sidebar btn-ai" @click="openAiReport" :title="tt('tooltips.aiReport')">
           <span style="font-size:16px;">✦</span> AI Report
         </button>
-        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject" :title="t('tooltips.newProject')">+ New Project</button>
+        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject" :title="tt('tooltips.newProject')">+ New Project</button>
         <div v-if="permStore.isCEO() || permStore.can('manageCompanies') || permStore.can('manageUsers')" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <button v-if="permStore.isCEO() || permStore.can('manageCompanies')" class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" :title="t('tooltips.newCompany')">+ Company</button>
-          <button v-if="permStore.isCEO() || permStore.can('manageUsers')" class="btn-sidebar" style="font-size:9px;" @click="openNewUser" :title="t('tooltips.newUser')">+ User</button>
+          <button v-if="permStore.isCEO() || permStore.can('manageCompanies')" class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" :title="tt('tooltips.newCompany')">+ Company</button>
+          <button v-if="permStore.isCEO() || permStore.can('manageUsers')" class="btn-sidebar" style="font-size:9px;" @click="openNewUser" :title="tt('tooltips.newUser')">+ User</button>
         </div>
       </div>
 
-      <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" :title="t('tooltips.profile')">
+      <!-- Language Switcher -->
+      <div class="lang-switcher">
+        <button :class="['lang-btn', { active: locale === 'el' }]" @click.stop="switchLang('el')"><img src="https://flagcdn.com/w20/gr.png" width="14" height="10" alt="GR" style="vertical-align:middle;margin-right:4px;border-radius:1px;">EL</button>
+        <button :class="['lang-btn', { active: locale === 'en' }]" @click.stop="switchLang('en')"><img src="https://flagcdn.com/w20/gb.png" width="14" height="10" alt="EN" style="vertical-align:middle;margin-right:4px;border-radius:1px;">EN</button>
+      </div>
+
+      <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" :title="tt('tooltips.profile')">
         <div class="avatar">{{ initials }}</div>
         <div>
           <div class="user-name">{{ auth.user?.fullName?.split(' ')[0] || 'CEO' }}</div>
@@ -136,23 +142,23 @@
 
         <div class="modal-body">
           <!-- BASIC INFO -->
-          <div class="form-section-title">{{ t('form.basicInfo') }}</div>
+          <div class="form-section-title">{{ tt('form.basicInfo') }}</div>
           <div class="form-group">
-            <label>{{ t('form.title') }} *</label>
-            <input v-model="form.title" :placeholder="t('form.titlePlaceholder')" class="form-input" />
+            <label>{{ tt('form.title') }} *</label>
+            <input v-model="form.title" :placeholder="tt('form.titlePlaceholder')" class="form-input" />
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>{{ t('form.company') }} *</label>
+              <label>{{ tt('form.company') }} *</label>
               <select v-model="form.companyId" class="form-input">
-                <option value="">{{ t('form.selectCompany') }}</option>
+                <option value="">{{ tt('form.selectCompany') }}</option>
                 <option v-for="co in store.companies" :key="co.id" :value="co.id">{{ co.name }}</option>
               </select>
             </div>
             <div class="form-group">
-              <label>{{ t('form.category') }} *</label>
+              <label>{{ tt('form.category') }} *</label>
               <select v-model="form.category" class="form-input">
-                <option value="">{{ t('form.selectCategory') }}</option>
+                <option value="">{{ tt('form.selectCategory') }}</option>
                 <option value="finance">$ Finance</option>
                 <option value="legal">⚖ Legal</option>
                 <option value="dev">⌨ Developing</option>
@@ -166,7 +172,7 @@
               <input v-model="form.budget" type="number" placeholder="0" class="form-input" />
             </div>
             <div class="form-group">
-              <label>{{ t('form.startDate') }}</label>
+              <label>{{ tt('form.startDate') }}</label>
               <input v-model="form.startDate" type="date" class="form-input" />
             </div>
             <div class="form-group">
@@ -175,14 +181,14 @@
             </div>
           </div>
           <div class="form-group">
-            <label>{{ t('form.contractDesc') }}</label>
-            <textarea v-model="form.contractDesc" :placeholder="t('form.contractDescPlaceholder')" class="form-input" rows="2"></textarea>
+            <label>{{ tt('form.contractDesc') }}</label>
+            <textarea v-model="form.contractDesc" :placeholder="tt('form.contractDescPlaceholder')" class="form-input" rows="2"></textarea>
           </div>
 
           <!-- SPECS -->
           <div class="form-section-title" style="margin-top:16px;">
             Specifications
-            <button class="add-btn" @click="addSpec">{{ t('form.addSpec') }}</button>
+            <button class="add-btn" @click="addSpec">{{ tt('form.addSpec') }}</button>
           </div>
           <div v-for="(s, i) in form.specs" :key="i" class="spec-row-full">
             <div class="spec-row">
@@ -192,25 +198,25 @@
             </div>
             <div class="spec-dates">
               <div class="spec-date-field">
-                <label class="spec-date-lbl">{{ t('form.specStart') }}</label>
+                <label class="spec-date-lbl">{{ tt('form.specStart') }}</label>
                 <input v-model="s.startDate" type="date" class="form-input spec-date-input" />
               </div>
               <div class="spec-date-field">
-                <label class="spec-date-lbl">{{ t('form.specEnd') }}</label>
+                <label class="spec-date-lbl">{{ tt('form.specEnd') }}</label>
                 <input v-model="s.endDate" type="date" class="form-input spec-date-input" />
               </div>
             </div>
-            <textarea v-model="s.notes" class="form-input" rows="2" :placeholder="t('form.specNotes')" style="font-size:12px;margin-top:4px;resize:vertical;"></textarea>
+            <textarea v-model="s.notes" class="form-input" rows="2" :placeholder="tt('form.specNotes')" style="font-size:12px;margin-top:4px;resize:vertical;"></textarea>
           </div>
 
           <!-- MODULES & TASKS -->
           <div class="form-section-title" style="margin-top:16px;">
             Modules & Tasks
-            <button class="add-btn" @click="addModule" :title="t('form.addModuleTooltip')">+ Module</button>
+            <button class="add-btn" @click="addModule" :title="tt('form.addModuleTooltip')">+ Module</button>
           </div>
           <div v-for="(m, mi) in form.modules" :key="mi" class="module-builder">
             <div class="mb-head">
-              <input v-model="m.name" :placeholder="t('form.moduleName')" class="form-input mb-name" />
+              <input v-model="m.name" :placeholder="tt('form.moduleName')" class="form-input mb-name" />
               <select v-model="m.color" class="form-input mb-color">
                 <option value="finance">$ Finance</option>
                 <option value="legal">⚖ Legal</option>
@@ -219,7 +225,7 @@
               </select>
               <button class="del-btn" @click="form.modules.splice(mi, 1)">✕</button>
             </div>
-            <textarea v-model="m.notes" class="form-input" rows="2" :placeholder="t('form.moduleNotes')" style="font-size:12px;resize:vertical;margin:4px 0 8px 0;"></textarea>
+            <textarea v-model="m.notes" class="form-input" rows="2" :placeholder="tt('form.moduleNotes')" style="font-size:12px;resize:vertical;margin:4px 0 8px 0;"></textarea>
             <div class="task-builder">
               <div v-for="(t, ti) in m.tasks" :key="ti" class="task-row">
                 <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
@@ -231,9 +237,9 @@
                     <button class="del-btn" @click="m.tasks.splice(ti, 1)">✕</button>
                   </div>
                   <div style="display:flex;gap:6px;align-items:center;">
-                    <label style="font-size:10px;color:var(--text-dim);min-width:50px;">{{ t('form.taskStart') }}</label>
+                    <label style="font-size:10px;color:var(--text-dim);min-width:50px;">{{ tt('form.taskStart') }}</label>
                     <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
-                    <label style="font-size:10px;color:var(--text-dim);min-width:30px;">{{ t('form.taskEnd') }}</label>
+                    <label style="font-size:10px;color:var(--text-dim);min-width:30px;">{{ tt('form.taskEnd') }}</label>
                     <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
                   </div>
                 </div>
@@ -246,9 +252,9 @@
         </div>
 
         <div class="modal-footer">
-          <button class="btn-cancel" @click="closeModal">{{ t('form.cancel') }}</button>
+          <button class="btn-cancel" @click="closeModal">{{ tt('form.cancel') }}</button>
           <button class="btn-submit" :disabled="submitting" @click="submitProject">
-            {{ submitting ? t('form.creating') : t('form.createProject') }}
+            {{ submitting ? tt('form.creating') : tt('form.createProject') }}
           </button>
         </div>
       </div>
@@ -263,14 +269,14 @@
       <div class="modal-body ai-body">
         <div v-if="aiLoading" class="ai-loading">
           <div class="ai-spinner"></div>
-          <div class="ai-loading-txt">{{ t('ai.analyzing', { count: store.projects.length }) }}</div>
+          <div class="ai-loading-txt">{{ tt('ai.analyzing', { count: store.projects.length }) }}</div>
         </div>
         <div v-else-if="aiReport" class="ai-report" v-html="renderMarkdown(aiReport)"></div>
-        <div v-else class="ai-error">{{ t('ai.reportFailed') }}</div>
+        <div v-else class="ai-error">{{ tt('ai.reportFailed') }}</div>
       </div>
       <div class="modal-footer" v-if="!aiLoading">
-        <button class="btn-cancel" @click="showAiReport=false">{{ t('ai.close') }}</button>
-        <button class="btn-submit" @click="loadAiReport">↺ {{ t('ai.refresh') }}</button>
+        <button class="btn-cancel" @click="showAiReport=false">{{ tt('ai.close') }}</button>
+        <button class="btn-submit" @click="loadAiReport">↺ {{ tt('ai.refresh') }}</button>
       </div>
     </div>
   </div>
@@ -285,12 +291,12 @@
       </div>
       <div class="modal-body">
         <div v-if="!mfaSetupData && !mfaEnabled" class="mfa-info">
-          <div class="mfa-status off">⚠ {{ t('mfa.disabled') }}</div>
-          <p class="mfa-desc">{{ t('mfa.enableDesc') }}</p>
-          <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : t('mfa.enableBtn') }}</button>
+          <div class="mfa-status off">⚠ {{ tt('mfa.disabled') }}</div>
+          <p class="mfa-desc">{{ tt('mfa.enableDesc') }}</p>
+          <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : tt('mfa.enableBtn') }}</button>
         </div>
         <div v-if="mfaSetupData" class="mfa-setup">
-          <div class="mfa-status">📱 {{ t('mfa.scanQR') }}</div>
+          <div class="mfa-status">📱 {{ tt('mfa.scanQR') }}</div>
           <div class="mfa-qr-wrap">
             <img :src="qrCodeUrl" class="mfa-qr" alt="QR" />
           </div>
@@ -298,16 +304,16 @@
             <span class="mfa-secret-label">Manual key:</span>
             <code class="mfa-secret">{{ mfaSetupData.secret }}</code>
           </div>
-          <p class="mfa-desc">{{ t('mfa.scanDesc') }}</p>
+          <p class="mfa-desc">{{ tt('mfa.scanDesc') }}</p>
           <input v-model="mfaCode" type="text" maxlength="6" placeholder="000000" class="form-input mfa-code-input" />
           <div v-if="mfaError" class="form-error">{{ mfaError }}</div>
-          <button class="btn-submit" @click="verifyMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? t('mfa.verifying') : t('mfa.verifyBtn') }}</button>
+          <button class="btn-submit" @click="verifyMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? tt('mfa.verifying') : tt('mfa.verifyBtn') }}</button>
         </div>
         <div v-if="mfaEnabled && !mfaSetupData" class="mfa-info">
-          <div class="mfa-status on">✅ {{ t('mfa.enabled') }}</div>
-          <p class="mfa-desc">{{ t('mfa.protectedDesc') }}</p>
-          <input v-model="mfaCode" type="text" maxlength="6" :placeholder="t('mfa.disablePlaceholder')" class="form-input mfa-code-input" />
-          <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : t('mfa.disableBtn') }}</button>
+          <div class="mfa-status on">✅ {{ tt('mfa.enabled') }}</div>
+          <p class="mfa-desc">{{ tt('mfa.protectedDesc') }}</p>
+          <input v-model="mfaCode" type="text" maxlength="6" :placeholder="tt('mfa.disablePlaceholder')" class="form-input mfa-code-input" />
+          <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : tt('mfa.disableBtn') }}</button>
         </div>
       </div>
     </div>
@@ -322,12 +328,12 @@
       </div>
       <div class="modal-body">
         <div v-if="!mfaSetupData && !mfaEnabled" class="mfa-info">
-          <div class="mfa-status off">⚠ {{ t('mfa.disabledAlt') }}</div>
-          <p class="mfa-desc">{{ t('mfa.enableDescAlt') }}</p>
+          <div class="mfa-status off">⚠ {{ tt('mfa.disabledAlt') }}</div>
+          <p class="mfa-desc">{{ tt('mfa.enableDescAlt') }}</p>
           <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : "Ενεργοποίηση MFA" }}</button>
         </div>
         <div v-if="mfaSetupData" class="mfa-setup">
-          <div class="mfa-status">📱 {{ t('mfa.scanQR') }}</div>
+          <div class="mfa-status">📱 {{ tt('mfa.scanQR') }}</div>
           <div class="mfa-qr-wrap">
             <img :src="qrCodeUrl" class="mfa-qr" alt="QR Code" />
           </div>
@@ -335,15 +341,15 @@
             <span class="mfa-secret-label">Manual key:</span>
             <code class="mfa-secret">{{ mfaSetupData.secret }}</code>
           </div>
-          <p class="mfa-desc">{{ t('mfa.scanDescAlt') }}</p>
+          <p class="mfa-desc">{{ tt('mfa.scanDescAlt') }}</p>
           <input v-model="mfaCode" type="text" maxlength="6" placeholder="000000" class="form-input mfa-code-input" />
           <div v-if="mfaError" class="form-error">{{ mfaError }}</div>
           <button class="btn-submit" @click="verifyMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "Επαλήθευση..." : "Επαλήθευση & Ενεργοποίηση" }}</button>
         </div>
         <div v-if="mfaEnabled && !mfaSetupData" class="mfa-info">
-          <div class="mfa-status on">✅ {{ t('mfa.enabledAlt') }}</div>
-          <p class="mfa-desc">{{ t('mfa.protectedDescAlt') }}</p>
-          <input v-model="mfaCode" type="text" maxlength="6" :placeholder="t('mfa.disablePlaceholder')" class="form-input mfa-code-input" />
+          <div class="mfa-status on">✅ {{ tt('mfa.enabledAlt') }}</div>
+          <p class="mfa-desc">{{ tt('mfa.protectedDescAlt') }}</p>
+          <input v-model="mfaCode" type="text" maxlength="6" :placeholder="tt('mfa.disablePlaceholder')" class="form-input mfa-code-input" />
           <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : "Απενεργοποίηση MFA" }}</button>
         </div>
       </div>
@@ -449,7 +455,7 @@ const store = useProjectStore()
 const permStore = usePermissionStore()
 const router = useRouter()
 const route = useRoute()
-const { t } = useI18n()
+const { t: tt } = useI18n()
 
 // ════ NEW COMPANY ════
 const showNewCompany = ref(false)
@@ -514,6 +520,14 @@ async function saveNewUser() {
   } finally { userSaving.value = false }
 }
 const sidebarOpen = ref(false)
+const showMfaModal = ref(false)
+
+// Language switcher
+const { locale } = useI18n()
+function switchLang(lang) {
+  locale.value = lang
+  localStorage.setItem('n2v_locale', lang)
+}
 
 // Close sidebar on route change
 watch(route, () => { sidebarOpen.value = false })
@@ -554,7 +568,7 @@ function addTask(m) {
 async function submitProject() {
   formError.value = ''
   if (!form.value.title || !form.value.companyId || !form.value.category) {
-    formError.value = t('form.errRequired')
+    formError.value = tt('form.errRequired')
     return
   }
   submitting.value = true
@@ -586,7 +600,7 @@ async function submitProject() {
     closeModal()
     router.push(`/projects/${proj.id}`)
   } catch (e) {
-    formError.value = e.response?.data?.message || t('form.errCreate')
+    formError.value = e.response?.data?.message || tt('form.errCreate')
   } finally {
     submitting.value = false
   }
@@ -651,14 +665,14 @@ const pageTitle = computed(() => ({
   Dashboard: 'Group Dashboard',
   Projects: 'All Projects',
   ProjectDetail: store.selectedProject?.title || 'Project Detail',
-  Guide: t('sidebar.guide'),
+  Guide: tt('sidebar.guide'),
 }[route.name] || 'Next2View'))
 
 const pageSubtitle = computed(() => ({
   Dashboard: 'All companies · All categories · CEO view',
   Projects: `${store.projects.length} projects`,
   ProjectDetail: store.selectedProject ? `${store.selectedProject.companyName} · ${store.selectedProject.category}` : '',
-  Guide: t('tooltips.guideFull'),
+  Guide: tt('tooltips.guideFull'),
 }[route.name] || ''))
 
 async function handleLogout() {
@@ -683,7 +697,7 @@ async function loadAiReport() {
     const res = await api.post('/ai/ceo-report')
     aiReport.value = res.data.report
   } catch (e) {
-    aiReport.value = t('ai.errorMd')
+    aiReport.value = tt('ai.errorMd')
   } finally {
     aiLoading.value = false
   }
@@ -935,4 +949,10 @@ textarea.form-input { resize: vertical; min-height: 60px; }
   color: var(--text-dim); cursor: pointer; font-family: 'Nunito', sans-serif;
 }
 .mfa-nudge-dismiss:hover { border-color: var(--text-mid); color: var(--text-mid); }
+
+.lang-switcher { display: flex; gap: 4px; padding: 8px 14px; border-top: 1px solid var(--sidebar-border); }
+.lang-btn { flex: 1; padding: 5px 0; border: 1px solid var(--sidebar-border); border-radius: 6px; background: transparent; color: var(--sidebar-text-dim); font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s; font-family: 'Nunito', sans-serif; }
+.lang-btn:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-text); }
+.lang-btn.active { background: var(--sidebar-active-bg); color: #fff; border-color: var(--sidebar-active-border); }
+
 </style>

@@ -308,7 +308,7 @@ const ganttEnd = computed(() => ganttViewEnd.value);
 const totalDays = computed(() => (ganttEnd.value - ganttStart.value) / 86400000);
 
 // Generate column headers ανάλογα με zoom
-const GR_MONTHS = computed(() => t('months.short'));
+const GR_MONTHS = computed(() => Array.from({length:12}, (_, mi) => t('months.' + mi)));
 
 const ganttColumns = computed(() => {
   const cfg = ganttConfig.value;
@@ -472,7 +472,7 @@ function daysClass(deadline) {
 function formatDate(iso) {
   if (!iso) return "—"
   const d = new Date(iso)
-  const m = t("months.short")
+  const m = Array.from({length:12}, (_, mi) => t('months.' + mi))
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`
 }
 function formatAgo(mins) {

@@ -185,7 +185,7 @@ function coShort(name) {
 function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
-  const m = t("months.short");
+  const m = Array.from({length:12}, (_, mi) => t('months.' + mi));
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;
 }
 
