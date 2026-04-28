@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <div v-if="loading" class="loading">{{ tt('pd.loading') }}</div>
+    <div v-if="loading" class="loading">{{ t('pd.loading') }}</div>
     <div v-else-if="project">
 
       <!-- BREADCRUMB -->
@@ -14,8 +14,8 @@
 
       <!-- CONTRACT HEADER -->
       <div :class="`contract-header ${project.category}`" style="position:relative;">
-        <button v-if="permStore.isCEO() || permStore.can('editProject')" class="edit-project-btn" @click="openEditModal" :title="tt('pd.edit')">{{ tt('pd.editBtn') }}</button>
-        <button v-if="permStore.isCEO()" class="delete-project-btn" @click="confirmDeleteProject" :title="tt('pd.deleteProject')">🗑 {{ tt('pd.delete') }}</button>
+        <button v-if="permStore.isCEO() || permStore.can('editProject')" class="edit-project-btn" @click="openEditModal" :title="t('pd.edit')">{{ t('pd.editBtn') }}</button>
+        <button v-if="permStore.isCEO()" class="delete-project-btn" @click="confirmDeleteProject" :title="t('pd.deleteProject')">🗑 {{ t('pd.delete') }}</button>
         <div class="ch-top">
           <div>
             <div class="ch-title">{{ project.title }}</div>
@@ -48,14 +48,14 @@
           </div>
         </div>
         <div class="ch-progress-wrap">
-          <div class="ch-progress-label">{{ tt('pd.tasks') }}</div>
+          <div class="ch-progress-label">{{ t('pd.tasks') }}</div>
           <div class="ch-progress-bar">
             <div class="ch-progress-fill" :style="`width:${project.completion}%;background:var(--${project.category});`"></div>
           </div>
           <span class="ch-progress-pct" :style="`color:var(--${project.category});`">{{ project.completion }}%</span>
         </div>
         <div v-if="timeProgress !== null" class="ch-progress-wrap" style="margin-top:8px;">
-          <div class="ch-progress-label">{{ tt('pd.time') }}</div>
+          <div class="ch-progress-label">{{ t('pd.time') }}</div>
           <div class="ch-progress-bar">
             <div class="ch-progress-fill" :style="`width:${timeProgress}%;background:${smartStatus.color};opacity:0.8;`"></div>
           </div>
@@ -73,7 +73,7 @@
           <div class="mg-header" @click="toggleAcc(m.id)">
             <span class="mg-expand">{{ openAcc.has(m.id) ? '▼' : '▶' }}</span>
             <span class="mg-name">{{ m.name }}</span>
-            <button class="delete-mod-btn" @click.stop="confirmDeleteModule(m)" :title="tt('pd.deleteModule')">🗑</button>
+            <button class="delete-mod-btn" @click.stop="confirmDeleteModule(m)" :title="t('pd.deleteModule')">🗑</button>
             <div class="mg-right">
               <div class="mg-bar-wrap"><div class="mg-bar"><div class="mg-bar-fill" :style="`width:${m.completion}%;background:var(--${m.color||project.category});`"></div></div></div>
               <span class="mg-pct" :style="`color:var(--${m.color||project.category});`">{{ m.completion }}%</span>
@@ -85,13 +85,13 @@
               <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
               <div style="flex:1;">
                 <div :class="`task-name ${t.isDone?'done':''}`">{{ t.name }}</div>
-                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" :title="tt('pd.deleteTask')">🗑</button>
+                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" :title="t('pd.deleteTask')">🗑</button>
                 <div v-if="t.blockNote" class="task-note">⚠ {{ t.blockNote }}</div>
               </div>
               <span class="task-assignee">{{ t.assignee||'—' }}</span>
               <div class="task-pct-wrap">
                 <div class="task-bar"><div class="task-bar-fill" :style="`width:${displayProgress(t)}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
-                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" :title="tt('pd.behindSchedule')" style="color:var(--red);margin-left:4px;">⚠</span></div>
+                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" :title="t('pd.behindSchedule')" style="color:var(--red);margin-left:4px;">⚠</span></div>
               </div>
             </div>
           </div>
@@ -117,30 +117,30 @@
       </div>
 
       <div v-if="project.contractDesc" class="contract-desc-panel" style="margin-top:14px;">
-        <div class="cd-title">{{ tt('pd.contractDesc') }}</div>
+        <div class="cd-title">{{ t('pd.contractDesc') }}</div>
         <div class="cd-text">{{ project.contractDesc }}</div>
       </div>
 
       <!-- CONTRACT FILES -->
       <div class="files-panel" style="margin-top:14px;">
         <div class="files-header">
-          <div class="files-title">{{ tt('pd.filesTitle') }}</div>
+          <div class="files-title">{{ t('pd.filesTitle') }}</div>
           <label v-if="permStore.isCEO() || permStore.can('uploadFiles')" class="files-upload-btn" :class="{uploading: uploading}">
             <input type="file" @change="uploadFile" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="uploading" />
-            {{ uploading ? tt('pd.uploading') : tt('pd.upload') }}
+            {{ uploading ? t('pd.uploading') : t('pd.upload') }}
           </label>
         </div>
         <div v-if="files.length" class="files-list">
-          <div v-for="f in files" :key="f.id" class="file-item" @click="openFile(f)" style="cursor:pointer;" :title="tt('pd.clickToOpen')">
+          <div v-for="f in files" :key="f.id" class="file-item" @click="openFile(f)" style="cursor:pointer;" :title="t('pd.clickToOpen')">
             <span class="file-icon">{{ fileIcon(f.contentType) }}</span>
             <div class="file-info">
               <div class="file-name">{{ f.fileName }}</div>
               <div class="file-meta">{{ formatSize(f.fileSizeBytes) }} · {{ f.uploadedBy }} · {{ formatInstant(f.uploadedAt) }}</div>
             </div>
-            <button class="file-del" @click.stop="deleteFile(f.id)" :title="tt('pd.delete')">✕</button>
+            <button class="file-del" @click.stop="deleteFile(f.id)" :title="t('pd.delete')">✕</button>
           </div>
         </div>
-        <div v-else-if="!uploading" class="files-empty">{{ tt('pd.noFiles') }}</div>
+        <div v-else-if="!uploading" class="files-empty">{{ t('pd.noFiles') }}</div>
         <div v-if="uploadError" class="files-error">{{ uploadError }}</div>
         <div v-if="fileError" class="files-error">{{ fileError }}</div>
       </div>
@@ -181,13 +181,13 @@
       <div v-if="permStore.isCEO() || permStore.can('viewCeoNotes')" class="notes-panel" style="margin-top:14px;">
         <div class="notes-header">
           <div class="notes-title">🔒 CEO Notes <span class="notes-private">Private</span></div>
-          <button class="notes-add-btn" @click="showNoteInput=!showNoteInput">{{ tt('pd.newNote') }}</button>
+          <button class="notes-add-btn" @click="showNoteInput=!showNoteInput">{{ t('pd.newNote') }}</button>
         </div>
         <div v-if="showNoteInput" class="note-input-wrap">
-          <textarea v-model="newNote" :placeholder="tt('pd.notePlaceholder')" class="note-textarea" rows="3"></textarea>
+          <textarea v-model="newNote" :placeholder="t('pd.notePlaceholder')" class="note-textarea" rows="3"></textarea>
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
-            <button class="note-cancel" @click="cancelNote">{{ tt('pd.cancel') }}</button>
-            <button class="note-save" @click="saveNote" :disabled="!newNote.trim()">{{ tt('pd.save') }}</button>
+            <button class="note-cancel" @click="cancelNote">{{ t('pd.cancel') }}</button>
+            <button class="note-save" @click="saveNote" :disabled="!newNote.trim()">{{ t('pd.save') }}</button>
           </div>
         </div>
         <div v-if="notes.length" class="notes-list">
@@ -200,7 +200,7 @@
             </div>
           </div>
         </div>
-        <div v-else-if="!showNoteInput" class="notes-empty">{{ tt('pd.noNotes') }}</div>
+        <div v-else-if="!showNoteInput" class="notes-empty">{{ t('pd.noNotes') }}</div>
       </div>
 
     </div>
@@ -211,21 +211,21 @@
     <div v-if="editingTask" class="modal-overlay" @click.self="closeTaskEdit">
       <div class="modal task-edit-modal">
         <div class="modal-header">
-          <div class="modal-title">{{ tt('pd.editTask') }}</div>
+          <div class="modal-title">{{ t('pd.editTask') }}</div>
           <button class="modal-close" @click="closeTaskEdit" :disabled="editingTaskSaving">✕</button>
         </div>
         <div class="modal-body">
           <div v-if="editingTaskError" class="te-error">{{ editingTaskError }}</div>
 
           <div class="te-field">
-            <label>{{ tt('pd.name') }}</label>
+            <label>{{ t('pd.name') }}</label>
             <input type="text" v-model="editingTask.name" :disabled="editingTaskSaving" />
           </div>
 
           <div class="te-row">
             <div class="te-field">
               <label>Assignee</label>
-              <input type="text" v-model="editingTask.assignee" :placeholder="tt('pd.assigneePlaceholder')" :disabled="editingTaskSaving" />
+              <input type="text" v-model="editingTask.assignee" :placeholder="t('pd.assigneePlaceholder')" :disabled="editingTaskSaving" />
             </div>
             <div class="te-field">
               <label>Module</label>
@@ -235,7 +235,7 @@
 
           <div class="te-field">
             <label>
-              {{ tt('pd.progress') }}: <strong>{{ editingTask.progress || 0 }}%</strong>
+              {{ t('pd.progress') }}: <strong>{{ editingTask.progress || 0 }}%</strong>
             </label>
             <input
               type="range"
@@ -253,11 +253,11 @@
 
           <div class="te-row">
             <div class="te-field">
-              <label>{{ tt('pd.start') }}</label>
+              <label>{{ t('pd.start') }}</label>
               <input type="date" v-model="editingTask.startDate" :disabled="editingTaskSaving" />
             </div>
             <div class="te-field">
-              <label>{{ tt('pd.end') }}</label>
+              <label>{{ t('pd.end') }}</label>
               <input type="date" v-model="editingTask.endDate" :disabled="editingTaskSaving" />
             </div>
           </div>
@@ -265,30 +265,30 @@
           <div class="te-toggles">
             <label class="te-toggle">
               <input type="checkbox" v-model="editingTask.isDone" :disabled="editingTaskSaving" />
-              <span>{{ tt('pd.completed') }}</span>
+              <span>{{ t('pd.completed') }}</span>
             </label>
             <label class="te-toggle">
               <input type="checkbox" v-model="editingTask.isBlocked" :disabled="editingTaskSaving" />
-              <span>{{ tt('pd.blocked') }}</span>
+              <span>{{ t('pd.blocked') }}</span>
             </label>
           </div>
 
           <div v-if="editingTask.isBlocked" class="te-field">
-            <label>{{ tt('pd.blockNoteLabel') }}</label>
+            <label>{{ t('pd.blockNoteLabel') }}</label>
             <input
               type="text"
               v-model="editingTask.blockNote"
-              :placeholder="tt('pd.blockNotePlaceholder')"
+              :placeholder="t('pd.blockNotePlaceholder')"
               :disabled="editingTaskSaving"
             />
           </div>
 
           <div class="te-field">
-            <label>{{ tt('pd.comment') }}</label>
+            <label>{{ t('pd.comment') }}</label>
             <textarea
               v-model="editingTask.comment"
               rows="3"
-              :placeholder="tt('pd.commentPlaceholder')"
+              :placeholder="t('pd.commentPlaceholder')"
               :disabled="editingTaskSaving"
             ></textarea>
           </div>
@@ -302,7 +302,7 @@
             Άκυρο
           </button>
           <button class="te-btn te-btn-primary" @click="saveTaskEdit" :disabled="editingTaskSaving">
-            {{ editingTaskSaving ? tt('pd.saving') : tt('pd.save') }}
+            {{ editingTaskSaving ? t('pd.saving') : t('pd.save') }}
           </button>
         </div>
       </div>
@@ -312,24 +312,24 @@
   <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal=false">
     <div class="modal modal-edit">
       <div class="modal-header">
-        <div class="modal-title">{{ tt('pd.editProject') }}</div>
+        <div class="modal-title">{{ t('pd.editProject') }}</div>
         <button class="modal-close" @click="showEditModal=false">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-section-title">{{ tt('pd.basicInfo') }}</div>
+        <div class="form-section-title">{{ t('pd.basicInfo') }}</div>
         <div class="form-group">
-          <label>{{ tt('pd.titleReq') }}</label>
-          <input v-model="editForm.title" type="text" class="form-input" :placeholder="tt('pd.titlePlaceholder')" />
+          <label>{{ t('pd.titleReq') }}</label>
+          <input v-model="editForm.title" type="text" class="form-input" :placeholder="t('pd.titlePlaceholder')" />
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label>{{ tt('pd.companyReq') }}</label>
+            <label>{{ t('pd.companyReq') }}</label>
             <select v-model="editForm.companyId" class="form-input">
               <option v-for="co in companies" :key="co.id" :value="co.id">{{ co.name }}</option>
             </select>
           </div>
           <div class="form-group">
-            <label>{{ tt('pd.categoryReq') }}</label>
+            <label>{{ t('pd.categoryReq') }}</label>
             <select v-model="editForm.category" class="form-input">
               <option value="finance">Finance</option>
               <option value="legal">Legal</option>
@@ -344,7 +344,7 @@
             <input v-model="editForm.budget" type="number" class="form-input" />
           </div>
           <div class="form-group">
-            <label>{{ tt('pd.startDateLabel') }}</label>
+            <label>{{ t('pd.startDateLabel') }}</label>
             <input v-model="editForm.startDate" type="date" class="form-input" />
           </div>
           <div class="form-group">
@@ -353,8 +353,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label>{{ tt('pd.contractDescLabel') }}</label>
-          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" :placeholder="tt('pd.briefDesc')"></textarea>
+          <label>{{ t('pd.contractDescLabel') }}</label>
+          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" :placeholder="t('pd.briefDesc')"></textarea>
         </div>
         <div class="form-group">
           <label>Status</label>
@@ -393,9 +393,9 @@
                 <button @click="m.tasks.splice(ti,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 6px;cursor:pointer;">✕</button>
               </div>
               <div style="display:flex;gap:6px;align-items:center;padding-left:4px;">
-                <label style="font-size:10px;color:var(--text-dim);min-width:55px;">{{ tt('pd.start') }}</label>
+                <label style="font-size:10px;color:var(--text-dim);min-width:55px;">{{ t('pd.start') }}</label>
                 <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
-                <label style="font-size:10px;color:var(--text-dim);min-width:35px;">{{ tt('pd.end') }}</label>
+                <label style="font-size:10px;color:var(--text-dim);min-width:35px;">{{ t('pd.end') }}</label>
                 <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
               </div>
             </div>
@@ -406,14 +406,14 @@
           </button>
         </div>
         <div v-if="editForm.modules.length===0" style="text-align:center;color:var(--text-dim);font-size:13px;padding:12px;">
-          {{ tt('pd.noModules') }}
+          {{ t('pd.noModules') }}
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn-cancel" @click="showEditModal=false">{{ tt('pd.cancel') }}</button>
+        <button class="btn-cancel" @click="showEditModal=false">{{ t('pd.cancel') }}</button>
         <button class="btn-submit" @click="saveEdit" :disabled="editSaving">
-          {{ editSaving ? tt('pd.saving') : tt('pd.save') }}
+          {{ editSaving ? t('pd.saving') : t('pd.save') }}
         </button>
       </div>
     </div>
@@ -456,8 +456,8 @@ const smartStatus = computed(() => {
 const timelineTooltip = computed(() => {
   if (!project.value) return ''
   const tp = timeProgress.value
-  if (tp === null) return tt('pd.timelineRange')
-  return tt('pd.timeElapsed', {pct: tp})
+  if (tp === null) return t('pd.timelineRange')
+  return t('pd.timeElapsed', {pct: tp})
 })
 
 const editingTask = ref(null)           // the task being edited (cloned)
@@ -540,7 +540,7 @@ async function saveTaskEdit() {
     closeTaskEdit()
     await loadProject()
   } catch (e) {
-    editingTaskError.value = tt('pd.err.saveFailed')
+    editingTaskError.value = t('pd.err.saveFailed')
     // Revert by reloading
     await loadProject()
   } finally {
@@ -550,7 +550,7 @@ async function saveTaskEdit() {
 
 async function deleteTaskFromModal() {
   if (!editingTask.value || !editingTaskModule.value) return
-  if (!confirm(tt('pd.confirmDeleteTask', {name: editingTask.value.name}))) return
+  if (!confirm(t('pd.confirmDeleteTask', {name: editingTask.value.name}))) return
   const modId = editingTaskModule.value.id
   const taskId = editingTask.value.id
   editingTaskSaving.value = true
@@ -591,7 +591,7 @@ async function deleteTaskFromModal() {
     closeTaskEdit()
     await loadProject()
   } catch (e) {
-    editingTaskError.value = tt('pd.err.deleteFailed')
+    editingTaskError.value = t('pd.err.deleteFailed')
     await loadProject()
   } finally {
     editingTaskSaving.value = false
@@ -607,7 +607,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
 
-const { t: tt } = useI18n()
+const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 const store = useProjectStore()
@@ -692,7 +692,7 @@ async function openFile(f) {
     }
   } catch (e) {
     console.error("File open error:", e)
-    fileError.value = tt('pd.err.openFailed')
+    fileError.value = t('pd.err.openFailed')
   }
 }
 
@@ -717,7 +717,7 @@ async function uploadFile(event) {
     })
     await loadFiles()
   } catch (e) {
-    uploadError.value = e.response?.data?.message || tt('pd.err.uploadFailed')
+    uploadError.value = e.response?.data?.message || t('pd.err.uploadFailed')
   } finally {
     uploading.value = false
     event.target.value = ""
@@ -725,7 +725,7 @@ async function uploadFile(event) {
 }
 
 async function deleteFile(fileId) {
-  if (!confirm(tt('pd.confirmDeleteFile'))) return
+  if (!confirm(t('pd.confirmDeleteFile'))) return
   try {
     await api.delete(`/projects/${project.value.id}/files/${fileId}`)
     await loadFiles()
@@ -821,15 +821,15 @@ async function toggleSpec(s) {
 }
 
 async function confirmDeleteProject() {
-  if (!confirm(tt('pd.confirmDeleteProject', {name: project.value.title}))) return
+  if (!confirm(t('pd.confirmDeleteProject', {name: project.value.title}))) return
   try {
     await api.delete('/projects/' + project.value.id)
     router.push('/projects')
-  } catch(e) { alert(tt('pd.err.deleteProjectFailed')) }
+  } catch(e) { alert(t('pd.err.deleteProjectFailed')) }
 }
 
 async function confirmDeleteModule(m) {
-  if (!confirm(tt('pd.confirmDeleteModule', {name: m.name}))) return
+  if (!confirm(t('pd.confirmDeleteModule', {name: m.name}))) return
   const idx = project.value.modules.findIndex(x => x.id === m.id)
   if (idx === -1) return
   project.value.modules.splice(idx, 1)
@@ -849,7 +849,7 @@ async function confirmDeleteModule(m) {
 }
 
 async function confirmDeleteTask(t, m) {
-  if (!confirm(tt('pd.confirmDeleteTask', {name: t.name}))) return
+  if (!confirm(t('pd.confirmDeleteTask', {name: t.name}))) return
   const tidx = m.tasks.findIndex(x => x.id === t.id)
   if (tidx === -1) return
   m.tasks.splice(tidx, 1)
@@ -917,7 +917,7 @@ async function saveSpecDetail() {
     })
     showSpecModal.value = false
   } catch(e) {
-    specSaveError.value = tt('pd.err.saveFailed')
+    specSaveError.value = t('pd.err.saveFailed')
   } finally { specSaving.value = false }
 }
 
@@ -970,7 +970,7 @@ async function openEditModal() {
 }
 
 async function saveEdit() {
-  if (!editForm.value.title.trim()) { editError.value = tt('pd.err.titleRequired'); return }
+  if (!editForm.value.title.trim()) { editError.value = t('pd.err.titleRequired'); return }
   editSaving.value = true
   editError.value = ""
   try {
@@ -1001,7 +1001,7 @@ async function saveEdit() {
     showEditModal.value = false
     await loadProject()
   } catch (e) {
-    editError.value = e.response?.data?.message || tt('pd.err.saveFailed')
+    editError.value = e.response?.data?.message || t('pd.err.saveFailed')
   } finally { editSaving.value = false }
 }
 
@@ -1047,7 +1047,7 @@ function budgetPct(amount, budget) {
 function formatInstant(instant) {
   if (!instant) return ""
   const d = new Date(instant)
-  const m = tt('months.short')
+  const m = t('months.short')
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}, ${d.getHours()}:${String(d.getMinutes()).padStart(2,"0")}`
 }
 
@@ -1065,7 +1065,7 @@ function toggleAcc(id) {
 // ════ GANTT LOGIC ════
 const ganttWeeks = computed(() => {
   const weeks = []
-  const months = tt('months.short')
+  const months = t('months.short')
   for (let i = 0; i < GANTT_WEEKS; i++) {
     const d = new Date(ganttStart.value)
     d.setDate(d.getDate() + i * 7)
@@ -1208,7 +1208,7 @@ const statusLabel = (s) => ({ on_track:'On Track', delayed:'Delayed', at_risk:'A
 function formatDate(iso) {
   if (!iso) return '—'
   const d = new Date(iso)
-  const m = tt('months.short')
+  const m = t('months.short')
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`
 }
 </script>
