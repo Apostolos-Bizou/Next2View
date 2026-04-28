@@ -24,3 +24,4 @@ export default defineConfig({
     sourcemap: false,
   },
 });
+// emergency rollback - 2026-04-28 13:27:13
