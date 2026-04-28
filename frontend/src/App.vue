@@ -9,7 +9,7 @@ import PwaInstallPrompt from "@/components/PwaInstallPrompt.vue";
 const auth = useAuthStore();
 onMounted(() => {
   auth.init();
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && !location.hostname.includes('localhost')) {
     navigator.serviceWorker.register('/sw.js')
       .then(reg => console.log('SW registered:', reg.scope))
       .catch(err => console.log('SW error:', err));

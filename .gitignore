@@ -42,3 +42,11 @@ fix_*.js
 # Local backup files from patch scripts
 *.vue.bak
 *.js.bak
+
+# Local env overrides (do not commit)
+frontend/.env.local
+frontend/.env.*.local
+frontend/.env.*.bak
+
+# C8 Backups
+.backup-c8/

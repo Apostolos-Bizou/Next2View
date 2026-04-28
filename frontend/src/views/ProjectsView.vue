@@ -5,14 +5,14 @@
         <div class="ph-title">{{ pageTitle }}</div>
         <div style="display:flex;gap:8px;align-items:center;">
           <select v-model="filterCat" @change="applyFilters" class="ph-select">
-            <option value="">Όλες κατηγορίες</option>
+            <option value="">{{ t('projects.allCategories') }}</option>
             <option value="finance">$ Finance</option>
             <option value="legal">⚖ Legal</option>
             <option value="dev">⌨ Developing</option>
             <option value="marketing">◈ Marketing</option>
           </select>
           <select v-model="filterCo" @change="applyFilters" class="ph-select">
-            <option value="">Όλες εταιρείες</option>
+            <option value="">{{ t('projects.allCompanies') }}</option>
             <option v-for="co in store.companies" :key="co.id" :value="co.id">{{ coShort(co.name) }}</option>
           </select>
           <div class="badge blue">{{ filtered.length }} projects</div>
@@ -22,7 +22,7 @@
         <table class="proj-tbl">
           <thead><tr>
             <th style="width:220px;">Project</th>
-            <th style="width:110px;">Κατηγορία</th>
+            <th style="width:110px;">{{ t('projects.category') }}</th>
             <th style="width:80px;">Status</th>
             <th style="width:130px;">Progress</th>
             <th style="width:70px;">Budget</th>
@@ -71,7 +71,7 @@
         </table>
         <div v-if="!filtered.length" class="empty-state">
           <div style="font-size:28px;margin-bottom:8px;opacity:0.4;">⬡</div>
-          <div>Δεν υπάρχουν projects.</div>
+          <div>{{ t('projects.noProjects') }}</div>
         </div>
       </div>
     </div>
@@ -80,7 +80,7 @@
     <!-- MOBILE CARDS -->
     <div class="projects-cards">
       <div v-if="!filtered.length" class="empty-state">
-        Δεν υπάρχουν projects.
+        {{ t('projects.noProjects') }}
       </div>
       <div v-for="p in filtered" :key="p.id"
         class="project-card-mobile"
@@ -113,11 +113,13 @@ import { useRouter, useRoute } from "vue-router";
 import { useProjectStore } from "@/stores/projects";
 import { usePermissionStore } from "@/stores/permissions";
 import { getTimeProgress, getDaysRemaining, getSmartStatus, formatDaysRemaining } from '@/utils/projectMetrics'
+import { useI18n } from 'vue-i18n'
 
 const store = useProjectStore();
 const permStore = usePermissionStore();
 const router = useRouter();
 const route = useRoute();
+const { t } = useI18n();
 
 // ══ Smart status helpers ══
 function projSmartStatus(p) {
@@ -183,7 +185,7 @@ function coShort(name) {
 function formatDate(iso) {
   if (!iso) return "—";
   const d = new Date(iso);
-  const m = ["Ιαν","Φεβ","Μαρ","Απρ","Μαι","Ιουν","Ιουλ","Αυγ","Σεπ","Οκτ","Νοε","Δεκ"];
+  const m = t("months.short");
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`;
 }
 

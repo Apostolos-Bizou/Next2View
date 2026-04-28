@@ -5,9 +5,9 @@
       <div class="profile-header">
         <div class="profile-avatar">{{ initials }}</div>
         <div class="profile-info">
-          <h2 class="profile-name">{{ user?.fullName || 'Χρήστης' }}</h2>
+          <h2 class="profile-name">{{ user?.fullName || t('profile.user') }}</h2>
           <p class="profile-email">{{ user?.email || '' }}</p>
-          <span class="profile-role">{{ user?.role || 'Χρήστης' }}</span>
+          <span class="profile-role">{{ user?.role || t('profile.user') }}</span>
         </div>
       </div>
     </div>
@@ -15,40 +15,40 @@
     <!-- Security Section Card -->
     <div class="profile-card">
       <div class="card-header">
-        <h3 class="card-title">🔐 Ασφάλεια</h3>
+        <h3 class="card-title">{{ t('profile.security') }}</h3>
       </div>
       <div class="card-content">
         
         <!-- MFA Row - Dynamic State -->
         <div class="security-row">
           <div class="security-info">
-            <div class="security-label">Έλεγχος Ταυτότητας (MFA)</div>
-            <div class="security-desc">Δεύτερος παράγοντας ελέγχου με εφαρμογή TOTP</div>
+            <div class="security-label">{{ t('profile.mfaLabel') }}</div>
+            <div class="security-desc">{{ t('profile.mfaDesc') }}</div>
           </div>
           
           <!-- STATE A: MFA Disabled -->
           <div v-if="!mfaEnabled && setupState === 'idle'" class="security-controls">
-            <span class="status-badge warning">⚠ Ανενεργό</span>
+            <span class="status-badge warning">{{ t('profile.inactive') }}</span>
             <button class="btn-primary" @click="startSetup" :disabled="loading">
-              Ενεργοποίηση MFA →
+              {{ t('profile.enableMfa') }}
             </button>
           </div>
 
           <!-- STATE B: Setup Pending -->
           <div v-if="setupState === 'pending'" class="mfa-setup">
             <div class="setup-header">
-              <h4>Ενεργοποίηση MFA</h4>
-              <p>Σκανάρισε το QR code με την εφαρμογή TOTP (π.χ. Google Authenticator, Authy)</p>
+              <h4>{{ t('profile.enableMfa') }}</h4>
+              <p>{{ t('profile.scanQrDesc') }}</p>
             </div>
             
             <div class="setup-content">
               <div class="qr-section">
                 <canvas ref="qrCanvas" class="qr-code"></canvas>
                 <div class="manual-entry">
-                  <label>Εναλλακτικά, χειροκίνητη εισαγωγή:</label>
+                  <label>{{ t('profile.manualEntry') }}</label>
                   <div class="secret-input">
                     <code class="secret-code">{{ secret }}</code>
-                    <button class="btn-copy" @click="copySecret" title="Αντιγραφή">
+                    <button class="btn-copy" @click="copySecret" :title="t('profile.copy')">
                       📋
                     </button>
                   </div>
@@ -56,7 +56,7 @@
               </div>
               
               <div class="verify-section">
-                <label for="verify-code">Κώδικας επαλήθευσης (6 ψηφία):</label>
+                <label for="verify-code">{{ t('profile.verifyLabel') }}</label>
                 <input 
                   id="verify-code"
                   v-model="codeInput" 
@@ -67,11 +67,9 @@
                   :disabled="loading"
                 />
                 <div class="verify-controls">
-                  <button class="btn-secondary" @click="cancelSetup" :disabled="loading">
-                    Ακύρωση
-                  </button>
+                  <button class="btn-secondary" @click="cancelSetup" :disabled="loading">{{ t('profile.cancel') }}</button>
                   <button class="btn-primary" @click="verifySetup" :disabled="!codeInput || codeInput.length !== 6 || loading">
-                    {{ loading ? 'Επαλήθευση...' : 'Επαλήθευση' }}
+                    {{ loading ? t('profile.verifying') : t('profile.verify') }}
                   </button>
                 </div>
               </div>
@@ -82,20 +80,19 @@
 
           <!-- STATE C: MFA Enabled -->
           <div v-if="mfaEnabled && setupState === 'idle'" class="security-controls">
-            <span class="status-badge success">✅ Ενεργό</span>
-            <button class="btn-danger" @click="startDisable" :disabled="loading">
-              Απενεργοποίηση
+            <span class="status-badge success">{{ t('profile.active') }}</span>
+            <button class="btn-danger" @click="startDisable" :disabled="loading">{{ t('profile.disableMfa') }}
             </button>
           </div>
 
           <!-- STATE C2: Disable Confirmation -->
           <div v-if="setupState === 'disabling'" class="mfa-disable">
             <div class="danger-warning">
-              <h4>⚠️ Επικίνδυνη ενέργεια</h4>
-              <p>Η απενεργοποίηση του MFA μειώνει την ασφάλεια του λογαριασμού σας.</p>
+              <h4>{{ t('profile.dangerTitle') }}</h4>
+              <p>{{ t('profile.dangerDesc') }}</p>
             </div>
             <div class="disable-form">
-              <label for="disable-code">Εισάγετε κώδικα MFA για επιβεβαίωση:</label>
+              <label for="disable-code">{{ t('profile.disableCodeLabel') }}</label>
               <input 
                 id="disable-code"
                 v-model="codeInput" 
@@ -106,11 +103,9 @@
                 :disabled="loading"
               />
               <div class="verify-controls">
-                <button class="btn-secondary" @click="cancelDisable" :disabled="loading">
-                  Ακύρωση
-                </button>
+                <button class="btn-secondary" @click="cancelDisable" :disabled="loading">{{ t('profile.cancel') }}</button>
                 <button class="btn-danger" @click="confirmDisable" :disabled="!codeInput || codeInput.length !== 6 || loading">
-                  {{ loading ? 'Απενεργοποίηση...' : 'Επιβεβαίωση Απενεργοποίησης' }}
+                  {{ loading ? t('profile.disabling') : t('profile.confirmDisable') }}
                 </button>
               </div>
             </div>
@@ -123,8 +118,8 @@
 
     <!-- Info Box -->
     <div class="info-card">
-      <h4>💡 Γιατί MFA;</h4>
-      <p>Ο δεύτερος παράγοντας ελέγχου προστατεύει τον λογαριασμό σας ακόμα κι αν κάποιος μάθει τον κωδικό σας. Απαραίτητο για πρόσβαση σε νομικά έγγραφα υψηλής εμπιστευτικότητας.</p>
+      <h4>{{ t('profile.whyMfaTitle') }}</h4>
+      <p>{{ t('profile.whyMfaDesc') }}</p>
     </div>
 
     <!-- Success Message -->
@@ -134,11 +129,13 @@
 
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import QRCode from 'qrcode'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/services/api'
 
 // Store
+const { t } = useI18n()
 const authStore = useAuthStore()
 
 // Reactive state
@@ -226,7 +223,7 @@ const startSetup = async () => {
     setupState.value = 'pending'
     try { await renderQR() } catch (e) { console.warn('QR render failed:', e) }
   } catch (err) {
-    error.value = err.response?.data?.message || 'Αποτυχία δημιουργίας MFA setup'
+    error.value = err.response?.data?.message || t('profile.setupError')
   } finally {
     loading.value = false
   }
@@ -252,7 +249,7 @@ const verifySetup = async () => {
     codeInput.value = ''
     secret.value = ''
     otpauthUrl.value = ''
-    successMsg.value = 'MFA ενεργοποιήθηκε επιτυχώς! 🎉'
+    successMsg.value = t('profile.mfaEnabledSuccess')
     
     // Clear success message after 4 seconds
     setTimeout(() => {
@@ -260,7 +257,7 @@ const verifySetup = async () => {
     }, 4000)
     
   } catch (err) {
-    error.value = err.response?.data?.message || 'Μη έγκυρος κώδικας επαλήθευσης'
+    error.value = err.response?.data?.message || t('profile.invalidCode')
   } finally {
     loading.value = false
   }
@@ -298,7 +295,7 @@ const confirmDisable = async () => {
     
     setupState.value = 'idle'
     codeInput.value = ''
-    successMsg.value = 'MFA απενεργοποιήθηκε.'
+    successMsg.value = t('profile.mfaDisabledSuccess')
     
     // Clear success message after 4 seconds
     setTimeout(() => {
@@ -306,7 +303,7 @@ const confirmDisable = async () => {
     }, 4000)
     
   } catch (err) {
-    error.value = err.response?.data?.message || 'Μη έγκυρος κώδικας επαλήθευσης'
+    error.value = err.response?.data?.message || t('profile.invalidCode')
   } finally {
     loading.value = false
   }
@@ -323,7 +320,7 @@ const copySecret = async () => {
     await navigator.clipboard.writeText(secret.value)
     // Temporary success feedback
     const originalText = secret.value
-    secret.value = 'Αντιγράφηκε!'
+    secret.value = t('profile.copied')
     setTimeout(() => {
       secret.value = originalText
     }, 1000)

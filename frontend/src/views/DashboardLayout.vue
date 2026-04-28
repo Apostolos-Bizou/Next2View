@@ -43,7 +43,7 @@
           <span class="nav-ico" style="color:var(--accent);">📊</span>Reports
         </router-link>
 
-        <div v-if="['finance','legal','dev','marketing'].some(cat => permStore.canViewCategory(cat))" class="nav-section" style="margin-top:6px;">Κατηγορία</div>
+        <div v-if="['finance','legal','dev','marketing'].some(cat => permStore.canViewCategory(cat))" class="nav-section" style="margin-top:6px;">{{ t('sidebar.categories') }}</div>
         <div v-if="permStore.canViewCategory('finance')" :class="['nav-item', route.query.category==='finance' ? 'active' : '']"
           @click="router.push('/projects?category=finance')">
           <span class="nav-ico" style="color:var(--finance);">$</span>Finance
@@ -65,7 +65,7 @@
           <span class="nav-count">{{ store.byCategory('marketing').length }}</span>
         </div>
 
-        <div class="nav-section" style="margin-top:6px;">Εταιρείες</div>
+        <div class="nav-section" style="margin-top:6px;">{{ t('sidebar.companies') }}</div>
         <div
           v-for="co in store.companies" :key="co.id"
           :class="['nav-item', route.query.companyId===co.id ? 'active' : '']"
@@ -81,22 +81,22 @@
         <div class="notif-label">Notifications</div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span v-if="store.atRisk.length" class="notif-badge">{{ store.atRisk.length }}</span>
-          <span class="notif-bell" title="Ειδοποιήσεις — deadlines, blocked tasks, καθυστερήσεις">🔔</span>
+          <span class="notif-bell" :title="t('nav.notifTooltip')">🔔</span>
         </div>
       </div>
 
       <div class="sidebar-actions">
-        <button v-if="permStore.isCEO() || permStore.can('aiCeoReport')" class="btn-sidebar btn-ai" @click="openAiReport" title="Δημιουργεί AI αναφορά για όλα τα active projects. Αναλύει progress, κινδύνους και δίνει προτάσεις στα Ελληνικά.">
+        <button v-if="permStore.isCEO() || permStore.can('aiCeoReport')" class="btn-sidebar btn-ai" @click="openAiReport" :title="t('tooltips.aiReport')">
           <span style="font-size:16px;">✦</span> AI Report
         </button>
-        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject" title="Δημιούργησε νέο project. Βάλε τίτλο, εταιρεία, κατηγορία, budget, ημερομηνίες, modules και tasks.">+ New Project</button>
+        <button v-if="permStore.isCEO() || permStore.can('createProject')" class="btn-sidebar" @click="openNewProject" :title="t('tooltips.newProject')">+ New Project</button>
         <div v-if="permStore.isCEO() || permStore.can('manageCompanies') || permStore.can('manageUsers')" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-          <button v-if="permStore.isCEO() || permStore.can('manageCompanies')" class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" title="Πρόσθεσε νέα εταιρεία στον Όμιλο. Βάλε όνομα, κωδικό (π.χ. PFS) και χρώμα κατηγορίας.">+ Company</button>
-          <button v-if="permStore.isCEO() || permStore.can('manageUsers')" class="btn-sidebar" style="font-size:9px;" @click="openNewUser" title="Πρόσθεσε νέο χρήστη. Βάλε email, κωδικό και ρόλο (CEO / Manager / Member).">+ User</button>
+          <button v-if="permStore.isCEO() || permStore.can('manageCompanies')" class="btn-sidebar" style="font-size:9px;" @click="openNewCompany" :title="t('tooltips.newCompany')">+ Company</button>
+          <button v-if="permStore.isCEO() || permStore.can('manageUsers')" class="btn-sidebar" style="font-size:9px;" @click="openNewUser" :title="t('tooltips.newUser')">+ User</button>
         </div>
       </div>
 
-      <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" title="Προφίλ & Ρυθμίσεις">
+      <div class="sidebar-user" @click="router.push('/profile')" style="cursor:pointer;" :title="t('tooltips.profile')">
         <div class="avatar">{{ initials }}</div>
         <div>
           <div class="user-name">{{ auth.user?.fullName?.split(' ')[0] || 'CEO' }}</div>
@@ -120,39 +120,11 @@
 
     
     <!-- MFA NUDGE POPUP -->
-    <div v-if="showMfaNudge" class="mfa-nudge-overlay" @click.self="showMfaNudge = false">
-      <div class="mfa-nudge-modal">
-        <button class="mfa-nudge-close" @click="showMfaNudge = false">✕</button>
-        <div class="mfa-nudge-icon">🔐</div>
-        <div class="mfa-nudge-greeting">Γεια σου {{ firstName }}!</div>
-        <div class="mfa-nudge-body">
-          <p>Λοιπόν, {{ firstName }}, <strong>πρόσεξε καλά</strong>,</p>
-          <p>Σε παρακαλώ πααάρα πολύ, έμπα στο <strong>Guide</strong> και διάβασε με λεπτομέρεια το section <strong>MFA Setup</strong>.</p>
-          <p class="mfa-nudge-highlight">Σε παρακαλώ ΕΝΕΡΓΟΠΟΙΗΣΟΥΟΥ!!!</p>
-          <p>Γιατί βλέπω να πιάνει κανένα σκουπόξυλο ο Αναστασίου και να μας κάνει μπάουλο στο ξύλο όλους παρέα.</p>
-          <p class="mfa-nudge-love">Ματς Μουτς ρε!! ❤️</p>
-        </div>
-        <button class="mfa-nudge-btn" @click="goToGuide">📖 Πήγαινέ με στο Guide</button>
-        <button class="mfa-nudge-dismiss" @click="dismissMfaNudge">Το έκανα ήδη — μην το ξαναδείξεις</button>
-      </div>
-    </div>
+    
 
 
     <!-- MFA SUCCESS POPUP -->
-    <div v-if="showMfaSuccess" class="mfa-nudge-overlay" @click.self="showMfaSuccess = false">
-      <div class="mfa-nudge-modal" style="border-top-color:#059669;">
-        <button class="mfa-nudge-close" @click="showMfaSuccess = false">✕</button>
-        <div class="mfa-nudge-icon">🎉</div>
-        <div class="mfa-nudge-greeting">Μπράβο! {{ mfaFirstName }}!</div>
-        <div class="mfa-nudge-body" style="text-align:center;">
-          <p style="font-size:18px;font-weight:800;color:#059669;margin-bottom:14px;">Γλιτώσαμε το ξύλο! 😂😂😂</p>
-          <p>Και εγώ και εσύ! 🙏</p>
-          <p>Το MFA σου είναι <strong>ενεργό</strong> και ο λογαριασμός σου είναι πλέον <strong>προστατευμένος</strong>.</p>
-          <p class="mfa-nudge-love">Ματς Μουτς ρε!! ❤️</p>
-        </div>
-        <button class="mfa-nudge-btn" style="background:#059669;" @click="showMfaSuccess = false">✔ Τέλειο!</button>
-      </div>
-    </div>
+    
 
 <!-- ════ NEW PROJECT MODAL ════ -->
     <div v-if="showNewProject" class="modal-overlay" @click.self="closeModal">
@@ -164,23 +136,23 @@
 
         <div class="modal-body">
           <!-- BASIC INFO -->
-          <div class="form-section-title">Βασικά Στοιχεία</div>
+          <div class="form-section-title">{{ t('form.basicInfo') }}</div>
           <div class="form-group">
-            <label>Τίτλος *</label>
-            <input v-model="form.title" placeholder="Τίτλος project" class="form-input" />
+            <label>{{ t('form.title') }} *</label>
+            <input v-model="form.title" :placeholder="t('form.titlePlaceholder')" class="form-input" />
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label>Εταιρεία *</label>
+              <label>{{ t('form.company') }} *</label>
               <select v-model="form.companyId" class="form-input">
-                <option value="">Επίλεξε εταιρεία</option>
+                <option value="">{{ t('form.selectCompany') }}</option>
                 <option v-for="co in store.companies" :key="co.id" :value="co.id">{{ co.name }}</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Κατηγορία *</label>
+              <label>{{ t('form.category') }} *</label>
               <select v-model="form.category" class="form-input">
-                <option value="">Επίλεξε κατηγορία</option>
+                <option value="">{{ t('form.selectCategory') }}</option>
                 <option value="finance">$ Finance</option>
                 <option value="legal">⚖ Legal</option>
                 <option value="dev">⌨ Developing</option>
@@ -194,7 +166,7 @@
               <input v-model="form.budget" type="number" placeholder="0" class="form-input" />
             </div>
             <div class="form-group">
-              <label>Ημ. Εναρξης</label>
+              <label>{{ t('form.startDate') }}</label>
               <input v-model="form.startDate" type="date" class="form-input" />
             </div>
             <div class="form-group">
@@ -203,14 +175,14 @@
             </div>
           </div>
           <div class="form-group">
-            <label>Περιγραφή Σύμβασης</label>
-            <textarea v-model="form.contractDesc" placeholder="Σύντομη περιγραφή..." class="form-input" rows="2"></textarea>
+            <label>{{ t('form.contractDesc') }}</label>
+            <textarea v-model="form.contractDesc" :placeholder="t('form.contractDescPlaceholder')" class="form-input" rows="2"></textarea>
           </div>
 
           <!-- SPECS -->
           <div class="form-section-title" style="margin-top:16px;">
             Specifications
-            <button class="add-btn" @click="addSpec">+ Προσθήκη</button>
+            <button class="add-btn" @click="addSpec">{{ t('form.addSpec') }}</button>
           </div>
           <div v-for="(s, i) in form.specs" :key="i" class="spec-row-full">
             <div class="spec-row">
@@ -220,25 +192,25 @@
             </div>
             <div class="spec-dates">
               <div class="spec-date-field">
-                <label class="spec-date-lbl">Εναρξη</label>
+                <label class="spec-date-lbl">{{ t('form.specStart') }}</label>
                 <input v-model="s.startDate" type="date" class="form-input spec-date-input" />
               </div>
               <div class="spec-date-field">
-                <label class="spec-date-lbl">Ληξη</label>
+                <label class="spec-date-lbl">{{ t('form.specEnd') }}</label>
                 <input v-model="s.endDate" type="date" class="form-input spec-date-input" />
               </div>
             </div>
-            <textarea v-model="s.notes" class="form-input" rows="2" placeholder="Σύντομη περιγραφή / σημειώσεις για αυτό το spec..." style="font-size:12px;margin-top:4px;resize:vertical;"></textarea>
+            <textarea v-model="s.notes" class="form-input" rows="2" :placeholder="t('form.specNotes')" style="font-size:12px;margin-top:4px;resize:vertical;"></textarea>
           </div>
 
           <!-- MODULES & TASKS -->
           <div class="form-section-title" style="margin-top:16px;">
             Modules & Tasks
-            <button class="add-btn" @click="addModule" title="Προσθήκη νέου module με tasks">+ Module</button>
+            <button class="add-btn" @click="addModule" :title="t('form.addModuleTooltip')">+ Module</button>
           </div>
           <div v-for="(m, mi) in form.modules" :key="mi" class="module-builder">
             <div class="mb-head">
-              <input v-model="m.name" placeholder="Όνομα module..." class="form-input mb-name" />
+              <input v-model="m.name" :placeholder="t('form.moduleName')" class="form-input mb-name" />
               <select v-model="m.color" class="form-input mb-color">
                 <option value="finance">$ Finance</option>
                 <option value="legal">⚖ Legal</option>
@@ -247,7 +219,7 @@
               </select>
               <button class="del-btn" @click="form.modules.splice(mi, 1)">✕</button>
             </div>
-            <textarea v-model="m.notes" class="form-input" rows="2" placeholder="Σύντομη περιγραφή module..." style="font-size:12px;resize:vertical;margin:4px 0 8px 0;"></textarea>
+            <textarea v-model="m.notes" class="form-input" rows="2" :placeholder="t('form.moduleNotes')" style="font-size:12px;resize:vertical;margin:4px 0 8px 0;"></textarea>
             <div class="task-builder">
               <div v-for="(t, ti) in m.tasks" :key="ti" class="task-row">
                 <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
@@ -259,9 +231,9 @@
                     <button class="del-btn" @click="m.tasks.splice(ti, 1)">✕</button>
                   </div>
                   <div style="display:flex;gap:6px;align-items:center;">
-                    <label style="font-size:10px;color:var(--text-dim);min-width:50px;">Έναρξη</label>
+                    <label style="font-size:10px;color:var(--text-dim);min-width:50px;">{{ t('form.taskStart') }}</label>
                     <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
-                    <label style="font-size:10px;color:var(--text-dim);min-width:30px;">Λήξη</label>
+                    <label style="font-size:10px;color:var(--text-dim);min-width:30px;">{{ t('form.taskEnd') }}</label>
                     <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
                   </div>
                 </div>
@@ -274,9 +246,9 @@
         </div>
 
         <div class="modal-footer">
-          <button class="btn-cancel" @click="closeModal">Ακύρωση</button>
+          <button class="btn-cancel" @click="closeModal">{{ t('form.cancel') }}</button>
           <button class="btn-submit" :disabled="submitting" @click="submitProject">
-            {{ submitting ? 'Δημιουργία...' : 'Δημιουργία Project' }}
+            {{ submitting ? t('form.creating') : t('form.createProject') }}
           </button>
         </div>
       </div>
@@ -291,14 +263,14 @@
       <div class="modal-body ai-body">
         <div v-if="aiLoading" class="ai-loading">
           <div class="ai-spinner"></div>
-          <div class="ai-loading-txt">Ο AI αναλύει {{ store.projects.length }} projects...</div>
+          <div class="ai-loading-txt">{{ t('ai.analyzing', { count: store.projects.length }) }}</div>
         </div>
         <div v-else-if="aiReport" class="ai-report" v-html="renderMarkdown(aiReport)"></div>
-        <div v-else class="ai-error">Δεν ήταν δυνατή η δημιουργία αναφοράς.</div>
+        <div v-else class="ai-error">{{ t('ai.reportFailed') }}</div>
       </div>
       <div class="modal-footer" v-if="!aiLoading">
-        <button class="btn-cancel" @click="showAiReport=false">Κλείσιμο</button>
-        <button class="btn-submit" @click="loadAiReport">↺ Ανανέωση</button>
+        <button class="btn-cancel" @click="showAiReport=false">{{ t('ai.close') }}</button>
+        <button class="btn-submit" @click="loadAiReport">↺ {{ t('ai.refresh') }}</button>
       </div>
     </div>
   </div>
@@ -313,12 +285,12 @@
       </div>
       <div class="modal-body">
         <div v-if="!mfaSetupData && !mfaEnabled" class="mfa-info">
-          <div class="mfa-status off">⚠ MFA απενεργοποιημένο</div>
-          <p class="mfa-desc">Ενεργοποίησε MFA για επιπλέον ασφάλεια. Χρειάζεσαι Google Authenticator ή Authy.</p>
-          <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : "Ενεργοποίηση MFA" }}</button>
+          <div class="mfa-status off">⚠ {{ t('mfa.disabled') }}</div>
+          <p class="mfa-desc">{{ t('mfa.enableDesc') }}</p>
+          <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : t('mfa.enableBtn') }}</button>
         </div>
         <div v-if="mfaSetupData" class="mfa-setup">
-          <div class="mfa-status">📱 Σκάναρε το QR Code</div>
+          <div class="mfa-status">📱 {{ t('mfa.scanQR') }}</div>
           <div class="mfa-qr-wrap">
             <img :src="qrCodeUrl" class="mfa-qr" alt="QR" />
           </div>
@@ -326,16 +298,16 @@
             <span class="mfa-secret-label">Manual key:</span>
             <code class="mfa-secret">{{ mfaSetupData.secret }}</code>
           </div>
-          <p class="mfa-desc">Μετά το scan, εισήγαγε τον 6-ψήφιο κωδικό:</p>
+          <p class="mfa-desc">{{ t('mfa.scanDesc') }}</p>
           <input v-model="mfaCode" type="text" maxlength="6" placeholder="000000" class="form-input mfa-code-input" />
           <div v-if="mfaError" class="form-error">{{ mfaError }}</div>
-          <button class="btn-submit" @click="verifyMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "Επαλήθευση..." : "Επαλήθευση & Ενεργοποίηση" }}</button>
+          <button class="btn-submit" @click="verifyMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? t('mfa.verifying') : t('mfa.verifyBtn') }}</button>
         </div>
         <div v-if="mfaEnabled && !mfaSetupData" class="mfa-info">
-          <div class="mfa-status on">✅ MFA ενεργοποιημένο</div>
-          <p class="mfa-desc">Το 2FA προστατεύει τον λογαριασμό σου.</p>
-          <input v-model="mfaCode" type="text" maxlength="6" placeholder="Κωδικός για απενεργοποίηση..." class="form-input mfa-code-input" />
-          <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : "Απενεργοποίηση MFA" }}</button>
+          <div class="mfa-status on">✅ {{ t('mfa.enabled') }}</div>
+          <p class="mfa-desc">{{ t('mfa.protectedDesc') }}</p>
+          <input v-model="mfaCode" type="text" maxlength="6" :placeholder="t('mfa.disablePlaceholder')" class="form-input mfa-code-input" />
+          <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : t('mfa.disableBtn') }}</button>
         </div>
       </div>
     </div>
@@ -350,12 +322,12 @@
       </div>
       <div class="modal-body">
         <div v-if="!mfaSetupData && !mfaEnabled" class="mfa-info">
-          <div class="mfa-status off">⚠ MFA είναι απενεργοποιημένο</div>
-          <p class="mfa-desc">Ενεργοποίησε το Two-Factor Authentication για επιπλέον ασφάλεια. Χρειάζεσαι μία εφαρμογή TOTP (Google Authenticator, Authy).</p>
+          <div class="mfa-status off">⚠ {{ t('mfa.disabledAlt') }}</div>
+          <p class="mfa-desc">{{ t('mfa.enableDescAlt') }}</p>
           <button class="btn-submit" @click="setupMfa" :disabled="mfaLoading">{{ mfaLoading ? "..." : "Ενεργοποίηση MFA" }}</button>
         </div>
         <div v-if="mfaSetupData" class="mfa-setup">
-          <div class="mfa-status">📱 Σκάναρε το QR Code</div>
+          <div class="mfa-status">📱 {{ t('mfa.scanQR') }}</div>
           <div class="mfa-qr-wrap">
             <img :src="qrCodeUrl" class="mfa-qr" alt="QR Code" />
           </div>
@@ -363,15 +335,15 @@
             <span class="mfa-secret-label">Manual key:</span>
             <code class="mfa-secret">{{ mfaSetupData.secret }}</code>
           </div>
-          <p class="mfa-desc">Σκάναρε με Google Authenticator ή Authy, μετά εισήγαγε τον 6-ψήφιο κωδικό:</p>
+          <p class="mfa-desc">{{ t('mfa.scanDescAlt') }}</p>
           <input v-model="mfaCode" type="text" maxlength="6" placeholder="000000" class="form-input mfa-code-input" />
           <div v-if="mfaError" class="form-error">{{ mfaError }}</div>
           <button class="btn-submit" @click="verifyMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "Επαλήθευση..." : "Επαλήθευση & Ενεργοποίηση" }}</button>
         </div>
         <div v-if="mfaEnabled && !mfaSetupData" class="mfa-info">
-          <div class="mfa-status on">✅ MFA είναι ενεργοποιημένο</div>
-          <p class="mfa-desc">Το Two-Factor Authentication προστατεύει τον λογαριασμό σου.</p>
-          <input v-model="mfaCode" type="text" maxlength="6" placeholder="Κωδικός για απενεργοποίηση..." class="form-input mfa-code-input" />
+          <div class="mfa-status on">✅ {{ t('mfa.enabledAlt') }}</div>
+          <p class="mfa-desc">{{ t('mfa.protectedDescAlt') }}</p>
+          <input v-model="mfaCode" type="text" maxlength="6" :placeholder="t('mfa.disablePlaceholder')" class="form-input mfa-code-input" />
           <button class="btn-cancel" @click="disableMfa" :disabled="mfaLoading || mfaCode.length !== 6">{{ mfaLoading ? "..." : "Απενεργοποίηση MFA" }}</button>
         </div>
       </div>
@@ -470,12 +442,14 @@ import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
 import api from '@/services/api'
+import { useI18n } from 'vue-i18n'
 
 const auth = useAuthStore()
 const store = useProjectStore()
 const permStore = usePermissionStore()
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 
 // ════ NEW COMPANY ════
 const showNewCompany = ref(false)
@@ -580,7 +554,7 @@ function addTask(m) {
 async function submitProject() {
   formError.value = ''
   if (!form.value.title || !form.value.companyId || !form.value.category) {
-    formError.value = 'Τίτλος, Εταιρεία και Κατηγορία είναι υποχρεωτικά.'
+    formError.value = t('form.errRequired')
     return
   }
   submitting.value = true
@@ -612,7 +586,7 @@ async function submitProject() {
     closeModal()
     router.push(`/projects/${proj.id}`)
   } catch (e) {
-    formError.value = e.response?.data?.message || 'Αποτυχία δημιουργίας project.'
+    formError.value = e.response?.data?.message || t('form.errCreate')
   } finally {
     submitting.value = false
   }
@@ -677,14 +651,14 @@ const pageTitle = computed(() => ({
   Dashboard: 'Group Dashboard',
   Projects: 'All Projects',
   ProjectDetail: store.selectedProject?.title || 'Project Detail',
-  Guide: 'Οδηγός Χρήσης',
+  Guide: t('sidebar.guide'),
 }[route.name] || 'Next2View'))
 
 const pageSubtitle = computed(() => ({
   Dashboard: 'All companies · All categories · CEO view',
   Projects: `${store.projects.length} projects`,
   ProjectDetail: store.selectedProject ? `${store.selectedProject.companyName} · ${store.selectedProject.category}` : '',
-  Guide: 'Πλήρης οδηγός πλατφόρμας',
+  Guide: t('tooltips.guideFull'),
 }[route.name] || ''))
 
 async function handleLogout() {
@@ -709,7 +683,7 @@ async function loadAiReport() {
     const res = await api.post('/ai/ceo-report')
     aiReport.value = res.data.report
   } catch (e) {
-    aiReport.value = '## ⚠️ Σφάλμα\n\nΔεν ήταν δυνατή η σύνδεση με το AI.'
+    aiReport.value = t('ai.errorMd')
   } finally {
     aiLoading.value = false
   }

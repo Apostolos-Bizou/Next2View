@@ -6,12 +6,12 @@
           <img src="/icons/icon-192.png" alt="Next2View" />
         </div>
         <div class="pwa-text">
-          <div class="pwa-title">Εγκατάσταση Next2View</div>
-          <div class="pwa-subtitle">Πρόσβαση από την επιφάνεια εργασίας σας</div>
+          <div class="pwa-title">{{ t('pwa.title') }}</div>
+          <div class="pwa-subtitle">{{ t('pwa.subtitle') }}</div>
         </div>
         <div class="pwa-actions">
-          <button class="pwa-btn-install" @click="install">Εγκατάσταση</button>
-          <button class="pwa-btn-dismiss" @click="dismiss">Όχι τώρα</button>
+          <button class="pwa-btn-install" @click="install">{{ t('pwa.install') }}</button>
+          <button class="pwa-btn-dismiss" @click="dismiss">{{ t('pwa.notNow') }}</button>
         </div>
       </div>
     </div>
@@ -20,7 +20,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const showPrompt = ref(false)
 let deferredPrompt = null
 
