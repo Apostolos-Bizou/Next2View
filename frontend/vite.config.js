@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
 
+const AZURE_BACKEND = "https://next2view-api.politefield-8c14abcc.northeurope.azurecontainerapps.io";
+
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -13,9 +15,19 @@ export default defineConfig({
     port: 5173,
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: AZURE_BACKEND,
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
+        secure: true,
+      },
+    },
+  },
+  preview: {
+    port: 4173,
+    proxy: {
+      "/api": {
+        target: AZURE_BACKEND,
+        changeOrigin: true,
+        secure: true,
       },
     },
   },
