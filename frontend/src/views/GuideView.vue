@@ -2,7 +2,7 @@
   <div class="content">
     <div class="guide-header">
       <div class="guide-badge">NEXT2VIEW</div>
-      <div class="guide-title">📘 Οδηγός Χρήσης</div>
+      <div class="guide-title">{{ locale === 'el' ? '📘 Οδηγός Χρήσης' : '📘 User Guide' }}</div>
       <div class="guide-sub">{{ t('guide.subtitle') }}</div>
     </div>
 
@@ -16,7 +16,7 @@
     </div>
 
     <!-- ── DASHBOARD ── -->
-    <div v-if="activeTab === 'dashboard'" class="guide-panel">
+    <div v-if="activeTab === 'dashboard' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">◈ Dashboard — Η Κεντρική Σελίδα</div>
       <div class="g-desc">Το Dashboard είναι η πρώτη σελίδα που βλέπεις μόλις μπεις στο Next2View. Από εδώ έχεις άμεση εικόνα για όλες τις εταιρείες και τα projects χωρίς να χρειαστεί να ψάξεις πουθενά.</div>
 
@@ -47,8 +47,41 @@
       <div class="g-tip">💡 Κάνε κλικ στον τίτλο ενός project στο Gantt για να πας απευθείας στη σελίδα του.</div>
     </div>
 
+
+    <!-- ── DASHBOARD EN ── -->
+    <div v-if="activeTab === 'dashboard' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">◈ Dashboard — The Main Page</div>
+      <div class="g-desc">The Dashboard is the first page you see when you log into Next2View. From here you get an instant overview of all companies and projects without having to search anywhere.</div>
+
+      <div class="g-subsection">📊 KPI Strip — The 6 Key Numbers</div>
+      <div class="g-kpi-row">
+        <div class="g-kpi-card"><div class="g-kpi-ico">%</div><div class="g-kpi-lbl">Overall</div><div class="g-kpi-desc">Average completion % of all active projects in the group.</div></div>
+        <div class="g-kpi-card finance"><div class="g-kpi-ico">$</div><div class="g-kpi-lbl">Finance</div><div class="g-kpi-desc">Average completion % of all Finance projects.</div></div>
+        <div class="g-kpi-card legal"><div class="g-kpi-ico">⚖</div><div class="g-kpi-lbl">Legal</div><div class="g-kpi-desc">Average completion % of all Legal projects.</div></div>
+        <div class="g-kpi-card dev"><div class="g-kpi-ico">⌨</div><div class="g-kpi-lbl">Developing</div><div class="g-kpi-desc">Average completion % of all Dev projects.</div></div>
+        <div class="g-kpi-card marketing"><div class="g-kpi-ico">◈</div><div class="g-kpi-lbl">Marketing</div><div class="g-kpi-desc">Average completion % of all Marketing projects.</div></div>
+        <div class="g-kpi-card risk"><div class="g-kpi-ico">⚠</div><div class="g-kpi-lbl">At Risk</div><div class="g-kpi-desc">Number of projects that need immediate attention (blocked, stale, deadline at risk).</div></div>
+      </div>
+      <div class="g-tip">💡 If "At Risk" shows >0, check the red banner at the top — it tells you exactly which projects have issues.</div>
+
+      <div class="g-subsection">🏢 Companies Panel</div>
+      <div class="g-desc">Shows each company with its number of projects and completion %. Click on a company to see only its projects.</div>
+
+      <div class="g-subsection">📅 Upcoming Deadlines</div>
+      <div class="g-desc">The next 5 deadlines sorted chronologically with color indicators:</div>
+      <div class="g-deadline-badges">
+        <span class="g-badge red">🔴 &lt;7 days — Urgent</span>
+        <span class="g-badge yellow">🟡 7-14 days — Caution</span>
+        <span class="g-badge green">🟢 &gt;14 days — OK</span>
+      </div>
+
+      <div class="g-subsection">📊 Timeline Gantt</div>
+      <div class="g-desc">At the bottom of the Dashboard you can see all projects in a weekly Gantt chart. The blue vertical line shows the <strong>current week</strong>. You can filter by category using the dropdown at the top right.</div>
+      <div class="g-tip">💡 Click on a project title in the Gantt to go directly to its page.</div>
+    </div>
+
     <!-- ── ΕΤΑΙΡΕΙΕΣ ── -->
-    <div v-if="activeTab === 'companies'" class="guide-panel">
+    <div v-if="activeTab === 'companies' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">🏢 Διαχείριση Εταιρειών</div>
       <div class="g-desc">Οι εταιρείες είναι η βάση της οργάνωσης. Κάθε project ανήκει σε μία εταιρεία.</div>
 
@@ -66,8 +99,28 @@
       <div class="g-tip">💡 Το χρώμα κάθε εταιρείας εμφανίζεται συνεχώς παντού — dashboard, progress bars, labels. Επίλεξε χρώματα που ξεχωρίζουν μεταξύ τους.</div>
     </div>
 
+
+    <!-- ── COMPANIES EN ── -->
+    <div v-if="activeTab === 'companies' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">🏢 Company Management</div>
+      <div class="g-desc">Companies are the foundation of the organization. Each project belongs to one company.</div>
+
+      <div class="g-subsection">+ How to add a new company</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Click <strong>"+ Company"</strong> at the bottom of the left sidebar.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Enter the <strong>company name</strong> (e.g. "Polaris Financial Services").</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Add a <strong>Short Code</strong> of 2-3 letters (e.g. "PF") — displayed as an avatar.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Choose a <strong>color</strong> for visual distinction.</div></div>
+        <div class="g-step"><span class="g-step-num">5</span><div>Click <strong>"Save Company"</strong>. It appears immediately on the Dashboard and sidebar.</div></div>
+      </div>
+
+      <div class="g-subsection">🗑 How to delete a company</div>
+      <div class="g-desc">Go to Manage (sidebar) → Companies → click × next to the company. Note: the company's projects are not deleted automatically.</div>
+      <div class="g-tip">💡 Each company's color appears everywhere — dashboard, progress bars, labels. Choose colors that are easily distinguishable.</div>
+    </div>
+
     <!-- ── PROJECTS ── -->
-    <div v-if="activeTab === 'projects'" class="guide-panel">
+    <div v-if="activeTab === 'projects' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">⬡ Διαχείριση Projects</div>
       <div class="g-desc">Κάθε project αντιπροσωπεύει μία εργασία ή ανάπτυξη που παρακολουθείς. Ένα project έχει κατηγορία, budget, deadline, modules και tasks.</div>
 
@@ -98,6 +151,41 @@
         <span class="g-status stale">🔴 Stale — Δεν ενημερώθηκε &gt;5 ημέρες</span>
       </div>
       <div class="g-tip">💡 Το status υπολογίζεται αυτόματα. Δεν χρειάζεται να το ορίσεις χειροκίνητα.</div>
+    </div>
+
+
+    <!-- ── PROJECTS EN ── -->
+    <div v-if="activeTab === 'projects' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">⬡ Project Management</div>
+      <div class="g-desc">Each project represents a task or development that you track. A project has a category, budget, deadline, modules and tasks.</div>
+
+      <div class="g-subsection">+ How to create a new project</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Click <strong>"+ New Project"</strong> in the sidebar or at the top right.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Enter the <strong>title</strong> (e.g. "IMO CII Compliance 2026").</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Select <strong>Company</strong> and <strong>Category</strong> (Finance / Legal / Developing / Marketing).</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Set the <strong>Budget</strong> (€) and <strong>Deadline</strong> (date).</div></div>
+        <div class="g-step"><span class="g-step-num">5</span><div>Write a brief <strong>contract description</strong> — what the project is about.</div></div>
+        <div class="g-step"><span class="g-step-num">6</span><div>Add <strong>Specifications</strong> — a checklist of deliverables (e.g. "Submit Flag State documents").</div></div>
+        <div class="g-step"><span class="g-step-num">7</span><div>Create <strong>Modules</strong> — project phases (e.g. "Assessment Phase", "Submission", "Training").</div></div>
+        <div class="g-step"><span class="g-step-num">8</span><div>Inside each Module add <strong>Tasks</strong> with assignee, deadline and completion %.</div></div>
+        <div class="g-step"><span class="g-step-num">9</span><div>Click <strong>"Save Project"</strong>. It appears immediately on the Dashboard and Timeline.</div></div>
+      </div>
+
+      <div class="g-subsection">✏ How to edit a project</div>
+      <div class="g-desc">From <strong>Project Detail</strong> (click on a project) → click the ✎ icon at the top right of the contract header. The same form opens with all fields pre-filled.</div>
+
+      <div class="g-subsection">🔍 How to filter projects</div>
+      <div class="g-desc">In the "All Projects" view there are 2 dropdowns at the top right: one for category and one for company. You can also click a category or company from the sidebar.</div>
+
+      <div class="g-subsection">📊 Project Status</div>
+      <div class="g-status-row">
+        <span class="g-status on-track">🟢 On Track — On schedule</span>
+        <span class="g-status delayed">🟡 Delayed — Behind schedule</span>
+        <span class="g-status at-risk">🔴 At Risk — Blocked or deadline near with low %</span>
+        <span class="g-status stale">🔴 Stale — Not updated for &gt;5 days</span>
+      </div>
+      <div class="g-tip">💡 Status is calculated automatically. You don't need to set it manually.</div>
     </div>
 
     <!-- ── TASKS ── -->
@@ -1065,10 +1153,10 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { usePermissionStore } from '@/stores/permissions'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const activeTab = ref('dashboard')
 
-const tabs = [
+const tabs = computed(() => [
   { id: 'mfa',           label: 'MFA Setup',     icon: '🔐', style: 'background:rgba(5,150,105,0.1);border-color:rgba(5,150,105,0.35);color:#047857;' },
   { id: 'dashboard',     label: 'Dashboard',    icon: '◈' },
   { id: 'companies',     label: t('guide.tabs.companies'),    icon: '🏢' },
@@ -1081,10 +1169,10 @@ const tabs = [
   { id: 'security',      label: 'Security',     icon: '🔒', style: 'background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.35);color:#b45309;' },
 
   { id: 'glossary',      label: t('guide.tabs.glossary'),   icon: '📖' },
-]
+])
 
   const permStore = usePermissionStore()
-  const visibleTabs = computed(() => tabs.filter(t => t.id !== 'security' || permStore.canViewSecurity()))
+  const visibleTabs = computed(() => tabs.value.filter(t => t.id !== 'security' || permStore.canViewSecurity()))
 
 // ============= Security Documents Manager =============
 import api from '@/services/api'
