@@ -85,13 +85,13 @@
               <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
               <div style="flex:1;">
                 <div :class="`task-name ${t.isDone?'done':''}`">{{ t.name }}</div>
-                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" :title="t('pd.deleteTask')">🗑</button>
+                <button class="delete-task-btn" @click.stop="confirmDeleteTask(t, m)" :title="'Διαγραφή task'">🗑</button>
                 <div v-if="t.blockNote" class="task-note">⚠ {{ t.blockNote }}</div>
               </div>
               <span class="task-assignee">{{ t.assignee||'—' }}</span>
               <div class="task-pct-wrap">
                 <div class="task-bar"><div class="task-bar-fill" :style="`width:${displayProgress(t)}%;background:${t.isDone?'var(--green)':'var(--'+( m.color||project.category)+')'};`"></div></div>
-                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" :title="t('pd.behindSchedule')" style="color:var(--red);margin-left:4px;">⚠</span></div>
+                <div class="task-pct" :style="`color:${t.isDone ? 'var(--green)' : 'var(--' + (m.color || project.category) + ')'}`">{{ displayProgress(t) }}%<span v-if="mismatchAlert(t)" :title="'Πίσω από το χρονοδιάγραμμα'" style="color:var(--red);margin-left:4px;">⚠</span></div>
               </div>
             </div>
           </div>
@@ -253,11 +253,11 @@
 
           <div class="te-row">
             <div class="te-field">
-              <label>{{ t('pd.start') }}</label>
+              <label>Έναρξη</label>
               <input type="date" v-model="editingTask.startDate" :disabled="editingTaskSaving" />
             </div>
             <div class="te-field">
-              <label>{{ t('pd.end') }}</label>
+              <label>Λήξη</label>
               <input type="date" v-model="editingTask.endDate" :disabled="editingTaskSaving" />
             </div>
           </div>
@@ -393,9 +393,9 @@
                 <button @click="m.tasks.splice(ti,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 6px;cursor:pointer;">✕</button>
               </div>
               <div style="display:flex;gap:6px;align-items:center;padding-left:4px;">
-                <label style="font-size:10px;color:var(--text-dim);min-width:55px;">{{ t('pd.start') }}</label>
+                <label style="font-size:10px;color:var(--text-dim);min-width:55px;">Έναρξη</label>
                 <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
-                <label style="font-size:10px;color:var(--text-dim);min-width:35px;">{{ t('pd.end') }}</label>
+                <label style="font-size:10px;color:var(--text-dim);min-width:35px;">Λήξη</label>
                 <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
               </div>
             </div>
