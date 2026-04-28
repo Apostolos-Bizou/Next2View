@@ -5,7 +5,7 @@
       <div>
         <div class="ganttv2-ph-title">📊 Project Timeline</div>
         <div class="ganttv2-ph-sub">
-          {{ project.title }} · {{ rangeLabel }} · {{ t('ganttv2.zoom.' + resolvedZoom) }}
+          {{ project.title }} · {{ rangeLabel }} · {{ tt('ganttv2.zoom.' + resolvedZoom) }}
         </div>
       </div>
       <div class="ganttv2-zoom-controls" role="tablist" aria-label="Zoom level">
@@ -14,8 +14,8 @@
           :key="z"
           :class="['ganttv2-zoom-btn', { active: zoom === z }]"
           @click="zoom = z"
-          :title="z === 'fit' ? t('ganttv2.zoomFitTip') : t('ganttv2.zoomTip') + ': ' + t('ganttv2.zoom.' + z)"
-        >{{ t('ganttv2.zoom.' + z) }}</button>
+          :title="z === 'fit' ? tt('ganttv2.zoomFitTip') : tt('ganttv2.zoomTip') + ': ' + tt('ganttv2.zoom.' + z)"
+        >{{ tt('ganttv2.zoom.' + z) }}</button>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
 
         <!-- HEADER ROW (sticky top) -->
         <div class="ganttv2-header">
-          <div class="ganttv2-header-label">{{ t('ganttv2.moduleTask') }}</div>
+          <div class="ganttv2-header-label">{{ tt('ganttv2.moduleTask') }}</div>
           <div class="ganttv2-header-cells" :style="{ minWidth: totalWidth + 'px' }">
             <!-- Top row (months or year) -->
             <div class="ganttv2-header-row top">
@@ -85,7 +85,7 @@
           <div class="ganttv2-row module-row" :style="{ minWidth: (labelColWidth + totalWidth) + 'px' }">
             <div class="ganttv2-label indent-1">
               <span class="mod-dot" style="background: var(--legal);"></span>
-              <span class="label-text">📋 {{ t('ganttv2.specifications') }}</span>
+              <span class="label-text">📋 {{ tt('ganttv2.specifications') }}</span>
               <span class="ganttv2-pct-pill">{{ specsCompletion }}%</span>
             </div>
             <div class="ganttv2-timeline" :style="{ minWidth: totalWidth + 'px' }">
@@ -211,15 +211,15 @@
 
     <!-- Legend strip -->
     <div class="ganttv2-strip">
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--dev);"></div>{{ t('ganttv2.legend.dev') }}</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--finance);"></div>{{ t('ganttv2.legend.finance') }}</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--legal);"></div>{{ t('ganttv2.legend.legal') }}</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--marketing);"></div>{{ t('ganttv2.legend.marketing') }}</div>
-      <div class="strip-item"><div class="strip-swatch" style="background:var(--red);"></div>{{ t('ganttv2.legend.blocked') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--dev);"></div>{{ tt('ganttv2.legend.dev') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--finance);"></div>{{ tt('ganttv2.legend.finance') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--legal);"></div>{{ tt('ganttv2.legend.legal') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--marketing);"></div>{{ tt('ganttv2.legend.marketing') }}</div>
+      <div class="strip-item"><div class="strip-swatch" style="background:var(--red);"></div>{{ tt('ganttv2.legend.blocked') }}</div>
       <div class="strip-divider"></div>
-      <div class="strip-item"><span class="kbd">Ctrl</span>{{ t('ganttv2.legend.scrollZoom') }}</div>
-      <div class="strip-item">{{ t('ganttv2.legend.pinchZoom') }}</div>
-      <div class="strip-item">{{ t('ganttv2.legend.hoverBars') }}</div>
+      <div class="strip-item"><span class="kbd">Ctrl</span>{{ tt('ganttv2.legend.scrollZoom') }}</div>
+      <div class="strip-item">{{ tt('ganttv2.legend.pinchZoom') }}</div>
+      <div class="strip-item">{{ tt('ganttv2.legend.hoverBars') }}</div>
     </div>
   </div>
 </template>
@@ -232,7 +232,7 @@ const props = defineProps({
   project: { type: Object, required: true }
 })
 const emit = defineEmits(['task-click'])
-const { t } = useI18n()
+const { t: tt } = useI18n()
 
 // ═══════════════════ STATE ═══════════════════
 const zoom = ref('fit')
@@ -245,9 +245,9 @@ const labelColWidth = computed(() => window.innerWidth < 768 ? LABEL_W_MOBILE : 
 
 const CELL_W = { day: 40, week: 80, month: 120 }
 
-const MONTH_SHORT = computed(() => t('months.short'))
-const MONTH_FULL_EL = computed(() => t('ganttv2.monthsFull'))
-const DAY_SHORT_EL = computed(() => t('ganttv2.daysShort'))
+const MONTH_SHORT = computed(() => tt('months.short'))
+const MONTH_FULL_EL = computed(() => tt('ganttv2.monthsFull'))
+const DAY_SHORT_EL = computed(() => tt('ganttv2.daysShort'))
 
 // ═══════════════════ HELPERS ═══════════════════
 const MS_DAY = 86400000
