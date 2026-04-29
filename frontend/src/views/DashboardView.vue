@@ -241,12 +241,12 @@ const recentActivity = computed(() =>
 
 // ════ GANTT ════
 // ──── GANTT ZOOM SYSTEM ────
-const GANTT_ZOOM_LEVELS = [
+const GANTT_ZOOM_LEVELS = computed(() => [
   { key: "WEEK",    label: t("gantt.week"), columns: 12, columnDays: 7,  navDays: 7  },
   { key: "MONTH",   label: t("gantt.month"),    columns: 6,  columnDays: 30, navDays: 30 },
   { key: "QUARTER", label: t("gantt.quarter"),  columns: 4,  columnDays: 90, navDays: 90 },
   { key: "YEAR",    label: t("gantt.year"),     columns: 12, columnDays: 30, navDays: 365 },
-];
+]);
 
 // Load persisted state από localStorage (default: MONTH, σήμερα)
 const _savedZoom = (() => {
@@ -259,7 +259,7 @@ const _savedStart = (() => {
   } catch (e) { return null; }
 })();
 
-const ganttZoom = ref(_savedZoom && GANTT_ZOOM_LEVELS.find(z => z.key === _savedZoom) ? _savedZoom : "MONTH");
+const ganttZoom = ref(_savedZoom && GANTT_ZOOM_LEVELS.value.find(z => z.key === _savedZoom) ? _savedZoom : "MONTH");
 
 // Helper: αρχή εβδομάδας (Κυριακή)
 function _weekStart(date) {
@@ -273,7 +273,7 @@ function _weekStart(date) {
 function _defaultViewStart(zoomKey) {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
-  const lvl = GANTT_ZOOM_LEVELS.find(z => z.key === zoomKey);
+  const lvl = GANTT_ZOOM_LEVELS.value.find(z => z.key === zoomKey);
   if (zoomKey === "WEEK") {
     return _weekStart(now); // αρχή της τρέχουσας εβδομάδας
   } else if (zoomKey === "MONTH") {
@@ -293,7 +293,7 @@ function _defaultViewStart(zoomKey) {
 const ganttViewStart = ref(_savedStart || _defaultViewStart(ganttZoom.value));
 
 const ganttConfig = computed(() =>
-  GANTT_ZOOM_LEVELS.find(z => z.key === ganttZoom.value) || GANTT_ZOOM_LEVELS[1]
+  GANTT_ZOOM_LEVELS.value.find(z => z.key === ganttZoom.value) || GANTT_ZOOM_LEVELS.value[1]
 );
 
 const ganttViewEnd = computed(() => {

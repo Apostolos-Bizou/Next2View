@@ -189,7 +189,7 @@
     </div>
 
     <!-- ── TASKS ── -->
-    <div v-if="activeTab === 'tasks'" class="guide-panel">
+    <div v-if="activeTab === 'tasks' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">✅ Tasks &amp; Modules</div>
       <div class="g-desc">Τα Tasks είναι οι μικρότερες μονάδες εργασίας. Οργανώνονται σε <strong>Modules</strong> (φάσεις). Το % κάθε Module = μέσος όρος tasks. Το % κάθε Project = μέσος όρος modules.</div>
 
@@ -305,8 +305,126 @@
       <div class="g-tip">💡 Ένα task με 100% θεωρείται αυτόματα ✓ Done. Δεν χρειάζεται να κάνεις τίποτα άλλο.</div>
     </div>
 
-    <!-- ── ΣΥΜΒΑΣΕΙΣ ── -->
-    <div v-if="activeTab === 'contracts'" class="guide-panel">
+
+    <!-- ── TASKS EN ── -->
+    <div v-if="activeTab === 'tasks' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">✅ Tasks & Modules</div>
+      <div class="g-desc">Tasks are the smallest work units. They are organized into <strong>Modules</strong> (phases). Module % = average of its tasks. Project % = average of its modules.</div>
+
+      <div class="g-subsection">🏗 Structure: Project → Module → Task</div>
+      <div class="g-tree">
+        <div class="g-tree-project">⬡ Project — e.g. "ATLANTIS ERP" <span class="g-tree-pct">(88% = module average)</span></div>
+        <div class="g-tree-module">▦ Module — e.g. "Core Modules" <span class="g-tree-pct">(100% = task average)</span></div>
+        <div class="g-tree-task">· Task — e.g. "Dashboard" ✓ <span class="g-tree-pct" style="color:var(--green);">100%</span></div>
+        <div class="g-tree-task">· Task — e.g. "Payroll calculator" <span class="g-tree-pct" style="color:var(--accent);">40%</span></div>
+      </div>
+
+      <div class="g-subsection">📊 Project Structure Diagram</div>
+      <div class="g-chart-wrap">
+        <svg width="100%" viewBox="0 0 680 580" role="img" style="max-width:680px;display:block;margin:0 auto;">
+          <title>Next2View — Project Schedule Structure</title>
+          <defs><marker id="garrow-en" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+          <!-- PROJECT -->
+          <g>
+            <rect x="200" y="30" width="280" height="48" rx="10" fill="#7F77DD" fill-opacity="0.15" stroke="#7F77DD" stroke-width="1"/>
+            <text x="340" y="51" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#7F77DD">📋 Project</text>
+            <text x="340" y="68" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#7F77DD">Title · Company · startDate · deadline</text>
+          </g>
+          <!-- Lines Project to Modules -->
+          <path d="M340 78 L340 95 L190 95 L190 110" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow-en)"/>
+          <path d="M340 78 L340 95 L490 95 L490 110" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow-en)"/>
+          <!-- MODULE 1 -->
+          <g>
+            <rect x="80" y="110" width="220" height="44" rx="8" fill="#1D9E75" fill-opacity="0.12" stroke="#1D9E75" stroke-width="1"/>
+            <text x="190" y="128" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#1D9E75">Module 1</text>
+            <text x="190" y="144" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#1D9E75">Color · sortOrder</text>
+          </g>
+          <!-- MODULE 2 -->
+          <g>
+            <rect x="380" y="110" width="220" height="44" rx="8" fill="#1D9E75" fill-opacity="0.12" stroke="#1D9E75" stroke-width="1"/>
+            <text x="490" y="128" text-anchor="middle" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#1D9E75">Module 2</text>
+            <text x="490" y="144" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#1D9E75">Color · sortOrder</text>
+          </g>
+          <!-- Lines Modules to Tasks -->
+          <path d="M190 154 L190 170 L120 170 L120 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow-en)"/>
+          <path d="M190 154 L190 170 L300 170 L300 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow-en)"/>
+          <path d="M490 154 L490 170 L420 170 L420 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow-en)"/>
+          <path d="M490 154 L490 170 L590 170 L590 190" fill="none" stroke="#888" stroke-width="1" marker-end="url(#garrow-en)"/>
+          <!-- TASKS -->
+          <g><rect x="40" y="190" width="160" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="120" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task A</text><text x="120" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <g><rect x="220" y="190" width="160" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="300" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task B</text><text x="300" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <g><rect x="340" y="190" width="160" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="420" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task C</text><text x="420" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <g><rect x="520" y="190" width="140" height="40" rx="6" fill="#888" fill-opacity="0.1" stroke="#888" stroke-width="0.5"/><text x="590" y="207" text-anchor="middle" font-family="Nunito,sans-serif" font-size="12" font-weight="700" fill="#555">Task D</text><text x="590" y="221" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#888">Assignee · %</text></g>
+          <!-- GANTT -->
+          <rect x="20" y="270" width="640" height="240" rx="10" fill="none" stroke="#ccc" stroke-width="0.5" stroke-dasharray="4 4"/>
+          <text x="40" y="295" font-family="Nunito,sans-serif" font-size="13" font-weight="700" fill="#555">📊 Gantt Timeline</text>
+          <rect x="40" y="305" width="600" height="24" rx="4" fill="#f0f0f0"/>
+          <text x="180" y="321" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">W1 · startDate</text>
+          <text x="380" y="321" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">W2</text>
+          <text x="570" y="321" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11" fill="#888">W3 · deadline</text>
+          <text x="40" y="348" font-family="Nunito,sans-serif" font-size="11" fill="#888">Module 1</text>
+          <rect x="140" y="337" width="200" height="16" rx="3" fill="#1D9E75" opacity="0.8"/>
+          <text x="40" y="376" font-family="Nunito,sans-serif" font-size="11" fill="#888">Module 2</text>
+          <rect x="340" y="365" width="240" height="16" rx="3" fill="#1D9E75" opacity="0.8"/>
+          <text x="40" y="404" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task A</text>
+          <rect x="140" y="393" width="100" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <text x="40" y="422" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task B</text>
+          <rect x="240" y="411" width="100" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <text x="40" y="440" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task C</text>
+          <rect x="340" y="429" width="120" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <text x="40" y="458" font-family="Nunito,sans-serif" font-size="11" fill="#888">Task D</text>
+          <rect x="460" y="447" width="120" height="12" rx="3" fill="#1D9E75" opacity="0.6"/>
+          <line x1="310" y1="305" x2="310" y2="465" stroke="#63B3ED" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <text x="313" y="478" font-family="Nunito,sans-serif" font-size="10" fill="#63B3ED">Today</text>
+          <rect x="40" y="488" width="620" height="16" rx="5" fill="#EFF6FF"/>
+          <text x="350" y="500" text-anchor="middle" font-family="Nunito,sans-serif" font-size="10" fill="#63B3ED">Auto progress: (today − taskStart) / (taskEnd − taskStart) × 100</text>
+        </svg>
+      </div>
+
+      <div class="g-subsection">⚙️ How Progress is Calculated</div>
+      <div class="g-progress-rules">
+        <div class="g-progress-rule">
+          <div class="g-progress-rule-num">1</div>
+          <div><strong>Nobody touched the task</strong> → progress = auto<br><span style="color:var(--text-dim);font-size:12px;">Increases automatically each day: (days elapsed / total days) × 100</span></div>
+        </div>
+        <div class="g-progress-rule">
+          <div class="g-progress-rule-num">2</div>
+          <div><strong>Someone set a manual %</strong> → manual wins, auto stops<br><span style="color:var(--text-dim);font-size:12px;">E.g. if you set 30%, it stays at 30% regardless of days passed.</span></div>
+        </div>
+        <div class="g-progress-rule warning">
+          <div class="g-progress-rule-num" style="background:var(--red-dim);color:var(--red);">⚠</div>
+          <div><strong>Manual &lt; Auto − 20%</strong> → CEO gets notified<br><span style="color:var(--text-dim);font-size:12px;">E.g. Day 8/10 → auto=80%, manual=30% → difference 50% → ⚠ "Task is behind schedule"</span></div>
+        </div>
+        <div class="g-progress-rule success">
+          <div class="g-progress-rule-num" style="background:var(--green);color:#fff;">✓</div>
+          <div><strong>Clicks ✅ checkbox</strong> → 100% immediately, task is closed</div>
+        </div>
+      </div>
+      <div class="g-tip">💡 The ⚠ appears next to the task % in Project Detail — the CEO can instantly see which tasks are behind schedule.</div>
+
+      <div class="g-subsection">✏ How to update a task</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Go to <strong>Project Detail</strong> (click on a project).</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Click on a <strong>Module</strong> title to expand/collapse it.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>You see each task with: <strong>checkmark</strong>, name, assignee, progress bar and %.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>To change the %, go to <strong>Edit Project (✎)</strong> → change the task % → Save.</div></div>
+      </div>
+
+      <div class="g-subsection">💬 How to add a comment to a task</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>In Project Detail, expand a Module.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Click the 💬 icon on the right of each task.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Write your comment and click <strong>"Save"</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>The comment appears as a preview below the task name and the AI takes it into account in reports.</div></div>
+      </div>
+
+      <div class="g-subsection">🚫 How to mark a task as Blocked</div>
+      <div class="g-desc">In Edit Project → add the word "BLOCK" and the reason in the task note (e.g. "BLOCK — awaiting documents from Flag State"). The task displays a red icon and the project status changes to "At Risk".</div>
+      <div class="g-tip">💡 A task with 100% is automatically considered ✓ Done. No further action needed.</div>
+    </div>
+
+        <!-- ── ΣΥΜΒΑΣΕΙΣ ── -->
+    <div v-if="activeTab === 'contracts' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">📄 Διαχείριση Συμβάσεων</div>
       <div class="g-desc">Κάθε project μπορεί να έχει ανεβασμένη την υπογεγραμμένη του σύμβαση. Το AI εξάγει αυτόματα τα βασικά στοιχεία και τα εμφανίζει ως διαμορφωμένη καρτέλα.</div>
 
@@ -338,8 +456,42 @@
       <div class="g-tip">💡 Αν τα στοιχεία που εξήχθηκαν δεν φαίνονται σωστά (π.χ. λείπει γλώσσα ή νομισματική μονάδα), πάτα <strong>"AI Ανάλυση"</strong> για να επαναλάβεις την εξαγωγή.</div>
     </div>
 
-    <!-- ── AI FEATURES ── -->
-    <div v-if="activeTab === 'ai'" class="guide-panel">
+
+    <!-- ── CONTRACTS EN ── -->
+    <div v-if="activeTab === 'contracts' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">📄 Contract Management</div>
+      <div class="g-desc">Each project can have its signed contract uploaded. The AI automatically extracts key information and displays it as a formatted card.</div>
+
+      <div class="g-subsection">📎 How to upload a contract</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Go to the <strong>Project Detail</strong> of the desired project.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Find the <strong>"Signed Contract"</strong> panel in the right column.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Click <strong>"Upload now"</strong> or drag & drop the file.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Supported formats: <strong>PDF, JPG, PNG</strong> up to 10MB.</div></div>
+        <div class="g-step"><span class="g-step-num">5</span><div>Once uploaded, the AI automatically starts extracting key information.</div></div>
+      </div>
+
+      <div class="g-subsection">🤖 What the AI extracts automatically</div>
+      <div class="g-kpi-row">
+        <div class="g-kpi-card"><div class="g-kpi-ico">👤</div><div class="g-kpi-lbl">Parties</div><div class="g-kpi-desc">The contracting parties (client + provider).</div></div>
+        <div class="g-kpi-card finance"><div class="g-kpi-ico">€</div><div class="g-kpi-lbl">Value</div><div class="g-kpi-desc">Total contract value.</div></div>
+        <div class="g-kpi-card legal"><div class="g-kpi-ico">📅</div><div class="g-kpi-lbl">Dates</div><div class="g-kpi-desc">Contract start and end dates.</div></div>
+        <div class="g-kpi-card dev"><div class="g-kpi-ico">📋</div><div class="g-kpi-lbl">Obligations</div><div class="g-kpi-desc">Main obligations of the contracting parties.</div></div>
+        <div class="g-kpi-card risk"><div class="g-kpi-ico">⚠</div><div class="g-kpi-lbl">Penalties</div><div class="g-kpi-desc">Penalties and penalty clauses if applicable.</div></div>
+        <div class="g-kpi-card marketing"><div class="g-kpi-ico">⚖</div><div class="g-kpi-lbl">Law</div><div class="g-kpi-desc">Governing law and jurisdiction.</div></div>
+      </div>
+
+      <div class="g-subsection">🖨 How to print / export as PDF</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Once the information is extracted, an <strong>"Export / Print"</strong> button appears at the top of the card.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Click the button — a new page opens with a print-ready layout.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Click <strong>"Print / Save as PDF"</strong> — from the browser dialog select "Save as PDF".</div></div>
+      </div>
+      <div class="g-tip">💡 If the extracted information doesn't look correct (e.g. missing language or currency), click <strong>"AI Analysis"</strong> to re-run the extraction.</div>
+    </div>
+
+        <!-- ── AI FEATURES ── -->
+    <div v-if="activeTab === 'ai' && locale === 'el'" class="guide-panel">
       <div class="g-section-title" style="color:#7c3aed;">✦ AI Features — Powered by Claude</div>
       <div class="g-desc">Το Next2View ενσωματώνει AI μέσω του <strong>Claude API (Anthropic)</strong>. Τρία AI εργαλεία είναι διαθέσιμα από διαφορετικά σημεία της εφαρμογής.</div>
 
@@ -443,8 +595,114 @@
       </div>
     </div>
 
-    <!-- ── NOTIFICATIONS ── -->
-    <div v-if="activeTab === 'notifications'" class="guide-panel">
+
+    <!-- ── AI FEATURES EN ── -->
+    <div v-if="activeTab === 'ai' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title" style="color:#7c3aed;">✦ AI Features — Powered by Claude</div>
+      <div class="g-desc">Next2View integrates AI through the <strong>Claude API (Anthropic)</strong>. Three AI tools are available from different points within the application.</div>
+
+      <div class="g-ai-section">
+        <div class="g-ai-title">🤖 AI CEO Report</div>
+        <div class="g-desc">Click <strong>"AI Report"</strong> in the sidebar to receive an automatic analysis of the entire portfolio.</div>
+        <div class="g-subsection">How to use it</div>
+        <div class="g-steps">
+          <div class="g-step"><span class="g-step-num">1</span><div>Click <strong>"AI Report"</strong> in the left sidebar.</div></div>
+          <div class="g-step"><span class="g-step-num">2</span><div>The AI analyzes <strong>all projects</strong>: status, deadlines, Finance, Legal, etc.</div></div>
+          <div class="g-step"><span class="g-step-num">3</span><div>In 20 seconds you receive a <strong>detailed report</strong> with highlights and recommended actions.</div></div>
+        </div>
+        <div class="g-subsection">What the report includes</div>
+        <div class="g-status-row" style="flex-wrap:wrap;">
+          <span class="g-status on-track">✓ Overall completion</span>
+          <span class="g-status delayed">⚠ Delayed projects</span>
+          <span class="g-status at-risk">🔴 Top 3 At Risk items</span>
+          <span class="g-status stale">📊 Per-category analysis</span>
+          <span class="g-status on-track">💡 Recommended actions</span>
+        </div>
+        <div class="g-tip">💡 "AI Report" is available only for the <strong>CEO role</strong> — it does not appear for Dept Head or Viewer.</div>
+      </div>
+
+      <div class="g-ai-section" style="margin-top:20px;">
+        <div class="g-ai-title">📄 AI Contract Data Extraction</div>
+        <div class="g-desc">Once you upload a contract (PDF/JPG/PNG), the AI automatically extracts key information and displays it in a structured card within Project Detail.</div>
+        <div class="g-tip">💡 Supports PDF and images. Recognizes both Greek and English text.</div>
+        <div class="g-subsection">📋 Example — This is what the result looks like</div>
+        <div class="g-contract-preview">
+          <div class="g-cp-header">
+            <div class="g-cp-title">Active Contract <span class="g-cp-badge">✓ Preview</span></div>
+            <div class="g-cp-actions">
+              <span class="g-cp-btn ai">✦ AI Analysis</span>
+              <span class="g-cp-btn">Export</span>
+              <span class="g-cp-btn">Print</span>
+            </div>
+          </div>
+          <div class="g-cp-body">
+            <div class="g-cp-desc">Provision of development services for a comprehensive ERP system for crew and fleet management in maritime transport, including user training and 12-month support.</div>
+            <div class="g-cp-parties">
+              <span class="g-cp-party">🏢 Crossworld Marine Services Ltd</span>
+              <span class="g-cp-party">🏢 OceanSoft Ltd</span>
+            </div>
+            <div class="g-cp-grid">
+              <div class="g-cp-field">
+                <div class="g-cp-label">CONTRACT VALUE</div>
+                <div class="g-cp-value finance">€45,000 EUR</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">PAYMENT TERMS</div>
+                <div class="g-cp-value small">30% advance, 40% beta delivery, 30% final delivery</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">START DATE</div>
+                <div class="g-cp-value">1 February 2026</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">END DATE</div>
+                <div class="g-cp-value risk">20 April 2026</div>
+              </div>
+            </div>
+            <div class="g-cp-obligations">
+              <div class="g-cp-obl-title">KEY OBLIGATIONS</div>
+              <div class="g-cp-obl-item">1. Development and delivery of full ERP with modules: Dashboard, Roster, RPA Hub, Payroll, Sign-Off</div>
+              <div class="g-cp-obl-item">2. User training up to 3 days before final delivery</div>
+              <div class="g-cp-obl-item">3. 12-month technical support after delivery, 24-hour SLA</div>
+              <div class="g-cp-obl-item">4. Delivery of complete documentation and source code to sender repository</div>
+            </div>
+            <div class="g-cp-penalty">
+              <div class="g-cp-penalty-label">⚠ PENALTIES / CLAUSES</div>
+              <div class="g-cp-penalty-val">Late delivery: 0.5% of contract value per week of delay, up to 10% total. SLA non-compliance: 1% compensation per breach</div>
+            </div>
+            <div class="g-cp-footer-grid">
+              <div class="g-cp-field">
+                <div class="g-cp-label">GOVERNING LAW</div>
+                <div class="g-cp-value small">Cyprus Law — Limassol Courts</div>
+              </div>
+              <div class="g-cp-field">
+                <div class="g-cp-label">SPECIAL TERMS</div>
+                <div class="g-cp-value small">Code exclusivity for 24 months. NDA valid for 5 years after expiry.</div>
+              </div>
+            </div>
+            <div class="g-cp-notice">* Results were automatically extracted from Project detail and do not substitute legal advice.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="g-ai-section" style="margin-top:20px;">
+        <div class="g-ai-title">🔍 AI Contract vs Progress Analysis</div>
+        <div class="g-desc">Once a contract is uploaded to a project, you can request a comparison of contract terms against actual progress.</div>
+        <div class="g-steps">
+          <div class="g-step"><span class="g-step-num">1</span><div>Open the project detail.</div></div>
+          <div class="g-step"><span class="g-step-num">2</span><div>Click the <strong>"AI Contract Analysis"</strong> button on the contract card.</div></div>
+          <div class="g-step"><span class="g-step-num">3</span><div>The AI compares what the contract promises vs what has actually been done.</div></div>
+        </div>
+        <div class="g-status-row">
+          <span class="g-status on-track">🟢 Compliant</span>
+          <span class="g-status delayed">🟡 Partial Deviation</span>
+          <span class="g-status at-risk">🔴 Serious Deviation</span>
+        </div>
+      </div>
+    </div>
+
+        <!-- ── NOTIFICATIONS ── -->
+    <div v-if="activeTab === 'notifications' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">🔔 Σύστημα Notifications</div>
       <div class="g-desc">Το Next2View έχει αυτόματο σύστημα για κάθε κρίσιμο event — χωρίς να χρειάζεται να ανανεώσεις το dashboard. Κάθε 5 λεπτά ελέγχονται όλα τα active projects.</div>
 
@@ -493,8 +751,59 @@
       <div class="g-tip">⏰ <strong>Συχνότητα ελέγχου:</strong> Κάθε <strong>5 λεπτά</strong> αυτόματα. Ο έλεγχος γίνεται και αμέσως μόλις ανοίξεις την εφαρμογή.</div>
     </div>
 
-    <!-- ── ROLES ── -->
-    <div v-if="activeTab === 'roles'" class="guide-panel">
+
+    <!-- ── NOTIFICATIONS EN ── -->
+    <div v-if="activeTab === 'notifications' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">🔔 Notification System</div>
+      <div class="g-desc">Next2View has an automatic system for every critical event — no need to refresh the dashboard. Every 5 minutes all active projects are checked.</div>
+
+      <div class="g-subsection">🔔 The Bell Icon</div>
+      <div class="g-desc">Appears at the bottom of the sidebar. When there are new notifications, a red badge shows the number of unread items. Click it to review them.</div>
+      <div class="g-tip">💡 The badge <strong>disappears</strong> once you open the panel. When you close it, notifications continue to be received.</div>
+
+      <div class="g-subsection">⚡ Automatic Triggers</div>
+      <div class="g-notif-cards">
+        <div class="g-notif-card red">
+          <div class="g-notif-card-title">⏰ Deadline Risk <span class="g-notif-badge red">URGENT</span></div>
+          <div class="g-notif-card-desc"><strong>When:</strong> Less than 7 days to deadline and progress below 80%.</div>
+          <div class="g-notif-card-desc"><strong>What it means:</strong> The project is at risk of missing its delivery date. Immediate action required.</div>
+        </div>
+        <div class="g-notif-card yellow">
+          <div class="g-notif-card-title">😴 Stale Project <span class="g-notif-badge yellow">WARNING</span></div>
+          <div class="g-notif-card-desc"><strong>When:</strong> The project has not been updated for more than 5 days.</div>
+          <div class="g-notif-card-desc"><strong>What it means:</strong> Possibly forgotten or pending. Check if follow-up is needed.</div>
+        </div>
+        <div class="g-notif-card blue">
+          <div class="g-notif-card-title">📈 Slow Progress Gap <span class="g-notif-badge blue">NOTICE</span></div>
+          <div class="g-notif-card-desc"><strong>When:</strong> More than 70% of the time period has passed but progress is below 50%.</div>
+          <div class="g-notif-card-desc"><strong>What it means:</strong> The work pace doesn't match the deadlines. Likely to be delayed.</div>
+        </div>
+        <div class="g-notif-card red">
+          <div class="g-notif-card-title">🚫 Blocked Task <span class="g-notif-badge red">URGENT</span></div>
+          <div class="g-notif-card-desc"><strong>When:</strong> Any task is marked as "BLOCK" with a reason.</div>
+          <div class="g-notif-card-desc"><strong>What it means:</strong> Something is blocking progress. CEO intervention required.</div>
+        </div>
+        <div class="g-notif-card green">
+          <div class="g-notif-card-title">📉 Under-billed <span class="g-notif-badge green">INFO</span></div>
+          <div class="g-notif-card-desc"><strong>When:</strong> Project progress is above 30% but no billing has been recorded.</div>
+          <div class="g-notif-card-desc"><strong>What it means:</strong> Risk of revenue loss — check payments.</div>
+        </div>
+      </div>
+
+      <div class="g-subsection">📩 Toast Notifications</div>
+      <div class="g-desc">Each new notification appears as a <strong>toast</strong> at the bottom right of the screen for 5 seconds. Click on it to go directly to the related project.</div>
+
+      <div class="g-subsection">🗑 Managing Notifications</div>
+      <div class="g-notif-mgmt">
+        <div class="g-mgmt-card"><div class="g-mgmt-ico">🔔</div><div class="g-mgmt-title">Open panel</div><div class="g-mgmt-desc">Click the bell icon in the sidebar. You see all notifications with color coding.</div></div>
+        <div class="g-mgmt-card"><div class="g-mgmt-ico">👆</div><div class="g-mgmt-title">Go to project</div><div class="g-mgmt-desc">Click on any notification to go directly to the Project Detail.</div></div>
+        <div class="g-mgmt-card"><div class="g-mgmt-ico">✓</div><div class="g-mgmt-title">Clear All</div><div class="g-mgmt-desc">Click "Clear all" in the panel to clear all notifications.</div></div>
+      </div>
+      <div class="g-tip">⏰ <strong>Check frequency:</strong> Every <strong>5 minutes</strong> automatically. A check also runs immediately when you open the application.</div>
+    </div>
+
+        <!-- ── ROLES ── -->
+    <div v-if="activeTab === 'roles' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">👤 Roles &amp; Δικαιώματα</div>
       <div class="g-desc">Το Next2View έχει 3 επίπεδα πρόσβασης. Κάθε χρήστης έχει ακριβώς αυτά που χρειάζεται — τίποτα παραπάνω.</div>
 
@@ -641,8 +950,158 @@
       </div>
     </div>
 
-    <!-- ── ΓΛΩΣΣΑΡΙΟ ── -->
-      <div v-if="activeTab === 'mfa'" class="guide-panel">
+
+    <!-- ── ROLES EN ── -->
+    <div v-if="activeTab === 'roles' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">👤 Roles & Permissions</div>
+      <div class="g-desc">Next2View has 3 access levels. Each user gets exactly what they need — nothing more.</div>
+
+      <div class="g-role-grid">
+        <div class="g-role ceo">
+          <div class="g-role-icon">👑</div>
+          <div class="g-role-title">CEO</div>
+          <div class="g-role-perms">✓ Full access<br>✓ All companies<br>✓ AI Reports<br>✓ CEO private notes<br>✓ Manage users<br>✓ Manage companies<br>✓ Delete projects</div>
+        </div>
+        <div class="g-role dept">
+          <div class="g-role-icon">🏢</div>
+          <div class="g-role-title">Department Head</div>
+          <div class="g-role-perms">✓ Projects in their category<br>✓ Cross-company access<br>✓ Update tasks<br>✓ Upload/Delete files<br>✓ Create projects<br>✕ AI Reports<br>✕ CEO notes<br>✕ Delete projects<br>✕ Manage users</div>
+        </div>
+        <div class="g-role viewer">
+          <div class="g-role-icon">👁</div>
+          <div class="g-role-title">Viewer</div>
+          <div class="g-role-perms">✓ View projects<br>✓ View tasks<br>✗ Cannot change anything<br>✗ Cannot upload files<br>✗ No AI access<br>✗ Cannot see CEO notes</div>
+        </div>
+      </div>
+
+      <div class="g-explainer-box">
+        <div class="g-explainer-title">💡 How Department Head access works</div>
+        <div class="g-explainer-text">
+          Each Department Head is assigned <strong>one category</strong> (Legal, Developing, Finance, or Marketing). They see <strong>all projects</strong> in that category across <strong>all companies</strong> in the group.
+        </div>
+        <div class="g-explainer-example">
+          📌 <strong>Example:</strong> A Legal Department Head belongs as an employee to one company, but sees legal projects from every company in the group (Crossworld, Polaris, Creworld, etc.).
+        </div>
+        <div class="g-explainer-note">
+          The company the user belongs to is only <em>HR info</em> — it does not restrict which projects they can see.
+        </div>
+      </div>
+
+      <div class="g-subsection">➕ How to add a new user</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Click <strong>"+ User"</strong> in the sidebar.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Fill in <strong>Name</strong> and <strong>Role</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Select <strong>Company</strong> and <strong>Department</strong> (Finance/Legal/Dev/Marketing/Management).</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Click <strong>"Save User"</strong>. The user appears in Manage.</div></div>
+      </div>
+      <div class="g-tip">💡 The CEO role has access to <strong>CEO Private Notes</strong> — notes attached to Project Detail that are invisible to other users.</div>
+
+      <!-- Permissions Matrix -->
+      <div class="g-subsection" style="margin-top: 32px;">🔑 Permissions Matrix — 14 Flags</div>
+      <div class="g-desc">The CEO can enable any combination of the following permissions for each user (Admin Panel → Users → 🔑).</div>
+
+      <div class="g-explainer-box" style="margin-top: 16px;">
+        <div class="g-explainer-title">👁️ Category Visibility (6 flags)</div>
+        <div class="g-explainer-text">
+          <strong>viewFinance</strong> — Can see finance projects<br>
+          <strong>viewLegal</strong> — Can see legal projects<br>
+          <strong>viewDev</strong> — Can see developing projects<br>
+          <strong>viewMarketing</strong> — Can see marketing projects<br>
+          <strong>viewFinancials</strong> — Can see budget & financial data of projects<br>
+          <strong>viewCeoNotes</strong> — Can see CEO Private Notes
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">⚡ Actions (4 flags)</div>
+        <div class="g-explainer-text">
+          <strong>updateTasks</strong> — Can change progress & status of tasks<br>
+          <strong>uploadFiles</strong> — Can upload & delete files in projects<br>
+          <strong>createProject</strong> — Can create new projects<br>
+          <strong>editProject</strong> — Can edit existing projects (title, deadline, etc.)
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">👥 Management (2 flags)</div>
+        <div class="g-explainer-text">
+          <strong>manageUsers</strong> — Can create & edit users<br>
+          <strong>manageCompanies</strong> — Can create & edit companies
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">🤖 AI Features (2 flags)</div>
+        <div class="g-explainer-text">
+          <strong>aiCeoReport</strong> — Can generate AI report for the Group Dashboard<br>
+          <strong>aiContract</strong> — Can analyze contracts with AI
+        </div>
+      </div>
+
+      <!-- Sidebar Visibility Rules -->
+      <div class="g-subsection" style="margin-top: 32px;">🏢 Company Visibility Rules in the Sidebar</div>
+      <div class="g-desc">Next2View intelligently filters which companies appear in each user's sidebar.</div>
+
+      <div class="g-explainer-box" style="margin-top: 16px; background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.35);">
+        <div class="g-explainer-title" style="color: #15803d;">✅ Shown when...</div>
+        <div class="g-explainer-text">
+          <strong>1.</strong> It has at least one project in the categories the user can see (e.g. legal/finance)<br>
+          <strong>2.</strong> It is completely empty (0 projects) AND the user has <em>manageCompanies</em> permission (orphan protection)
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px; background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.35);">
+        <div class="g-explainer-title" style="color: #b91c1c;">❌ NOT shown when...</div>
+        <div class="g-explainer-text">
+          It has projects only in categories the user cannot see. This is <strong>data privacy</strong> — we don't leak information about departments outside the user's scope.
+        </div>
+      </div>
+
+      <!-- Dynamic example -->
+      <div class="g-subsection" style="margin-top: 32px;">🔄 Real example — Dynamic visibility</div>
+      <div class="g-explainer-box">
+        <div class="g-explainer-example">
+          📌 <strong>Scenario:</strong> Marianna is a Legal DEPT_HEAD. Until yesterday she <strong>could not see</strong> the company "Polaris Financial" because it only had finance projects without legal ones.
+        </div>
+        <div class="g-explainer-text" style="margin-top: 8px;">
+          Today the CEO creates a new <strong>legal</strong> project in Polaris Financial.
+        </div>
+        <div class="g-explainer-note" style="margin-top: 8px;">
+          ✨ <strong>Result:</strong> On Marianna's next refresh, Polaris Financial <strong>automatically appears</strong> in her sidebar with count (1). The system tracks activity in real-time.
+        </div>
+      </div>
+
+      <!-- Common scenarios -->
+      <div class="g-subsection" style="margin-top: 32px;">💡 Common Scenarios</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>I want someone to create companies</strong><br>→ Enable <code>manageCompanies</code></div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>I want someone to see legal and finance</strong><br>→ Enable <code>viewLegal</code> + <code>viewFinance</code></div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>I want someone to create projects in their department</strong><br>→ Enable <code>createProject</code></div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>I want to hide financials from someone</strong><br>→ Disable <code>viewFinancials</code> (they see projects but not budget data)</div></div>
+        <div class="g-step"><span class="g-step-num">Q</span><div><strong>New company with no projects disappears?</strong><br>→ No. As long as the user has <code>manageCompanies</code>, they see empty companies (orphan protection).</div></div>
+      </div>
+
+      <!-- Department vs Permissions -->
+      <div class="g-subsection" style="margin-top: 32px;">⚖️ Department vs Permissions — What's the difference?</div>
+      <div class="g-explainer-box">
+        <div class="g-explainer-title">🏛️ Department = Base access</div>
+        <div class="g-explainer-text">
+          The department (<strong>Legal / Finance / Dev / Marketing / Management</strong>) is set when the user is created. It automatically grants access to the corresponding project categories (e.g. Legal department → sees legal projects).
+        </div>
+      </div>
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">🏛️ Permissions = Extra access</div>
+        <div class="g-explainer-text">
+          The 14 permission flags are <em>additional</em> rights granted by the CEO for specific actions. Independent of department.
+        </div>
+      </div>
+      <div class="g-tip" style="margin-top: 12px;">
+        💡 <strong>Example:</strong> Marianna is a Legal DEPT_HEAD (department) but also has <code>manageCompanies</code> permission. She sees legal projects (from department) AND creates companies (from permission).
+      </div>
+    </div>
+
+        <!-- ── ΓΛΩΣΣΑΡΙΟ ── -->
+      <div v-if="activeTab === 'mfa' && locale === 'el'" class="guide-panel">
         <div class="g-mfa-hero">
           <div class="g-mfa-hero-icon">🔐</div>
           <div class="g-mfa-hero-text">
@@ -796,7 +1255,163 @@
       </div>
 
 
-      <div v-if="activeTab === 'security'" class="guide-panel">
+
+      <!-- ── MFA EN ── -->
+      <div v-if="activeTab === 'mfa' && locale !== 'el'" class="guide-panel">
+        <div class="g-mfa-hero">
+          <div class="g-mfa-hero-icon">🔐</div>
+          <div class="g-mfa-hero-text">
+            <h2 class="g-mfa-hero-title">Multi-Factor Authentication (MFA)</h2>
+            <p class="g-mfa-hero-subtitle">Second factor verification for your account security</p>
+          </div>
+          <div class="g-mfa-hero-badge">⚠️ Required for Legal & Finance</div>
+        </div>
+
+        <div class="g-section">
+          <h3>📌 What is MFA?</h3>
+          <p><strong>Multi-Factor Authentication (MFA)</strong> adds an extra layer of security to your account. Beyond your password, you need a 6-digit code that changes every 30 seconds and is generated by an app on your phone.</p>
+          <p>This way, even if someone learns your password, <strong>they cannot access your account</strong> without your phone.</p>
+        </div>
+
+        <div class="g-section g-section-warning">
+          <h3>🚨 When is it REQUIRED?</h3>
+          <p>MFA is <strong>required</strong> for users who have access to:</p>
+          <ul class="g-list">
+            <li><strong>Legal documents</strong> (contracts, legal files) — required for every upload/download</li>
+            <li><strong>Finance data</strong> (financial information, payments, IBAN) — required for accessing financials</li>
+            <li><strong>Confidential CEO Notes</strong> (confidential notes) — requires additional verification</li>
+          </ul>
+          <p style="margin-top:12px;">If you don't enable MFA, <strong>you won't have access to these features</strong>. The system will notify you automatically.</p>
+        </div>
+
+        <div class="g-section">
+          <h3>📱 Step 1: Install Google Authenticator</h3>
+          <p>Before setting up in Next2View, you need an authenticator app on your phone. We recommend <strong>Google Authenticator</strong> because it's free, reliable, and easy to use.</p>
+
+          <div class="g-mfa-download-grid">
+            <a href="https://apps.apple.com/app/google-authenticator/id388497605" target="_blank" rel="noopener" class="g-mfa-download-card g-mfa-apple">
+              <div class="g-mfa-download-icon">🍎</div>
+              <div class="g-mfa-download-text">
+                <div class="g-mfa-download-label">iPhone / iPad</div>
+                <div class="g-mfa-download-store">App Store</div>
+              </div>
+              <div class="g-mfa-download-arrow">→</div>
+            </a>
+
+            <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" target="_blank" rel="noopener" class="g-mfa-download-card g-mfa-android">
+              <div class="g-mfa-download-icon">🤖</div>
+              <div class="g-mfa-download-text">
+                <div class="g-mfa-download-label">Android</div>
+                <div class="g-mfa-download-store">Google Play</div>
+              </div>
+              <div class="g-mfa-download-arrow">→</div>
+            </a>
+          </div>
+
+          <p class="g-mfa-alt"><strong>Alternatives:</strong> You can also use other compatible apps like <em>Microsoft Authenticator</em>, <em>Authy</em>, <em>1Password</em>, <em>Bitwarden</em>. All work with the same standard (TOTP / RFC 6238).</p>
+        </div>
+
+        <div class="g-section">
+          <h3>⚙️ Step 2: Enable MFA in Next2View</h3>
+          <ol class="g-mfa-steps">
+            <li>
+              <strong>Go to your Profile</strong>
+              <p>Click your name at the top right → select "Profile" (or click your avatar).</p>
+            </li>
+            <li>
+              <strong>Find the "Security" section</strong>
+              <p>On the Profile page you'll see a section titled 🔐 <em>Security</em>. There you'll find the "Identity Verification (MFA)" field.</p>
+            </li>
+            <li>
+              <strong>Click "Enable MFA →"</strong>
+              <p>A QR code and a cryptographic secret (alphanumeric code) will appear.</p>
+            </li>
+            <li>
+              <strong>Open Google Authenticator on your phone</strong>
+              <p>Tap the <strong>+</strong> at the bottom right → select <strong>"Scan QR code"</strong>.</p>
+            </li>
+            <li>
+              <strong>Scan the QR code</strong>
+              <p>Point your phone camera at the QR code on your computer screen. The app will automatically add a "Next2View" account with your email.</p>
+            </li>
+            <li>
+              <strong>Get the 6-digit code</strong>
+              <p>In the app you'll see a 6-digit code below the "Next2View" account. The code changes every 30 seconds.</p>
+            </li>
+            <li>
+              <strong>Enter the code in Next2View</strong>
+              <p>In the "Verification code" field, type the 6-digit code and click <strong>"Verify"</strong>.</p>
+            </li>
+            <li>
+              <strong>✅ Done!</strong>
+              <p>From now on, every time you log into Next2View or request access to Legal/Finance, you'll be asked for the 6-digit code from the app.</p>
+            </li>
+          </ol>
+        </div>
+
+        <div class="g-section">
+          <h3>🔄 Step 3: How to use it daily</h3>
+          <p>When logging in or trying to access Legal/Finance:</p>
+          <ol class="g-list-numbered">
+            <li>Open Google Authenticator on your phone</li>
+            <li>See the current 6-digit code below "Next2View"</li>
+            <li>Type it on screen before it expires (you have 30 seconds)</li>
+            <li>If the code expires before you finish, wait for the next one and try again</li>
+          </ol>
+        </div>
+
+        <div class="g-section g-section-tip">
+          <h3>💡 Tips & Best Practices</h3>
+          <ul class="g-list">
+            <li><strong>Backup:</strong> Take a screenshot of the cryptographic secret (the code below the QR) and keep it in a safe place. If you lose your phone, you can reconfigure MFA with this code.</li>
+            <li><strong>Multiple devices:</strong> You can scan the same QR on a second phone (e.g. tablet) as backup.</li>
+            <li><strong>Cloud sync:</strong> Google Authenticator supports syncing with your Google account — if you change phones, your codes come with you.</li>
+            <li><strong>Confidentiality:</strong> NEVER share your QR code or 6-digit code with anyone, not even support.</li>
+            <li><strong>Phone time:</strong> Make sure your phone time is correct (auto-sync). Wrong time = wrong code.</li>
+          </ul>
+        </div>
+
+        <div class="g-section g-section-warning">
+          <h3>❓ Frequently Asked Questions</h3>
+
+          <div class="g-faq">
+            <div class="g-faq-q">I lost my phone. What do I do?</div>
+            <div class="g-faq-a">Contact the CEO or IT administrator immediately. They will disable your MFA from the database and you'll be able to log in again and set it up from scratch on a new device.</div>
+          </div>
+
+          <div class="g-faq">
+            <div class="g-faq-q">The code doesn't work. Why?</div>
+            <div class="g-faq-a">Usually it's a time issue. Go to your phone settings → Date & Time → enable "Automatic network time". Try again after 1 minute.</div>
+          </div>
+
+          <div class="g-faq">
+            <div class="g-faq-q">Does my Google account need to be the same as my Next2View email?</div>
+            <div class="g-faq-a"><strong>No.</strong> Google Authenticator is an independent app. It's not connected to any Google account. You can use it on any phone with any email.</div>
+          </div>
+
+          <div class="g-faq">
+            <div class="g-faq-q">Can I disable MFA?</div>
+            <div class="g-faq-a">Yes, from Profile → Security → "Disable". HOWEVER, if you are a Legal or Finance user, you won't have access to those features until you re-enable it.</div>
+          </div>
+
+          <div class="g-faq">
+            <div class="g-faq-q">What does "TOTP" mean?</div>
+            <div class="g-faq-a">Time-based One-Time Password (RFC 6238). It's the international standard for 6-digit codes that change over time. Works offline on your phone, without internet.</div>
+          </div>
+
+          <div class="g-faq">
+            <div class="g-faq-q">Is it safe if someone sees my QR code?</div>
+            <div class="g-faq-a"><strong>No.</strong> The QR contains your secret. If someone scans it, they can generate the same codes as you. Always do the setup in a private space and don't show it to anyone.</div>
+          </div>
+        </div>
+
+        <div class="g-callout-success">
+          <strong>✅ Pro tip:</strong> Once you complete the setup, try logging out and back in. This ensures MFA works correctly before you need access to critical data.
+        </div>
+      </div>
+
+
+            <div v-if="activeTab === 'security'" class="guide-panel">
         <div class="g-sec-hero">
           <div class="g-sec-hero-icon">🛡️</div>
           <div class="g-sec-hero-text">
@@ -1134,11 +1749,23 @@
       </div>
 
 
-    <div v-if="activeTab === 'glossary'" class="guide-panel">
+    <div v-if="activeTab === 'glossary' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">📖 Γλωσσάριο</div>
       <div class="g-desc">Βασικοί όροι που χρησιμοποιούνται στο Next2View.</div>
       <div class="g-glossary">
         <div v-for="term in glossary" :key="term.word" class="g-gloss-row">
+          <div class="g-gloss-term">{{ term.word }}</div>
+          <div class="g-gloss-def">{{ term.def }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GLOSSARY EN ── -->
+    <div v-if="activeTab === 'glossary' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">📖 Glossary</div>
+      <div class="g-desc">Key terms used in Next2View.</div>
+      <div class="g-glossary">
+        <div v-for="term in glossaryEn" :key="term.word" class="g-gloss-row">
           <div class="g-gloss-term">{{ term.word }}</div>
           <div class="g-gloss-def">{{ term.def }}</div>
         </div>
@@ -1311,6 +1938,25 @@ const glossary = [
   { word: 'Notification',     def: 'Αυτόματη ειδοποίηση για κρίσιμο event (deadline, blocked task, stale project κλπ). Εμφανίζεται ως toast και στο bell panel.' },
   { word: 'Toast',            def: 'Προσωρινή ειδοποίηση που εμφανίζεται κάτω δεξιά για 5 δευτερόλεπτα. Κλικ πάνω της για να πας στο project.' },
   { word: 'Under-billed',     def: 'Project που η πρόοδος του ξεπερνά το ζητούμενο κάτω από 30%+ αλλά δεν έχει γίνει χρέωση. Κίνδυνος απώλειας εσόδων.' },
+]
+
+const glossaryEn = [
+  { word: 'Project',          def: 'A task or development you track (e.g. "IMO CII Compliance", "Hivebee MVP"). Each project belongs to a company and category.' },
+  { word: 'Module',           def: 'A phase or section of a project (e.g. "Assessment Phase", "Frontend UI"). Contains tasks.' },
+  { word: 'Task',             def: 'The smallest unit of work. Has an assignee and completion percentage (0-100%).' },
+  { word: '% Completion',     def: 'Task % \u2192 Module % (average of tasks) \u2192 Project % (average of modules). Calculated automatically.' },
+  { word: 'Status',           def: 'Automatic project state: On Track / Delayed / At Risk / Stale. Based on %, deadline and blockers.' },
+  { word: 'Stale',            def: 'A project that has not been updated for more than 5 days. Displayed with a yellow warning.' },
+  { word: 'Blocked',          def: 'A task that cannot progress due to an external factor. Marked with "BLOCK" in the note.' },
+  { word: 'At Risk',          def: 'A project with a blocked task, or deadline <7 days with low %, or status >5 days without update.' },
+  { word: 'KPI',              def: 'Key Performance Indicator \u2014 the key numbers displayed in the Dashboard cards.' },
+  { word: 'Gantt Timeline',   def: 'A weekly chart showing when each task runs. The blue line = today.' },
+  { word: 'Contract Summary', def: 'Automatic extraction of key information from an uploaded contract (PDF/image) via AI.' },
+  { word: 'CEO Notes',        def: 'Private CEO notes on each project. Not visible to other users.' },
+  { word: 'SAS Token',        def: 'A temporary, secure link for file access (e.g. contracts). Valid for 1 hour.' },
+  { word: 'Notification',     def: 'An automatic alert for a critical event (deadline, blocked task, stale project, etc.). Appears as a toast and in the bell panel.' },
+  { word: 'Toast',            def: 'A temporary notification that appears at the bottom right for 5 seconds. Click on it to go to the project.' },
+  { word: 'Under-billed',     def: 'A project whose progress exceeds 30%+ but no billing has been recorded. Risk of revenue loss.' },
 ]
 </script>
 
