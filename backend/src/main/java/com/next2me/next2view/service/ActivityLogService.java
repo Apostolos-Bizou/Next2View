@@ -2,9 +2,13 @@ package com.next2me.next2view.service;
 
 import com.next2me.next2view.model.ActivityLog;
 import com.next2me.next2view.model.ActivityDismissal;
-import com.next2me.next2view.repository.ActivityDismissalRepository;
+import com.next2me.next2view.model.Project;
 import com.next2me.next2view.model.User;
+import com.next2me.next2view.repository.ActivityDismissalRepository;
 import com.next2me.next2view.repository.ActivityLogRepository;
+import com.next2me.next2view.repository.UserRepository;
+import com.next2me.next2view.security.PermissionEvaluator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,10 +32,14 @@ public class ActivityLogService {
 
     private final ActivityLogRepository activityLogRepository;
     private final ActivityDismissalRepository activityDismissalRepository;
+    private final SseEmitterService sseEmitterService;
+    private final UserRepository userRepository;
+    private final PermissionEvaluator permissionEvaluator;
+    private final ObjectMapper objectMapper;
 
-    // ═══════════════════════════════════════════════════════
-    // Core logging — async, never fails the caller
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════
+    // Core logging + SSE broadcast
+    // ═══════════════════════════════════════════
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -38,7 +47,7 @@ public class ActivityLogService {
                             UUID entityId, String entityName, String category,
                             UUID companyId, String description) {
         try {
-            activityLogRepository.save(ActivityLog.builder()
+            ActivityLog saved = activityLogRepository.save(ActivityLog.builder()
                     .actorId(actor.getId())
                     .actorName(actor.getFullName())
                     .actionType(actionType)
@@ -50,19 +59,19 @@ public class ActivityLogService {
                     .description(description)
                     .build());
             log.debug("Activity: {} {} {} '{}'", actor.getEmail(), actionType, entityType, entityName);
+            broadcastToEligibleUsers(actor, saved);
         } catch (Exception e) {
             log.error("Failed to log activity: {} {} {}", actionType, entityType, entityName, e);
         }
     }
 
-    /** Overload with metadata */
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void logActivity(User actor, String actionType, String entityType,
                             UUID entityId, String entityName, String category,
                             UUID companyId, String description, Map<String, Object> metadata) {
         try {
-            activityLogRepository.save(ActivityLog.builder()
+            ActivityLog saved = activityLogRepository.save(ActivityLog.builder()
                     .actorId(actor.getId())
                     .actorName(actor.getFullName())
                     .actionType(actionType)
@@ -74,14 +83,60 @@ public class ActivityLogService {
                     .description(description)
                     .metadata(metadata)
                     .build());
+            broadcastToEligibleUsers(actor, saved);
         } catch (Exception e) {
             log.error("Failed to log activity: {} {} {}", actionType, entityType, entityName, e);
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    // Query methods (called by controller)
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════
+    // SSE broadcast to eligible users
+    // ═══════════════════════════════════════════
+
+    private void broadcastToEligibleUsers(User actor, ActivityLog activity) {
+        try {
+            String category = activity.getCategory();
+            Project.Category cat = category != null ? Project.Category.valueOf(category) : null;
+
+            Set<UUID> targetUserIds = new HashSet<>();
+            List<User> activeUsers = userRepository.findAllByActiveTrue();
+
+            for (User user : activeUsers) {
+                if (user.getId().equals(actor.getId())) continue;
+                try {
+                    if (permissionEvaluator.isCeo(user)) {
+                        targetUserIds.add(user.getId());
+                    } else if (cat != null) {
+                        Set<Project.Category> allowed = permissionEvaluator.allowedCategories(user);
+                        if (allowed.contains(cat)) {
+                            targetUserIds.add(user.getId());
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+
+            if (!targetUserIds.isEmpty()) {
+                String json = objectMapper.writeValueAsString(Map.of(
+                    "id", activity.getId().toString(),
+                    "actorName", activity.getActorName(),
+                    "actionType", activity.getActionType(),
+                    "entityType", activity.getEntityType(),
+                    "entityName", activity.getEntityName() != null ? activity.getEntityName() : "",
+                    "category", category != null ? category : "",
+                    "description", activity.getDescription() != null ? activity.getDescription() : "",
+                    "createdAt", activity.getCreatedAt().toString()
+                ));
+                sseEmitterService.broadcast(actor.getId(), json, targetUserIds);
+                log.debug("SSE broadcast to {} users for {}", targetUserIds.size(), activity.getActionType());
+            }
+        } catch (Exception e) {
+            log.error("SSE broadcast failed", e);
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    // Query methods
+    // ═══════════════════════════════════════════
 
     public List<ActivityLog> getRecentForCeo(int limit, Instant since) {
         PageRequest page = PageRequest.of(0, limit);
@@ -102,13 +157,9 @@ public class ActivityLogService {
         return activityLogRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc(entityType, entityId);
     }
 
-    // ═══════════════════════════════════════════════════════
-    // Constants
-    // ═══════════════════════════════════════════════════════
-
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════
     // Dismiss methods
-    // ═══════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════
 
     public Set<UUID> getDismissedIds(UUID userId) {
         return activityDismissalRepository.findDismissedActivityIdsByUserId(userId);
@@ -133,7 +184,6 @@ public class ActivityLogService {
             }
         }
     }
-
 
     // Action types
     public static final String CREATED        = "CREATED";
