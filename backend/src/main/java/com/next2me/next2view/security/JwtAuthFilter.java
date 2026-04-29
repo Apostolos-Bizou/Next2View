@@ -47,9 +47,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 String userId = jwtService.extractUserId(token);
                 String role   = jwtService.extractRole(token);
                 boolean mfaVerified = jwtService.extractMfaVerified(token);
+
                 java.util.List<SimpleGrantedAuthority> authorities = new java.util.ArrayList<>();
                 authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
                 if (mfaVerified) authorities.add(new SimpleGrantedAuthority("MFA_VERIFIED"));
+
                 var auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
             }
@@ -59,16 +61,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     private Optional<String> extractToken(HttpServletRequest request) {
+        // 1. Authorization header
         String header = request.getHeader("Authorization");
         if (header != null && header.startsWith("Bearer ")) {
             return Optional.of(header.substring(7));
         }
+
+        // 2. Query parameter (for SSE EventSource which cannot set headers)
+        String queryToken = request.getParameter("token");
+        if (queryToken != null && !queryToken.isBlank()) {
+            return Optional.of(queryToken);
+        }
+
+        // 3. Cookie
         if (request.getCookies() != null) {
             return Arrays.stream(request.getCookies())
                     .filter(c -> "access_token".equals(c.getName()))
                     .map(Cookie::getValue)
                     .findFirst();
         }
+
         return Optional.empty();
     }
 

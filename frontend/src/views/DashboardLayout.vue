@@ -439,15 +439,20 @@
     </div>
   </div>
 
+
+  <!-- SSE TOAST NOTIFICATIONS -->
+  <ToastNotification ref="toastRef" />
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
 import api from '@/services/api'
+import { connectSSE, disconnectSSE, onActivity } from '@/services/sseService'
+import ToastNotification from '@/components/ToastNotification.vue'
 import { useI18n } from 'vue-i18n'
 
 const auth = useAuthStore()
