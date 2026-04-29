@@ -316,16 +316,16 @@
         <div class="history-header" @click="historyExpanded = !historyExpanded; if (historyExpanded && !historyLoaded) loadProjectHistory()" style="cursor:pointer;user-select:none;">
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="history-chevron" :class="{ open: historyExpanded }">▶</span>
-            <div class="history-title">📋 Project History</div>
+            <div class="history-title">📋 {{ tt('pd.historyTitle') }}</div>
           </div>
           <span v-if="historyLoaded && projectHistory.length" class="history-count">{{ projectHistory.length }}</span>
         </div>
         <div v-if="historyExpanded" class="history-body">
           <div v-if="project && project.createdBy" class="history-created">
-            Created by <strong>{{ project.createdByName || 'Unknown' }}</strong> — {{ formatHistoryDate(project.createdAt) }}
+            {{ tt('pd.historyCreatedBy') }} <strong>{{ project.createdByName || tt('pd.historyUnknown') }}</strong> — {{ formatHistoryDate(project.createdAt) }}
           </div>
-          <div v-if="historyLoading" class="history-loading">Loading...</div>
-          <div v-else-if="historyLoaded && !projectHistory.length" class="history-empty">No recorded changes yet.</div>
+          <div v-if="historyLoading" class="history-loading">{{ tt('pd.historyLoading') }}</div>
+          <div v-else-if="historyLoaded && !projectHistory.length" class="history-empty">{{ tt('pd.historyNoChanges') }}</div>
           <div v-else-if="historyLoaded" class="history-timeline">
             <div v-for="h in projectHistory" :key="h.id" class="history-item">
               <div class="history-dot"></div>
