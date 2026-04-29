@@ -2,13 +2,13 @@
   <div class="content">
         <!-- TABS: Alerts vs Activity -->
     <div class="notif-tabs-bar">
-      <button class="notif-tab" :class="{active: activeTab==='alerts'}" @click="activeTab='alerts'">
-        ⚠ {{ t('notif.tabAlerts') || 'Alerts' }}
-        <span v-if="allNotifs.length" class="tab-badge alerts">{{ allNotifs.length }}</span>
-      </button>
       <button class="notif-tab" :class="{active: activeTab==='activity'}" @click="activeTab='activity'; loadActivity()">
         📋 {{ t('notif.tabActivity') || 'Activity Log' }}
         <span v-if="activityLog.length" class="tab-badge activity">{{ activityLog.length }}</span>
+      </button>
+      <button class="notif-tab" :class="{active: activeTab==='alerts'}" @click="activeTab='alerts'">
+        ⚠ {{ t('notif.tabAlerts') || 'Alerts' }}
+        <span v-if="allNotifs.length" class="tab-badge alerts">{{ allNotifs.length }}</span>
       </button>
     </div>
 
@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div v-if="!filtered.length" class="notif-empty">
+    <div v-if="activeTab==='alerts' && !filtered.length" class="notif-empty">
       <div class="notif-empty-ico">✓</div>
       <div class="notif-empty-txt">{{ t('notif.emptyText') }}</div>
       <div class="notif-empty-sub">{{ t('notif.emptySub') }}</div>
@@ -118,7 +118,7 @@ function dismissAllAlerts() {
   localStorage.setItem("n2v_dismissed_alerts", JSON.stringify([...dismissedAlerts.value]))
 }
 
-const activeTab = ref('alerts')
+const activeTab = ref('activity')
 const activityLog = ref([])
 const activityLoading = ref(false)
 let activityTimer = null
@@ -141,7 +141,10 @@ function startActivityPolling() {
   }, 60000)
 }
 
-onMounted(() => startActivityPolling())
+onMounted(() => {
+  loadActivity()
+  startActivityPolling()
+})
 onUnmounted(() => { if (activityTimer) clearInterval(activityTimer) })
 
 function actionIcon(type) {
@@ -308,7 +311,7 @@ const filtered = computed(() => {
 })
 
 // Sync badge count to DashboardLayout
-watch(allNotifs, (val) => {
+watch(activityLog, (val) => {
   window.__n2vAlertCount = val.length
   window.dispatchEvent(new Event('alert-count-changed'))
 }, { immediate: true })

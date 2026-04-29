@@ -261,15 +261,14 @@
       "marketing": "Marketing"
     },
     "allOk": "✓ Όλα καλά",
-    "filterInfo": "🔵 Ενημερώσεις",
-    "tabAlerts": "Ειδοποιήσεις",
-    "tabActivity": "Ιστορικό Ενεργειών",
+    "filterInfo": "🔵 Ενημερώσεις",
+    "tabAlerts": "Προειδοποιήσεις",
+    "tabActivity": "Ενέργειες",
     "refresh": "Ανανέωση",
     "clearAll": "Καθαρισμός",
-    "markAllRead": "Καθαρισμός",
+    "markAllRead": "Σημείωση ως αναγνωσμένα",
     "loadingActivity": "Φόρτωση ενεργειών...",
     "noActivity": "Δεν υπάρχουν πρόσφατες ενέργειες",
-    "markAllRead": "Σημείωση ως αναγνωσμένα",
     "noActivitySub": "Οι ενέργειες θα εμφανίζονται εδώ καθώς πραγματοποιούνται."
   },
   "profile": {

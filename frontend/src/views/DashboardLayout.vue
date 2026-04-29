@@ -441,7 +441,6 @@
 
 
   <!-- SSE TOAST NOTIFICATIONS -->
-  <ToastNotification ref="toastRef" />
 </template>
 
 <script setup>
@@ -452,7 +451,6 @@ import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
 import api from '@/services/api'
 import { connectSSE, disconnectSSE, onActivity } from '@/services/sseService'
-import ToastNotification from '@/components/ToastNotification.vue'
 import { useI18n } from 'vue-i18n'
 
 const auth = useAuthStore()
@@ -547,16 +545,17 @@ const emptyForm = () => ({
 })
 const form = ref(emptyForm())
 
-const toastRef = ref(null)
 let unsubActivity = null
 
 onMounted(async () => {
   await Promise.all([store.fetchProjects(), store.fetchCompanies(), permStore.loadMyPermissions()])
+  // Connect SSE for real-time push notifications
   connectSSE()
   unsubActivity = onActivity((data) => {
-    if (toastRef.value) toastRef.value.addToast(data)
-    window.__n2vAlertCount = (window.__n2vAlertCount || 0) + 1
-    window.dispatchEvent(new Event('alert-count-changed'))
+    // Refresh projects so alerts update automatically
+    store.fetchProjects()
+    // Dispatch event so badge recalculates from NotificationsView
+    window.dispatchEvent(new Event('sse-activity-received'))
   })
 })
 

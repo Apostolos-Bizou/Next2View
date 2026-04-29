@@ -261,15 +261,14 @@
       "marketing": "Marketing"
     },
     "allOk": "✓ All good",
-    "filterInfo": "🔵 Updates",
-    "tabAlerts": "Alerts",
-    "tabActivity": "Activity Log",
+    "filterInfo": "🔵 Updates",
+    "tabAlerts": "Warnings",
+    "tabActivity": "Actions",
     "refresh": "Refresh",
     "clearAll": "Clear All",
-    "markAllRead": "Clear All",
+    "markAllRead": "Mark all read",
     "loadingActivity": "Loading activity...",
     "noActivity": "No recent activity",
-    "markAllRead": "Mark all read",
     "noActivitySub": "Actions will appear here as they happen."
   },
   "profile": {
