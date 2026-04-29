@@ -261,7 +261,14 @@
       "marketing": "Marketing"
     },
     "allOk": "✓ Όλα καλά",
-    "filterInfo": "🔵 Ενημερώσεις"
+    "filterInfo": "🔵 Ενημερώσεις",
+    "tabAlerts": "Ειδοποιήσεις",
+    "tabActivity": "Ιστορικό Ενεργειών",
+    "refresh": "Ανανέωση",
+    "clearAll": "Καθαρισμός",
+    "loadingActivity": "Φόρτωση ενεργειών...",
+    "noActivity": "Δεν υπάρχουν πρόσφατες ενέργειες",
+    "noActivitySub": "Οι ενέργειες θα εμφανίζονται εδώ καθώς πραγματοποιούνται."
   },
   "profile": {
     "user": "Χρήστης",

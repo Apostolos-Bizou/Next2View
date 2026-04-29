@@ -7,6 +7,7 @@ import com.next2me.next2view.model.Company;
 import com.next2me.next2view.repository.AuditLogRepository;
 import com.next2me.next2view.model.Project;
 import com.next2me.next2view.model.User;
+import com.next2me.next2view.service.ActivityLogService;
 import com.next2me.next2view.repository.CompanyRepository;
 import com.next2me.next2view.repository.ProjectRepository;
 import com.next2me.next2view.security.PermissionEvaluator;
@@ -27,6 +28,8 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final ProjectRepository projectRepository;
     private final AuditLogRepository auditLogRepository;
+    private final ActivityLogService activityLogService;
+    private final com.next2me.next2view.repository.UserRepository userRepository;
     private final PermissionEvaluator permissions;
 
     @Transactional(readOnly = true)
@@ -88,6 +91,13 @@ public class CompanyService {
                 .newValue(Map.of("name", c.getName(), "code", c.getCode()))
                 .build());
 
+        // Activity log
+        userRepository.findByEmail(actorEmail).ifPresent(actor ->
+            activityLogService.logActivity(actor, ActivityLogService.CREATED, ActivityLogService.COMPANY,
+                c.getId(), c.getName(), null,
+                null, actor.getFullName() + " created company '" + c.getName() + "'")
+        );
+
         return toDto(c);
     }
 
@@ -112,6 +122,13 @@ public class CompanyService {
                 .newValue(Map.of("name", c.getName(), "color", c.getColor()))
                 .build());
 
+        // Activity log
+        userRepository.findByEmail(actorEmail).ifPresent(actor ->
+            activityLogService.logActivity(actor, ActivityLogService.UPDATED, ActivityLogService.COMPANY,
+                c.getId(), c.getName(), null,
+                null, actor.getFullName() + " updated company '" + c.getName() + "'")
+        );
+
         return toDto(c);
     }
 
@@ -129,6 +146,13 @@ public class CompanyService {
                 .entityId(id)
                 .oldValue(Map.of("name", c.getName()))
                 .build());
+
+        // Activity log
+        userRepository.findByEmail(actorEmail).ifPresent(actor ->
+            activityLogService.logActivity(actor, ActivityLogService.DELETED, ActivityLogService.COMPANY,
+                c.getId(), c.getName(), null,
+                null, actor.getFullName() + " deleted company '" + c.getName() + "'")
+        );
     }
 
     private CompanyDto toDto(Company c) {
