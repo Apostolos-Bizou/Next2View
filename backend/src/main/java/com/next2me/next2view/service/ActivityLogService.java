@@ -1,6 +1,8 @@
 package com.next2me.next2view.service;
 
 import com.next2me.next2view.model.ActivityLog;
+import com.next2me.next2view.model.ActivityDismissal;
+import com.next2me.next2view.repository.ActivityDismissalRepository;
 import com.next2me.next2view.model.User;
 import com.next2me.next2view.repository.ActivityLogRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -23,6 +26,7 @@ import java.util.UUID;
 public class ActivityLogService {
 
     private final ActivityLogRepository activityLogRepository;
+    private final ActivityDismissalRepository activityDismissalRepository;
 
     // ═══════════════════════════════════════════════════════
     // Core logging — async, never fails the caller
@@ -101,6 +105,35 @@ public class ActivityLogService {
     // ═══════════════════════════════════════════════════════
     // Constants
     // ═══════════════════════════════════════════════════════
+
+    // ═══════════════════════════════════════════════════════
+    // Dismiss methods
+    // ═══════════════════════════════════════════════════════
+
+    public Set<UUID> getDismissedIds(UUID userId) {
+        return activityDismissalRepository.findDismissedActivityIdsByUserId(userId);
+    }
+
+    @Transactional
+    public void dismiss(UUID userId, List<UUID> activityIds) {
+        for (UUID activityId : activityIds) {
+            if (!activityDismissalRepository.existsByUserIdAndActivityId(userId, activityId)) {
+                activityDismissalRepository.save(ActivityDismissal.builder()
+                        .userId(userId).activityId(activityId).build());
+            }
+        }
+    }
+
+    @Transactional
+    public void dismissAll(UUID userId, List<UUID> activityIds) {
+        for (UUID activityId : activityIds) {
+            if (!activityDismissalRepository.existsByUserIdAndActivityId(userId, activityId)) {
+                activityDismissalRepository.save(ActivityDismissal.builder()
+                        .userId(userId).activityId(activityId).build());
+            }
+        }
+    }
+
 
     // Action types
     public static final String CREATED        = "CREATED";

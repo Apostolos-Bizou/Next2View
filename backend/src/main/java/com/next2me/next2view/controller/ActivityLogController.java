@@ -1,5 +1,6 @@
 package com.next2me.next2view.controller;
 
+import java.util.Map;
 import com.next2me.next2view.model.ActivityLog;
 import com.next2me.next2view.model.Project;
 import com.next2me.next2view.model.User;
@@ -57,7 +58,62 @@ public class ActivityLogController {
             activities = activityLogService.getRecentForCategories(categoryNames, limit, since);
         }
 
+
+        // Filter out dismissed activities for this user
+        Set<UUID> dismissed = activityLogService.getDismissedIds(actorId);
+        if (!dismissed.isEmpty()) {
+            activities = activities.stream()
+                    .filter(a -> !dismissed.contains(a.getId()))
+                    .toList();
+        }
+
         return ResponseEntity.ok(activities);
+    }
+
+    /**
+     * POST /api/activity-log/dismiss
+     * Body: { "ids": ["uuid1", "uuid2"] }
+     */
+    @PostMapping("/dismiss")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> dismiss(
+            @RequestBody Map<String, List<UUID>> body,
+            @AuthenticationPrincipal String userId
+    ) {
+        UUID actorId = parseUserId(userId);
+        List<UUID> ids = body.getOrDefault("ids", List.of());
+        if (!ids.isEmpty()) {
+            activityLogService.dismiss(actorId, ids);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * POST /api/activity-log/dismiss-all
+     * Dismisses all currently visible activities for this user.
+     */
+    @PostMapping("/dismiss-all")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> dismissAll(
+            @RequestParam(defaultValue = "200") int limit,
+            @AuthenticationPrincipal String userId
+    ) {
+        UUID actorId = parseUserId(userId);
+        User user = permissions.requireUser(actorId);
+        // Get all visible activity IDs for this user
+        List<ActivityLog> visible;
+        if (permissions.isCeo(user)) {
+            visible = activityLogService.getRecentForCeo(limit, null);
+        } else {
+            Set<Project.Category> cats = permissions.allowedCategories(user);
+            List<String> categoryNames = cats.stream().map(Enum::name).toList();
+            visible = activityLogService.getRecentForCategories(categoryNames, limit, null);
+        }
+        List<UUID> ids = visible.stream().map(ActivityLog::getId).toList();
+        if (!ids.isEmpty()) {
+            activityLogService.dismissAll(actorId, ids);
+        }
+        return ResponseEntity.ok().build();
     }
 
     private UUID parseUserId(String userId) {

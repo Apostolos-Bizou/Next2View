@@ -25,6 +25,7 @@
         <button class="filter-btn" :class="{active: filter==='critical'}" @click="filter='critical'">🔴 {{ t('notif.critical') }}</button>
         <button class="filter-btn" :class="{active: filter==='warning'}" @click="filter='warning'">🟡 {{ t('notif.warnings') }}</button>
         <button class="filter-btn" :class="{active: filter==='info'}" @click="filter='info'">{{ t('notif.filterInfo') }}</button>
+        <button v-if="filtered.length" class="filter-btn dismiss-all-btn" @click="dismissAllAlerts">✓ {{ t('notif.markAllRead', 'Mark all read') }}</button>
       </div>
     </div>
 
@@ -34,7 +35,7 @@
       <div class="notif-empty-sub">{{ t('notif.emptySub') }}</div>
     </div>
 
-    <div class="notif-list">
+    <div v-if="activeTab==='alerts' && filtered.length" class="notif-list">
       <div v-for="n in filtered" :key="n.id"
         :class="['notif-card', n.level]"
         @click="n.projectId && router.push(`/projects/${n.projectId}`)">
@@ -51,6 +52,38 @@
           </div>
         </div>
         <div class="notif-arrow">›</div>
+        <button class="dismiss-btn" @click.stop="dismissAlert(n)" title="Dismiss">✕</button>
+      </div>
+    </div>
+
+    <!-- ACTIVITY TAB -->
+    <div v-if="activeTab==='activity'" class="activity-section">
+      <div class="activity-controls">
+        <button class="filter-btn" @click="loadActivity">↻ {{ t('notif.refresh') || 'Refresh' }}</button>
+        <button v-if="activityLog.length" class="filter-btn dismiss-all-btn" @click="dismissAllActivities">🗑️ {{ t('notif.clearAll') || 'Clear All' }}</button>
+      </div>
+      <div v-if="activityLoading" class="notif-empty">
+        <div class="notif-empty-ico">⏳</div>
+        <div class="notif-empty-txt">{{ t('notif.loadingActivity') || 'Loading activity...' }}</div>
+      </div>
+      <div v-else-if="!activityLog.length" class="notif-empty">
+        <div class="notif-empty-ico">📋</div>
+        <div class="notif-empty-txt">{{ t('notif.noActivity') || 'No recent activity' }}</div>
+        <div class="notif-empty-sub">{{ t('notif.noActivitySub') || 'Actions will appear here as they happen.' }}</div>
+      </div>
+      <div v-else class="notif-list">
+        <div v-for="a in activityLog" :key="a.id" class="notif-card info activity-card">
+          <div class="notif-icon">{{ actionIcon(a.actionType) }}</div>
+          <div class="notif-body">
+            <div class="notif-title">{{ a.actorName }} {{ actionLabel(a.actionType) }} {{ entityLabel(a.entityType) }}</div>
+            <div class="notif-desc">{{ a.entityName || a.description }}</div>
+            <div class="notif-meta">
+              <span v-if="a.category" :class="'notif-cat ' + a.category">{{ a.category }}</span>
+              <span class="notif-days">{{ timeAgo(a.createdAt) }}</span>
+              <button class="dismiss-btn" @click.stop="dismissActivity(a.id)" title="Dismiss">✕</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -67,6 +100,24 @@ const { t } = useI18n()
 const store = useProjectStore()
 const router = useRouter()
 const filter = ref('')
+
+// Dismissed alerts (localStorage)
+const dismissedAlerts = ref(new Set(JSON.parse(localStorage.getItem("n2v_dismissed_alerts") || "[]")))
+
+function alertKey(n) {
+  return n.projectId + ":" + n.icon + ":" + n.level
+}
+
+function dismissAlert(n) {
+  dismissedAlerts.value.add(alertKey(n))
+  localStorage.setItem("n2v_dismissed_alerts", JSON.stringify([...dismissedAlerts.value]))
+}
+
+function dismissAllAlerts() {
+  filtered.value.forEach(n => dismissedAlerts.value.add(alertKey(n)))
+  localStorage.setItem("n2v_dismissed_alerts", JSON.stringify([...dismissedAlerts.value]))
+}
+
 const activeTab = ref('alerts')
 const activityLog = ref([])
 const activityLoading = ref(false)
@@ -103,6 +154,24 @@ function actionLabel(type) {
 
 function entityLabel(type) {
   return { PROJECT: 'project', TASK: 'task', COMPANY: 'company', USER: 'user', FILE: 'file', MODULE: 'module', COMMENT: 'comment' }[type] || type
+}
+
+async function dismissActivity(id) {
+  try {
+    await api.post('/activity-log/dismiss', { ids: [id] })
+    activityLog.value = activityLog.value.filter(a => a.id !== id)
+  } catch (e) {
+    console.error('Failed to dismiss:', e)
+  }
+}
+
+async function dismissAllActivities() {
+  try {
+    await api.post('/activity-log/dismiss-all')
+    activityLog.value = []
+  } catch (e) {
+    console.error('Failed to dismiss all:', e)
+  }
 }
 
 function timeAgo(iso) {
@@ -223,7 +292,10 @@ const allNotifs = computed(() => {
 
   // Sort: critical first, then warning, then info
   const order = { critical: 0, warning: 1, info: 2 }
-  return notifs.sort((a, b) => order[a.level] - order[b.level])
+  // Filter out dismissed alerts
+  const activeNotifs = notifs.filter(n => !dismissedAlerts.value.has(alertKey(n)))
+
+  return activeNotifs.sort((a, b) => order[a.level] - order[b.level])
 })
 
 const critical = computed(() => allNotifs.value.filter(n => n.level === 'critical'))
@@ -278,6 +350,10 @@ const catLabel = (c) => t('notif.cats.' + c, c)
 .notif-days.urgent  { background: var(--red-dim); color: var(--red); }
 .notif-days.overdue { background: var(--red-dim); color: var(--red); }
 .notif-arrow { color: var(--text-dim); font-size: 20px; flex-shrink: 0; margin-top: 4px; }
+.notif-card { position: relative; }
+.notif-card .dismiss-btn { position: absolute; top: 12px; right: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); cursor: pointer; font-size: 12px; padding: 4px 8px; transition: all 0.15s; }
+
+.notif-card .dismiss-btn:hover { background: var(--red-dim); border-color: var(--red); color: var(--red); }
 
 @media (max-width: 768px) {
   .notif-content { padding: 14px 12px; }
@@ -295,4 +371,8 @@ const catLabel = (c) => t('notif.cats.' + c, c)
 .activity-section { margin-top: 8px; }
 .activity-controls { display: flex; gap: 8px; margin-bottom: 16px; }
 .activity-card::before { background: var(--accent) !important; }
+.activity-card { position: relative; }
+.dismiss-btn { position: absolute; top: 10px; right: 10px; background: none; border: 1px solid var(--border); border-radius: 5px; color: var(--text-dim); cursor: pointer; font-size: 11px; padding: 2px 7px; transition: all 0.15s; z-index: 1; }
+.dismiss-btn:hover { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+.dismiss-all-btn { background: var(--red-dim) !important; border-color: rgba(220,38,38,0.3) !important; color: var(--red) !important; }
 </style>
