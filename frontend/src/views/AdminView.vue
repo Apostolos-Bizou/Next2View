@@ -231,7 +231,7 @@
 
 <script setup>
 // === PHASE 2A — Security Documentation === // built 2026-04-21T13:41:47.331Z
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import { useProjectStore } from '@/stores/projects'
@@ -241,10 +241,10 @@ const { t } = useI18n()
 const store = useProjectStore()
 const permStore = usePermissionStore()
 const activeTab = ref('users')
-const tabs = [
+const tabs = computed(() => [
   { id: 'users',     label: t('admin.usersTab'),   icon: '👤' },
   { id: 'companies', label: t('admin.companiesTab'), icon: '🏢' },
-]
+])
 
 const users = ref([])
 const companies = ref([])
