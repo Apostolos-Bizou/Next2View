@@ -311,24 +311,29 @@
     </div>
 
     
-      <!-- PROJECT HISTORY (immutable audit trail) -->
+      <!-- PROJECT HISTORY (collapsible audit trail) -->
       <div v-if="project" class="project-history-panel" style="margin-top:14px;">
-        <div class="history-header">
-          <div class="history-title">📋 Project History</div>
-          <button v-if="!historyLoaded" class="filter-btn" @click="loadProjectHistory" style="font-size:10px;">Load History</button>
+        <div class="history-header" @click="historyExpanded = !historyExpanded; if (historyExpanded && !historyLoaded) loadProjectHistory()" style="cursor:pointer;user-select:none;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="history-chevron" :class="{ open: historyExpanded }">▶</span>
+            <div class="history-title">📋 Project History</div>
+          </div>
+          <span v-if="historyLoaded && projectHistory.length" class="history-count">{{ projectHistory.length }}</span>
         </div>
-        <div v-if="project && project.createdBy" class="history-created">
-          Created by <strong>{{ project.createdByName || 'Unknown' }}</strong> — {{ formatHistoryDate(project.createdAt) }}
-        </div>
-        <div v-if="historyLoading" class="history-loading">Loading...</div>
-        <div v-else-if="historyLoaded && !projectHistory.length" class="history-empty">No recorded changes yet.</div>
-        <div v-else-if="historyLoaded" class="history-timeline">
-          <div v-for="h in projectHistory" :key="h.id" class="history-item">
-            <div class="history-dot"></div>
-            <div class="history-content">
-              <div class="history-actor">{{ h.actorName }}</div>
-              <div class="history-action">{{ h.description || (h.actionType + ' ' + h.entityType.toLowerCase()) }}</div>
-              <div class="history-time">{{ formatHistoryDate(h.createdAt) }}</div>
+        <div v-if="historyExpanded" class="history-body">
+          <div v-if="project && project.createdBy" class="history-created">
+            Created by <strong>{{ project.createdByName || 'Unknown' }}</strong> — {{ formatHistoryDate(project.createdAt) }}
+          </div>
+          <div v-if="historyLoading" class="history-loading">Loading...</div>
+          <div v-else-if="historyLoaded && !projectHistory.length" class="history-empty">No recorded changes yet.</div>
+          <div v-else-if="historyLoaded" class="history-timeline">
+            <div v-for="h in projectHistory" :key="h.id" class="history-item">
+              <div class="history-dot"></div>
+              <div class="history-content">
+                <div class="history-actor">{{ h.actorName }}</div>
+                <div class="history-action">{{ h.description || (h.actionType + ' ' + h.entityType.toLowerCase()) }}</div>
+                <div class="history-time">{{ formatHistoryDate(h.createdAt) }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -643,6 +648,7 @@ const project = ref(null)
 const loading = ref(true)
 const projectHistory = ref([])
 const historyLoaded = ref(false)
+const historyExpanded = ref(false)
 const historyLoading = ref(false)
 
 async function loadProjectHistory() {
@@ -1679,6 +1685,12 @@ function formatDate(iso) {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
+
+
+.history-chevron { font-size: 9px; color: var(--text-dim); transition: transform 0.2s ease; display: inline-block; }
+.history-chevron.open { transform: rotate(90deg); }
+.history-count { font-size: 10px; font-weight: 700; color: var(--accent); background: var(--accent-dim); padding: 2px 8px; border-radius: 10px; }
+.history-body { animation: slideDown 0.2s ease; }
 
 .project-history-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px 22px; }
 .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
