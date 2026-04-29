@@ -547,8 +547,22 @@ const emptyForm = () => ({
 })
 const form = ref(emptyForm())
 
+const toastRef = ref(null)
+let unsubActivity = null
+
 onMounted(async () => {
   await Promise.all([store.fetchProjects(), store.fetchCompanies(), permStore.loadMyPermissions()])
+  connectSSE()
+  unsubActivity = onActivity((data) => {
+    if (toastRef.value) toastRef.value.addToast(data)
+    window.__n2vAlertCount = (window.__n2vAlertCount || 0) + 1
+    window.dispatchEvent(new Event('alert-count-changed'))
+  })
+})
+
+onUnmounted(() => {
+  disconnectSSE()
+  if (unsubActivity) unsubActivity()
 })
 
 function openNewProject() {
