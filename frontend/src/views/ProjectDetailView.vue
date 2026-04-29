@@ -793,7 +793,7 @@ async function deleteFile(fileId) {
 function isMfaError(e) {
   if (e?.response?.status !== 403) return false
   const msg = e?.response?.data?.message || e?.response?.data?.error || ''
-  return msg.toLowerCase().includes('mfa')
+  return msg.toLowerCase().includes('mfa') || msg === ''
 }
 
 function fileIcon(ct) {
