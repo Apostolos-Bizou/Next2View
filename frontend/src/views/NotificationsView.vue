@@ -72,7 +72,7 @@
         <div class="notif-empty-sub">{{ t('notif.noActivitySub') || 'Actions will appear here as they happen.' }}</div>
       </div>
       <div v-else class="notif-list">
-        <div v-for="a in activityLog" :key="a.id" class="notif-card info activity-card">
+        <div v-for="a in activityLog" :key="a.id" class="notif-card info activity-card" @click="a.entityId && router.push('/projects/' + a.entityId)" style="cursor:pointer;">
           <div class="notif-icon">{{ actionIcon(a.actionType) }}</div>
           <div class="notif-body">
             <div class="notif-title">{{ a.actorName }}</div>
