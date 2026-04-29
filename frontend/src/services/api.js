@@ -34,13 +34,7 @@ api.interceptors.response.use(
     const originalRequest = err.config;
 
     // Αν δεν είναι 401 ή αν έχουμε ήδη κάνει retry, βγες
-    if ((err.response?.status !== 401 && err.response?.status !== 403) || originalRequest._retry) {
-      return Promise.reject(err);
-    }
-
-    // MFA 403: don't refresh, let the caller handle it
-    const errMsg = err.response?.data?.message || err.response?.data?.error || '';
-    if (err.response?.status === 403 && (errMsg.toLowerCase().includes('mfa') || errMsg === '')) {
+    if ((err.response?.status !== 401) || originalRequest._retry) {
       return Promise.reject(err);
     }
 
