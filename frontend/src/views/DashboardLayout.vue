@@ -551,10 +551,8 @@ onMounted(async () => {
   await Promise.all([store.fetchProjects(), store.fetchCompanies(), permStore.loadMyPermissions()])
   // Connect SSE for real-time push notifications
   connectSSE()
-  unsubActivity = onActivity((data) => {
-    // Refresh projects so alerts update automatically
-    store.fetchProjects()
-    // Dispatch event so badge recalculates from NotificationsView
+  unsubActivity = onActivity(() => {
+    // Dispatch event for NotificationsView to reload activity log
     window.dispatchEvent(new Event('sse-activity-received'))
   })
 })
