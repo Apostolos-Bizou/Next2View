@@ -132,7 +132,24 @@ public class PermissionEvaluator {
             }
         }
     
-        public void requireCanRead(User user, Project project) {
+        
+
+    /**
+     * Requires MFA for file operations on Legal and Finance projects.
+     * CEO is always exempt. All other roles must have mfaVerified=true.
+     */
+    public void requireMfaForFiles(Project project, boolean mfaVerified, User user) {
+        if (project == null) return;
+        if (isCeo(user)) return; // CEO bypass
+        boolean needsMfa = project.getCategory() == Project.Category.legal
+                        || project.getCategory() == Project.Category.finance;
+        if (needsMfa && !mfaVerified) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                "MFA verification required to access files in this category");
+        }
+    }
+
+    public void requireCanRead(User user, Project project) {
         if (!canRead(user, project)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied to this project");
         }

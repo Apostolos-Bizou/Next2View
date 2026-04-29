@@ -67,7 +67,7 @@ public class ContractFileController {
         User actor = permissions.requireUser(parseUserId(userId));
         Project project = requireProject(projectId);
         permissions.requireCanRead(actor, project);
-        permissions.requireMfaForLegal(project, isMfaVerified());
+        permissions.requireMfaForFiles(project, isMfaVerified(), actor);
 
         List<ContractFile> files = contractFileService.listActive(projectId);
 
@@ -99,7 +99,7 @@ public class ContractFileController {
         User actor = permissions.requireUser(parseUserId(userId));
         Project project = requireProject(projectId);
         permissions.requireCanWrite(actor, project);
-        permissions.requireMfaForLegal(project, isMfaVerified());
+        permissions.requireMfaForFiles(project, isMfaVerified(), actor);
 
         // Validate (throws 400 if invalid)
         FileValidator.Validated v = fileValidator.validate(file);
@@ -132,7 +132,7 @@ public class ContractFileController {
         // The service will also validate project match via findActiveById
         Project project = requireProject(projectId);
         permissions.requireCanRead(actor, project);
-        permissions.requireMfaForLegal(project, isMfaVerified());
+        permissions.requireMfaForFiles(project, isMfaVerified(), actor);
 
         ContractFileService.DecryptedFile decrypted =
                 contractFileService.downloadDecrypted(fileId, actor);
@@ -168,7 +168,7 @@ public class ContractFileController {
         User actor = permissions.requireUser(parseUserId(userId));
         Project project = requireProject(projectId);
         permissions.requireCanWrite(actor, project);
-        permissions.requireMfaForLegal(project, isMfaVerified());
+        permissions.requireMfaForFiles(project, isMfaVerified(), actor);
 
         contractFileService.softDelete(fileId, actor, reason);
         return ResponseEntity.noContent().build();

@@ -67,7 +67,8 @@ public class AuthService {
         userRepository.save(user);
         // Phase A: grace period — mfaVerified=true if (a) user completed MFA this session OR (b) user has no MFA setup yet.
         // Phase B (future): require mfaEnabled=true AND valid code.
-        boolean mfaVerifiedForSession = !user.getMfaEnabled() || (request.mfaCode() != null && !request.mfaCode().isBlank());
+        // MFA verified ONLY if user completed MFA this session (no grace period)
+        boolean mfaVerifiedForSession = user.getMfaEnabled() && request.mfaCode() != null && !request.mfaCode().isBlank();
         String accessToken = jwtService.generateAccessToken(
                 user.getId(), user.getEmail(), user.getRole().name(), mfaVerifiedForSession);
         String rawRefresh = UUID.randomUUID().toString();

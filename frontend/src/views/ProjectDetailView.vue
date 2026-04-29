@@ -748,7 +748,7 @@ async function openFile(f) {
     }
   } catch (e) {
     console.error("File open error:", e)
-    fileError.value = tt('pd.err.openFailed')
+    fileError.value = isMfaError(e) ? '\u{1F512} MFA verification required to download legal files. Enable MFA in Profile.' : tt('pd.err.openFailed')
   }
 }
 
@@ -757,7 +757,7 @@ async function loadFiles() {
   try {
     const res = await api.get(`/projects/${project.value.id}/files`)
     files.value = res.data
-  } catch { files.value = [] }
+  } catch (e) { if (isMfaError(e)) { fileError.value = '\u{1F512} MFA verification required to access legal files. Enable MFA in your Profile \u2192 Security settings.'; } else { files.value = [] } }
 }
 
 async function uploadFile(event) {
@@ -773,7 +773,7 @@ async function uploadFile(event) {
     })
     await loadFiles()
   } catch (e) {
-    uploadError.value = e.response?.data?.message || tt('pd.err.uploadFailed')
+    uploadError.value = isMfaError(e) ? '\u{1F512} MFA verification required to upload legal files. Enable MFA in Profile.' : (e.response?.data?.message || tt('pd.err.uploadFailed'))
   } finally {
     uploading.value = false
     event.target.value = ""
@@ -785,7 +785,15 @@ async function deleteFile(fileId) {
   try {
     await api.delete(`/projects/${project.value.id}/files/${fileId}`)
     await loadFiles()
-  } catch {}
+  } catch (e) { if (isMfaError(e)) { fileError.value = '\u{1F512} MFA verification required to delete legal files.'; } }
+}
+
+
+// MFA error detection helper
+function isMfaError(e) {
+  if (e?.response?.status !== 403) return false
+  const msg = e?.response?.data?.message || e?.response?.data?.error || ''
+  return msg.toLowerCase().includes('mfa')
 }
 
 function fileIcon(ct) {

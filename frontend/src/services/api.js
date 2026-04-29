@@ -38,6 +38,12 @@ api.interceptors.response.use(
       return Promise.reject(err);
     }
 
+    // MFA 403: don't refresh, let the caller handle it
+    const errMsg = err.response?.data?.message || err.response?.data?.error || '';
+    if (err.response?.status === 403 && errMsg.toLowerCase().includes('mfa')) {
+      return Promise.reject(err);
+    }
+
     // Μην κάνεις refresh για το ίδιο το /auth/refresh endpoint
     if (originalRequest.url?.includes("/auth/refresh")) {
       sessionStorage.removeItem("access_token");
