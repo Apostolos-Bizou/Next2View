@@ -141,9 +141,14 @@ function startActivityPolling() {
   }, 60000)
 }
 
+function onSseActivity() {
+  loadActivity()
+}
+
 onMounted(() => {
   loadActivity()
   startActivityPolling()
+  window.addEventListener('sse-activity-received', onSseActivity)
 })
 onUnmounted(() => {
   if (activityTimer) clearInterval(activityTimer)

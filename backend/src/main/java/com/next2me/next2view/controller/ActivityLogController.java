@@ -67,6 +67,12 @@ public class ActivityLogController {
                     .toList();
         }
 
+        // Filter out own activities (user should not see their own actions)
+        final UUID currentUserId = actorId;
+        activities = activities.stream()
+                .filter(a -> !a.getActorId().equals(currentUserId))
+                .toList();
+
         return ResponseEntity.ok(activities);
     }
 
