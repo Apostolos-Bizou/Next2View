@@ -8,6 +8,7 @@ import com.next2me.next2view.model.ContractFile;
 import com.next2me.next2view.model.Project;
 import com.next2me.next2view.model.User;
 import com.next2me.next2view.repository.AuditLogRepository;
+import com.next2me.next2view.service.ActivityLogService;
 import com.next2me.next2view.repository.ContractFileRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +56,7 @@ public class ContractFileService {
 
     private final ContractFileRepository contractFileRepository;
     private final AuditLogRepository auditLogRepository;
+    private final ActivityLogService activityLogService;
     private final LegalVaultCrypto crypto;
 
     /** Nullable — configured only if legal vault is set up. */
@@ -150,6 +152,10 @@ public class ContractFileService {
                         "sha256", enc.sha256Hex(),
                         "algo", "AES-256-GCM"))
                 .build());
+
+        activityLogService.logActivity(uploader, ActivityLogService.UPLOADED, ActivityLogService.FILE,
+                cf.getId(), sanitizedFilename, project.getCategory().name(),
+                project.getCompany().getId(), uploader.getFullName() + " uploaded file \"" + sanitizedFilename + "\"");
 
         log.info("Encrypted contract uploaded: projectId={}, fileId={}, size={}B",
                 project.getId(), cf.getId(), file.getSize());
@@ -252,6 +258,10 @@ public class ContractFileService {
                 .oldValue(Map.of("fileName", cf.getFileName()))
                 .newValue(Map.of("reason", Objects.toString(reason, "(none)")))
                 .build());
+
+        activityLogService.logActivity(deleter, ActivityLogService.DELETED, ActivityLogService.FILE,
+                cf.getId(), cf.getFileName(), null,
+                null, deleter.getFullName() + " deleted file \"" + cf.getFileName() + "\"");
 
         log.info("Contract soft-deleted: fileId={}, deleter={}", fileId, deleter.getEmail());
         // Note: blob remains for 90 days via Azure soft-delete retention.

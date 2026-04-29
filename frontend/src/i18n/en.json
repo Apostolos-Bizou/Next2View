@@ -261,7 +261,14 @@
       "marketing": "Marketing"
     },
     "allOk": "✓ All good",
-    "filterInfo": "🔵 Updates"
+    "filterInfo": "🔵 Updates",
+    "tabAlerts": "Alerts",
+    "tabActivity": "Activity Log",
+    "refresh": "Refresh",
+    "clearAll": "Clear All",
+    "loadingActivity": "Loading activity...",
+    "noActivity": "No recent activity",
+    "noActivitySub": "Actions will appear here as they happen."
   },
   "profile": {
     "user": "User",

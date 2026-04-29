@@ -4,6 +4,7 @@ import com.next2me.next2view.dto.ProjectDto;
 import com.next2me.next2view.dto.ProjectRequest;
 import com.next2me.next2view.model.*;
 import com.next2me.next2view.repository.*;
+import com.next2me.next2view.service.ActivityLogService;
 import com.next2me.next2view.security.PermissionEvaluator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,6 +24,7 @@ public class ProjectService {
     private final CompanyRepository companyRepository;
     private final UserRepository userRepository;
     private final AuditLogRepository auditLogRepository;
+    private final ActivityLogService activityLogService;
     private final PermissionEvaluator permissions;
 
     @Transactional(readOnly = true)
@@ -150,6 +152,10 @@ public class ProjectService {
                 .newValue(Map.of("title", p.getTitle()))
                 .build());
 
+        activityLogService.logActivity(actor, ActivityLogService.UPDATED, ActivityLogService.PROJECT,
+                p.getId(), p.getTitle(), p.getCategory().name(),
+                p.getCompany().getId(), actor.getFullName() + " updated project '" + p.getTitle() + "'");
+
         return toDto(p);
     }
 
@@ -170,6 +176,10 @@ public class ProjectService {
                 .entityType("projects").entityId(id)
                 .oldValue(Map.of("title", p.getTitle()))
                 .build());
+
+        activityLogService.logActivity(actor, ActivityLogService.DELETED, ActivityLogService.PROJECT,
+                p.getId(), p.getTitle(), p.getCategory().name(),
+                p.getCompany().getId(), actor.getFullName() + " deleted project '" + p.getTitle() + "'");
     }
 
     // ── Helpers ──
