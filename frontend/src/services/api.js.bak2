@@ -40,7 +40,7 @@ api.interceptors.response.use(
 
     // MFA 403: don't refresh, let the caller handle it
     const errMsg = err.response?.data?.message || err.response?.data?.error || '';
-    if (err.response?.status === 403 && (errMsg.toLowerCase().includes('mfa') || errMsg === '')) {
+    if (err.response?.status === 403 && errMsg.toLowerCase().includes('mfa')) {
       return Promise.reject(err);
     }
 
