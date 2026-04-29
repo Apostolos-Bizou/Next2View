@@ -116,6 +116,22 @@ public class ActivityLogController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * GET /api/activity-log/entity/{entityType}/{entityId}
+     * Returns activity history for a specific entity (e.g. project history).
+     */
+    @GetMapping("/entity/{entityType}/{entityId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ActivityLog>> getEntityHistory(
+            @PathVariable String entityType,
+            @PathVariable UUID entityId,
+            @AuthenticationPrincipal String userId
+    ) {
+        parseUserId(userId); // auth check
+        List<ActivityLog> history = activityLogService.getEntityHistory(entityType.toUpperCase(), entityId);
+        return ResponseEntity.ok(history);
+    }
+
     private UUID parseUserId(String userId) {
         if (userId == null || userId.isBlank() || "anonymousUser".equals(userId)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
