@@ -90,7 +90,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
@@ -105,7 +105,7 @@ const filter = ref('')
 const dismissedAlerts = ref(new Set(JSON.parse(localStorage.getItem("n2v_dismissed_alerts") || "[]")))
 
 function alertKey(n) {
-  return n.projectId + ":" + n.icon + ":" + n.level
+  return n.projectId + ":" + n.level
 }
 
 function dismissAlert(n) {
@@ -306,6 +306,12 @@ const filtered = computed(() => {
   if (!filter.value) return allNotifs.value
   return allNotifs.value.filter(n => n.level === filter.value)
 })
+
+// Sync badge count to DashboardLayout
+watch(allNotifs, (val) => {
+  window.__n2vAlertCount = val.length
+  window.dispatchEvent(new Event('alert-count-changed'))
+}, { immediate: true })
 
 const catLabel = (c) => t('notif.cats.' + c, c)
 </script>

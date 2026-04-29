@@ -7,7 +7,7 @@
       </button>
       <div class="mobile-logo">Next2<span>View</span></div>
       <router-link to="/notifications" class="mobile-notif-btn">
-        🔔<span v-if="store.unreadCount > 0" class="mobile-notif-badge">{{ store.unreadCount }}</span>
+        🔔<span v-if="activeBadgeCount > 0" class="mobile-notif-badge">{{ activeBadgeCount }}</span>
       </router-link>
     </div>
 
@@ -34,7 +34,7 @@
         </router-link>
         <router-link to="/notifications" class="nav-item" active-class="active">
           <span class="nav-ico" style="color:var(--yellow);">🔔</span>Notifications
-          <span v-if="store.atRisk.length" class="nav-count" style="background:var(--red);color:#fff;">{{ store.atRisk.length }}</span>
+          <span v-if="activeBadgeCount > 0" class="nav-count" style="background:var(--red);color:#fff;">{{ activeBadgeCount }}</span>
         </router-link>
         <router-link v-if="permStore.isCEO()" to="/admin" class="nav-item" active-class="active">
           <span class="nav-ico" style="color:var(--text-dim);">⚙</span>Admin
@@ -80,7 +80,7 @@
       <div class="notif-row" @click="router.push('/notifications')" style="cursor:pointer;">
         <div class="notif-label">Notifications</div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <span v-if="store.atRisk.length" class="notif-badge">{{ store.atRisk.length }}</span>
+          <span v-if="activeBadgeCount > 0" class="notif-badge">{{ activeBadgeCount }}</span>
           <span class="notif-bell" :title="tt('nav.notifTooltip')">🔔</span>
         </div>
       </div>
@@ -654,6 +654,15 @@ window.addEventListener('mfa-activated', () => {
   showMfaNudge.value = false
   showMfaSuccess.value = true
   sessionStorage.setItem('mfa_nudge_dismissed', 'true')
+})
+
+// Badge: reads count from NotificationsView via global event
+const activeBadgeCount = ref(window.__n2vAlertCount || 0)
+window.addEventListener('alert-count-changed', () => {
+  activeBadgeCount.value = window.__n2vAlertCount || 0
+})
+window.addEventListener('alerts-dismissed', () => {
+  setTimeout(() => { activeBadgeCount.value = window.__n2vAlertCount || 0 }, 100)
 })
 
 const initials = computed(() => {
