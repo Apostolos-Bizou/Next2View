@@ -145,7 +145,10 @@ onMounted(() => {
   loadActivity()
   startActivityPolling()
 })
-onUnmounted(() => { if (activityTimer) clearInterval(activityTimer) })
+onUnmounted(() => {
+  if (activityTimer) clearInterval(activityTimer)
+  window.removeEventListener('sse-activity-received', onSseActivity)
+})
 
 function actionIcon(type) {
   return { CREATED: '➕', UPDATED: '✏️', DELETED: '🗑️', COMPLETED: '✅', UPLOADED: '📎', COMMENTED: '💬', STATUS_CHANGED: '🔄', TASK_ADDED: '➕', TASK_REMOVED: '🗑️', TASK_COMPLETED: '✅', TASK_REOPENED: '🔄', TASK_PROGRESS: '📊', TASK_REASSIGNED: '👤', TASK_BLOCKED: '🚫', TASK_UNBLOCKED: '✅' }[type] || '📌'
