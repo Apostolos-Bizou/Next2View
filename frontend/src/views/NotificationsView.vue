@@ -75,8 +75,8 @@
         <div v-for="a in activityLog" :key="a.id" class="notif-card info activity-card">
           <div class="notif-icon">{{ actionIcon(a.actionType) }}</div>
           <div class="notif-body">
-            <div class="notif-title">{{ a.actorName }} {{ actionLabel(a.actionType) }} {{ entityLabel(a.entityType) }}</div>
-            <div class="notif-desc">{{ a.entityName || a.description }}</div>
+            <div class="notif-title">{{ a.actorName }}</div>
+            <div class="notif-desc">{{ a.description || (actionLabel(a.actionType) + ' ' + entityLabel(a.entityType) + ' ' + (a.entityName || '')) }}</div>
             <div class="notif-meta">
               <span v-if="a.category" :class="'notif-cat ' + a.category">{{ a.category }}</span>
               <span class="notif-days">{{ timeAgo(a.createdAt) }}</span>
@@ -145,11 +145,11 @@ onMounted(() => startActivityPolling())
 onUnmounted(() => { if (activityTimer) clearInterval(activityTimer) })
 
 function actionIcon(type) {
-  return { CREATED: '➕', UPDATED: '✏️', DELETED: '🗑️', COMPLETED: '✅', UPLOADED: '📎', COMMENTED: '💬', STATUS_CHANGED: '🔄' }[type] || '📌'
+  return { CREATED: '➕', UPDATED: '✏️', DELETED: '🗑️', COMPLETED: '✅', UPLOADED: '📎', COMMENTED: '💬', STATUS_CHANGED: '🔄', TASK_ADDED: '➕', TASK_REMOVED: '🗑️', TASK_COMPLETED: '✅', TASK_REOPENED: '🔄', TASK_PROGRESS: '📊', TASK_REASSIGNED: '👤', TASK_BLOCKED: '🚫', TASK_UNBLOCKED: '✅' }[type] || '📌'
 }
 
 function actionLabel(type) {
-  return { CREATED: 'created', UPDATED: 'updated', DELETED: 'deleted', COMPLETED: 'completed', UPLOADED: 'uploaded', COMMENTED: 'commented on', STATUS_CHANGED: 'changed status of' }[type] || type
+  return { CREATED: 'created', UPDATED: 'updated', DELETED: 'deleted', COMPLETED: 'completed', UPLOADED: 'uploaded', COMMENTED: 'commented on', STATUS_CHANGED: 'changed status of', TASK_ADDED: 'added task in', TASK_REMOVED: 'removed task from', TASK_COMPLETED: 'completed task in', TASK_REOPENED: 'reopened task in', TASK_PROGRESS: 'changed progress in', TASK_REASSIGNED: 'reassigned task in', TASK_BLOCKED: 'blocked task in', TASK_UNBLOCKED: 'unblocked task in' }[type] || type
 }
 
 function entityLabel(type) {
