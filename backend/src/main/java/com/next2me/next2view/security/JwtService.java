@@ -15,6 +15,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
 
+// CI test marker
 @Service
 @Slf4j
 public class JwtService {
