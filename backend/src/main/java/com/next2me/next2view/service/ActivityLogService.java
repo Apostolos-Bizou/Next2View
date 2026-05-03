@@ -89,6 +89,58 @@ public class ActivityLogService {
         }
     }
 
+    // New overloads with projectId for proper notification navigation (V23)
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logActivity(User actor, String actionType, String entityType,
+                            UUID entityId, String entityName, String category,
+                            UUID companyId, UUID projectId, String description) {
+        try {
+            ActivityLog saved = activityLogRepository.save(ActivityLog.builder()
+                    .actorId(actor.getId())
+                    .actorName(actor.getFullName())
+                    .actionType(actionType)
+                    .entityType(entityType)
+                    .entityId(entityId)
+                    .entityName(entityName)
+                    .category(category)
+                    .companyId(companyId)
+                    .projectId(projectId)
+                    .description(description)
+                    .build());
+            log.debug("Activity: {} {} {} '{}'", actor.getEmail(), actionType, entityType, entityName);
+            broadcastToEligibleUsers(actor, saved);
+        } catch (Exception e) {
+            log.error("Failed to log activity: {} {} {}", actionType, entityType, entityName, e);
+        }
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void logActivity(User actor, String actionType, String entityType,
+                            UUID entityId, String entityName, String category,
+                            UUID companyId, UUID projectId, String description, Map<String, Object> metadata) {
+        try {
+            ActivityLog saved = activityLogRepository.save(ActivityLog.builder()
+                    .actorId(actor.getId())
+                    .actorName(actor.getFullName())
+                    .actionType(actionType)
+                    .entityType(entityType)
+                    .entityId(entityId)
+                    .entityName(entityName)
+                    .category(category)
+                    .companyId(companyId)
+                    .projectId(projectId)
+                    .description(description)
+                    .metadata(metadata)
+                    .build());
+            broadcastToEligibleUsers(actor, saved);
+        } catch (Exception e) {
+            log.error("Failed to log activity: {} {} {}", actionType, entityType, entityName, e);
+        }
+    }
+
     // ═══════════════════════════════════════════
     // SSE broadcast to eligible users
     // ═══════════════════════════════════════════
