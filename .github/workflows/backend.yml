@@ -1,4 +1,4 @@
-﻿name: Backend CI/CD
+name: Backend CI/CD
 
 on:
   push:
@@ -7,12 +7,6 @@ on:
   pull_request:
     branches: [ main, staging ]
     paths: [ 'backend/**' ]
-
-env:
-  ACR_REGISTRY: next2viewdevacr.azurecr.io
-  IMAGE_NAME: next2view-api
-  CONTAINER_APP: next2view-api
-  RESOURCE_GROUP: next2view-rg
 
 jobs:
   build-and-test:
@@ -60,38 +54,3 @@ jobs:
           name: test-results
           path: backend/target/surefire-reports/
 
-      - name: Set image tag
-        if: github.event_name == 'push'
-        id: tag
-        run: echo "TAG=${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> $GITHUB_OUTPUT
-
-      - name: Log in to ACR
-        if: github.event_name == 'push'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.ACR_REGISTRY }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
-
-      - name: Build & Push Docker image
-        if: github.event_name == 'push'
-        uses: docker/build-push-action@v5
-        with:
-          context: backend
-          file: backend/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.tag.outputs.TAG }}
-            ${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-
-      - name: Deploy to Azure Container Apps
-        if: github.event_name == 'push'
-        run: |
-          az login --service-principal \
-            -u ${{ secrets.AZURE_CLIENT_ID }} \
-            -p ${{ secrets.AZURE_CLIENT_SECRET }} \
-            --tenant ${{ secrets.AZURE_TENANT_ID }}
-          az containerapp update \
-            --name ${{ env.CONTAINER_APP }} \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --image ${{ steps.tag.outputs.TAG }}
