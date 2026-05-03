@@ -42,3 +42,7 @@ fix_*.js
 # Local backup files from patch scripts
 *.vue.bak
 *.js.bak
+
+*.bak
+*.bak2
+.backup-c8/
