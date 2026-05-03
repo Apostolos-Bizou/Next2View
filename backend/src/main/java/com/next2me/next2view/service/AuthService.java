@@ -90,8 +90,10 @@ public class AuthService {
             throw new BadCredentialsException("Refresh token expired or revoked");
         }
         User user = token.getUser();
+        // mfaVerified=false on refresh: refresh does not prove MFA verification.
+        // Step-up flow (when implemented) must re-issue token via separate endpoint.
         String newAccess = jwtService.generateAccessToken(
-                user.getId(), user.getEmail(), user.getRole().name(), user.getMfaEnabled());
+                user.getId(), user.getEmail(), user.getRole().name(), false);
         return new AuthResponse(newAccess, null, "Bearer", 15 * 60, buildUserInfo(user), false);
     }
     @Transactional
