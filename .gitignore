@@ -48,5 +48,9 @@ frontend/.env.local
 frontend/.env.*.local
 frontend/.env.*.bak
 
+# Generic backup files (from patch scripts)
+*.bak
+*.bak2
+
 # C8 Backups
 .backup-c8/

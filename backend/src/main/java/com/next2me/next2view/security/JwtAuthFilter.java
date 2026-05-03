@@ -54,6 +54,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 var auth = new UsernamePasswordAuthenticationToken(userId, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(auth);
+            } else {
+                log.warn("Token present but invalid for path: {} (caller will receive 403)", request.getServletPath());
             }
         });
 
