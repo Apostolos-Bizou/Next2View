@@ -63,8 +63,11 @@ public class JwtService {
         try {
             validateAndParseClaims(token);
             return true;
+        } catch (ExpiredJwtException e) {
+            log.warn("JWT token expired: {}", e.getMessage());
+            return false;
         } catch (JwtException | IllegalArgumentException e) {
-            log.debug("Invalid JWT token: {}", e.getMessage());
+            log.warn("JWT validation failed: {}", e.getMessage());
             return false;
         }
     }
