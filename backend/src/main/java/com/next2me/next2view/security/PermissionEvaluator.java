@@ -136,16 +136,21 @@ public class PermissionEvaluator {
 
     /**
      * Requires MFA for file operations on Legal and Finance projects.
-     * CEO is always exempt. All other roles must have mfaVerified=true.
+     * CEO is always exempt. All other roles must have MFA enabled in their profile.
+     *
+     * NOTE: This is enrollment-based MFA (user.mfaEnabled), not step-up.
+     * Step-up MFA challenge per sensitive action is tracked as future work (C17).
      */
-    public void requireMfaForFiles(Project project, boolean mfaVerified, User user) {
+    public void requireMfaForFiles(Project project, User user) {
         if (project == null) return;
         if (isCeo(user)) return; // CEO bypass
         boolean needsMfa = project.getCategory() == Project.Category.legal
                         || project.getCategory() == Project.Category.finance;
-        if (needsMfa && !mfaVerified) {
+        if (!needsMfa) return;
+        boolean mfaEnabled = user != null && Boolean.TRUE.equals(user.getMfaEnabled());
+        if (!mfaEnabled) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "MFA verification required to access files in this category");
+                "MFA must be enabled in your profile to access files in this category");
         }
     }
 
