@@ -42,6 +42,9 @@ public class ActivityLog {
     @Column(name = "company_id")
     private UUID companyId;
 
+    @Column(name = "project_id")
+    private UUID projectId;
+
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
