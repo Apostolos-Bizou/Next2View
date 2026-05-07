@@ -2,6 +2,7 @@ package com.next2me.next2view.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.next2me.next2view.util.HtmlSanitizer;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -29,4 +30,15 @@ public class CeoNote {
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
+
+    /**
+     * Sanitize HTML content before persisting (defense-in-depth XSS protection).
+     */
+    @PrePersist
+    @PreUpdate
+    private void sanitizeHtmlContent() {
+        if (this.content != null) {
+            this.content = HtmlSanitizer.clean(this.content);
+        }
+    }
 }

@@ -2,6 +2,7 @@ package com.next2me.next2view.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.next2me.next2view.util.HtmlSanitizer;
 
 import java.time.LocalDate;
 
@@ -66,4 +67,18 @@ public class Task extends BaseEntity {
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private Integer sortOrder = 0;
+
+    /**
+     * Sanitize HTML content before persisting (defense-in-depth XSS protection).
+     */
+    @PrePersist
+    @PreUpdate
+    private void sanitizeHtmlContent() {
+        if (this.comment != null) {
+            this.comment = HtmlSanitizer.clean(this.comment);
+        }
+        if (this.blockNote != null) {
+            this.blockNote = HtmlSanitizer.clean(this.blockNote);
+        }
+    }
 }

@@ -432,5 +432,29 @@
     },
     "confirmDeleteDoc": "Διαγραφή του \"{name}\";",
     "loadError": "Δεν φορτώθηκαν τα έγγραφα"
+  },
+  "editor": {
+    "bold": "Έντονα",
+    "italic": "Πλάγια",
+    "underline": "Υπογράμμιση",
+    "heading1": "Επικεφαλίδα 1",
+    "heading2": "Επικεφαλίδα 2",
+    "bulletList": "Λίστα κουκκίδες",
+    "orderedList": "Αριθμημένη λίστα",
+    "color": "Χρώμα κειμένου",
+    "colorClear": "Κατάργηση χρώματος",
+    "colorBlack": "Μαύρο",
+    "colorNavy": "Σκούρο μπλε",
+    "colorBlue": "Μπλε",
+    "colorGreen": "Πράσινο",
+    "colorAmber": "Πορτοκαλί",
+    "colorRed": "Κόκκινο",
+    "colorPurple": "Μωβ",
+    "colorGray": "Γκρι",
+    "link": "Σύνδεσμος",
+    "linkPrompt": "Εισάγετε URL:",
+    "undo": "Αναίρεση",
+    "redo": "Επανάληψη",
+    "clearFormatting": "Καθαρισμός μορφοποίησης"
   }
 }

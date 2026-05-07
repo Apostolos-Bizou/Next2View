@@ -2,6 +2,7 @@ package com.next2me.next2view.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import com.next2me.next2view.util.HtmlSanitizer;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -84,4 +85,16 @@ public class Project extends BaseEntity {
     public enum Category { finance, legal, dev, marketing }
 
     public enum Status { on_track, delayed, at_risk, stale, completed }
+
+    /**
+     * Sanitize HTML content before persisting (defense-in-depth XSS protection).
+     * Frontend already sanitizes with DOMPurify; this catches direct API bypass attempts.
+     */
+    @PrePersist
+    @PreUpdate
+    private void sanitizeHtmlContent() {
+        if (this.contractDesc != null) {
+            this.contractDesc = HtmlSanitizer.clean(this.contractDesc);
+        }
+    }
 }

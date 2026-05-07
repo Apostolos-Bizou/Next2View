@@ -120,7 +120,7 @@
 
       <div v-if="project.contractDesc" class="contract-desc-panel" style="margin-top:14px;">
         <div class="cd-title">{{ tt('pd.contractDesc') }}</div>
-        <div class="cd-text">{{ project.contractDesc }}</div>
+        <div class="cd-text rte-display" v-html="sanitizedContractDesc"></div>
       </div>
 
       <!-- CONTRACT FILES -->
@@ -186,7 +186,7 @@
           <button class="notes-add-btn" @click="showNoteInput=!showNoteInput">{{ tt('pd.newNote') }}</button>
         </div>
         <div v-if="showNoteInput" class="note-input-wrap">
-          <textarea v-model="newNote" :placeholder="tt('pd.notePlaceholder')" class="note-textarea" rows="3"></textarea>
+          <RichTextEditor v-model="newNote" :placeholder="tt('pd.notePlaceholder')" min-height="90px" />
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
             <button class="note-cancel" @click="cancelNote">{{ tt('pd.cancel') }}</button>
             <button class="note-save" @click="saveNote" :disabled="!newNote.trim()">{{ tt('pd.save') }}</button>
@@ -194,7 +194,7 @@
         </div>
         <div v-if="notes.length" class="notes-list">
           <div v-for="n in notes" :key="n.id" class="note-item">
-            <div class="note-content">{{ n.content }}</div>
+            <div class="note-content rte-display" v-html="sanitizeHtml(n.content)"></div>
             <div class="note-meta">
               <span>{{ n.createdBy }}</span>
               <span>{{ formatInstant(n.createdAt) }}</span>
@@ -287,12 +287,12 @@
 
           <div class="te-field">
             <label>{{ tt('pd.comment') }}</label>
-            <textarea
+            <RichTextEditor
               v-model="editingTask.comment"
-              rows="3"
               :placeholder="tt('pd.commentPlaceholder')"
               :disabled="editingTaskSaving"
-            ></textarea>
+              min-height="90px"
+            />
           </div>
         </div>
         <div class="modal-footer te-footer">
@@ -385,7 +385,7 @@
         </div>
         <div class="form-group">
           <label>{{ tt('pd.contractDescLabel') }}</label>
-          <textarea v-model="editForm.contractDesc" class="form-input" rows="3" :placeholder="tt('pd.briefDesc')"></textarea>
+          <RichTextEditor v-model="editForm.contractDesc" :placeholder="tt('pd.briefDesc')" min-height="100px" />
         </div>
         <div class="form-group">
           <label>Status</label>
@@ -480,6 +480,26 @@ const daysRemainingClass = computed(() => {
   if (d <= 30) return 'warning'
   return 'ok'
 })
+
+// Sanitize contract description HTML before rendering with v-html (XSS protection)
+const sanitizedContractDesc = computed(() => {
+  if (!project.value || !project.value.contractDesc) return ''
+  return DOMPurify.sanitize(project.value.contractDesc, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'ul', 'ol', 'li', 'a', 'span'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'style'],
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):)/i,
+  })
+})
+
+// Reusable HTML sanitizer for note/comment content (same whitelist as contractDesc)
+function sanitizeHtml(html) {
+  if (!html) return ''
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'u', 'h1', 'h2', 'ul', 'ol', 'li', 'a', 'span'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'style'],
+    ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto):)/i,
+  })
+}
 const smartStatus = computed(() => {
   if (!project.value) return { code: 'on_track', label: 'On Track', color: '#059669', icon: '🟢' }
   return getSmartStatus(timeProgress.value, project.value.completion, project.value.status)
@@ -637,6 +657,8 @@ import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
+import RichTextEditor from '@/components/RichTextEditor.vue'
+import DOMPurify from 'dompurify'
 
 const { t: tt } = useI18n()
 const route = useRoute()
@@ -1712,4 +1734,24 @@ function formatDate(iso) {
 .history-actor { font-size: 12px; font-weight: 700; color: var(--text); }
 .history-action { font-size: 11px; color: var(--text-mid); margin-top: 2px; }
 .history-time { font-size: 10px; color: var(--text-dim); font-family: "Nunito Sans", sans-serif; margin-top: 3px; }
+/* === Rendered rich text content (read-only display) === */
+.rte-display {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.rte-display :deep(p) { margin: 0 0 6px 0; }
+.rte-display :deep(p:last-child) { margin-bottom: 0; }
+.rte-display :deep(h1) { font-size: 16px; font-weight: 700; margin: 6px 0 4px 0; line-height: 1.3; }
+.rte-display :deep(h2) { font-size: 14px; font-weight: 700; margin: 6px 0 3px 0; line-height: 1.3; }
+.rte-display :deep(ul), .rte-display :deep(ol) { padding-left: 22px; margin: 4px 0 6px 0; }
+.rte-display :deep(ul li), .rte-display :deep(ol li) { margin: 2px 0; }
+.rte-display :deep(ul) { list-style-type: disc; }
+.rte-display :deep(ol) { list-style-type: decimal; }
+.rte-display :deep(strong) { font-weight: 700; }
+.rte-display :deep(em) { font-style: italic; }
+.rte-display :deep(u) { text-decoration: underline; }
+.rte-display :deep(a) { color: var(--accent); text-decoration: underline; }
+.rte-display :deep(a:hover) { color: #1d4ed8; }
+
 </style>
