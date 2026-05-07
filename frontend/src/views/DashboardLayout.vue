@@ -182,7 +182,7 @@
           </div>
           <div class="form-group">
             <label>{{ tt('form.contractDesc') }}</label>
-            <textarea v-model="form.contractDesc" :placeholder="tt('form.contractDescPlaceholder')" class="form-input" rows="2"></textarea>
+            <RichTextEditor v-model="form.contractDesc" :placeholder="tt('form.contractDescPlaceholder')" min-height="100px" />
           </div>
 
           <!-- SPECS -->
@@ -206,7 +206,7 @@
                 <input v-model="s.endDate" type="date" class="form-input spec-date-input" />
               </div>
             </div>
-            <textarea v-model="s.notes" class="form-input" rows="2" :placeholder="tt('form.specNotes')" style="font-size:12px;margin-top:4px;resize:vertical;"></textarea>
+            <div style="margin-top:4px;"><RichTextEditor v-model="s.notes" :placeholder="tt('form.specNotes')" compact min-height="60px" /></div>
           </div>
 
           <!-- MODULES & TASKS -->
@@ -225,7 +225,7 @@
               </select>
               <button class="del-btn" @click="form.modules.splice(mi, 1)">✕</button>
             </div>
-            <textarea v-model="m.notes" class="form-input" rows="2" :placeholder="tt('form.moduleNotes')" style="font-size:12px;resize:vertical;margin:4px 0 8px 0;"></textarea>
+            <div style="margin:4px 0 8px 0;"><RichTextEditor v-model="m.notes" :placeholder="tt('form.moduleNotes')" compact min-height="60px" /></div>
             <div class="task-builder">
               <div v-for="(t, ti) in m.tasks" :key="ti" class="task-row">
                 <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
@@ -452,6 +452,7 @@ import { usePermissionStore } from '@/stores/permissions'
 import api from '@/services/api'
 import { connectSSE, disconnectSSE, onActivity } from '@/services/sseService'
 import { useI18n } from 'vue-i18n'
+import RichTextEditor from '@/components/RichTextEditor.vue'
 
 const auth = useAuthStore()
 const store = useProjectStore()

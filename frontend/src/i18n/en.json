@@ -432,5 +432,29 @@
     },
     "confirmDeleteDoc": "Delete \"{name}\"?",
     "loadError": "Failed to load documents"
+  },
+  "editor": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "heading1": "Heading 1",
+    "heading2": "Heading 2",
+    "bulletList": "Bullet list",
+    "orderedList": "Numbered list",
+    "color": "Text color",
+    "colorClear": "Clear color",
+    "colorBlack": "Black",
+    "colorNavy": "Navy",
+    "colorBlue": "Blue",
+    "colorGreen": "Green",
+    "colorAmber": "Amber",
+    "colorRed": "Red",
+    "colorPurple": "Purple",
+    "colorGray": "Gray",
+    "link": "Link",
+    "linkPrompt": "Enter URL:",
+    "undo": "Undo",
+    "redo": "Redo",
+    "clearFormatting": "Clear formatting"
   }
 }
