@@ -65,6 +65,23 @@
         </div>
       </div>
 
+      <!-- PROJECT DESCRIPTION (permanent) -->
+      <div class="project-desc-panel" style="margin-top:14px;">
+        <div class="pd-desc-header">
+          <div class="pd-desc-title">{{ tt('pd.descriptionTitle') }}</div>
+          <div v-if="canEditDescription" class="pd-desc-actions">
+            <button v-if="descriptionDirty && !descriptionSaving" class="pd-desc-btn pd-desc-btn-cancel" @click="cancelDescriptionEdit">{{ tt('pd.cancel') }}</button>
+            <button v-if="canEditDescription" class="pd-desc-btn pd-desc-btn-save" :disabled="!descriptionDirty || descriptionSaving" @click="saveDescription">
+              {{ descriptionSaving ? tt('pd.saving') : tt('pd.save') }}
+            </button>
+          </div>
+        </div>
+        <div v-if="descriptionError" class="pd-desc-error">{{ descriptionError }}</div>
+        <RichTextEditor v-if="canEditDescription" v-model="descriptionDraft" :placeholder="tt('pd.descriptionPlaceholder')" min-height="120px" />
+        <div v-else-if="project.description" class="rte-display" v-html="sanitizedDescription"></div>
+        <div v-else class="pd-desc-empty">{{ tt('pd.descriptionEmpty') }}</div>
+      </div>
+
       <!-- GANTT TIMELINE v2 -->
       <GanttV2 :project="project" @task-click="handleGanttTaskClick" />
 
@@ -351,6 +368,10 @@
         <div class="form-group">
           <label>{{ tt('pd.titleReq') }}</label>
           <input v-model="editForm.title" type="text" class="form-input" :placeholder="tt('pd.titlePlaceholder')" />
+        </div>
+        <div class="form-group">
+          <label>{{ tt('pd.descriptionLabel') }}</label>
+          <RichTextEditor v-model="editForm.description" :placeholder="tt('pd.descriptionPlaceholder')" min-height="100px" />
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -1032,6 +1053,63 @@ const editError = ref("")
 const editSaving = ref(false)
 const companies = ref([])
 
+// ── Inline project description (permanent) ──
+const descriptionDraft = ref('')
+const descriptionSaving = ref(false)
+const descriptionError = ref('')
+const descriptionDirty = computed(() => {
+  const current = (project.value && project.value.description) || ''
+  return (descriptionDraft.value || '') !== current
+})
+const canEditDescription = computed(() => permStore.isCEO() || permStore.can('editProject'))
+const sanitizedDescription = computed(() => DOMPurify.sanitize(project.value?.description || ''))
+
+function cancelDescriptionEdit() {
+  descriptionDraft.value = (project.value && project.value.description) || ''
+  descriptionError.value = ''
+}
+
+async function saveDescription() {
+  if (!canEditDescription.value) return
+  descriptionSaving.value = true
+  descriptionError.value = ''
+  try {
+    await api.put('/projects/' + project.value.id, {
+      title: project.value.title,
+      companyId: project.value.companyId,
+      category: project.value.category,
+      budget: project.value.budget || 0,
+      startDate: project.value.startDate || null,
+      deadline: project.value.deadline || null,
+      contractDesc: project.value.contractDesc || '',
+      description: descriptionDraft.value || '',
+      status: project.value.status,
+      specs: (project.value.specs || []).map(s => ({
+        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
+        startDate: s.startDate || null, endDate: s.endDate || null
+      })),
+      modules: (project.value.modules || []).map(m => ({
+        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+        tasks: (m.tasks || []).map(t => ({
+          name: t.name, assignee: t.assignee, progress: t.progress,
+          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+          comment: t.comment, deadline: t.deadline,
+          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
+          startDay: t.startDay, durationDays: t.durationDays,
+          sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false,
+          startDate: t.startDate || null, endDate: t.endDate || null
+        }))
+      }))
+    })
+    await loadProject()
+    descriptionDraft.value = (project.value && project.value.description) || ''
+  } catch (e) {
+    descriptionError.value = e.response?.data?.message || tt('pd.err.saveFailed')
+  } finally {
+    descriptionSaving.value = false
+  }
+}
+
 async function openEditModal() {
   editError.value = ""
   editForm.value = {
@@ -1042,6 +1120,7 @@ async function openEditModal() {
     startDate: project.value.startDate || "",
     deadline: project.value.deadline || "",
     contractDesc: project.value.contractDesc || "",
+    description: project.value.description || "",
     status: project.value.status || "on_track",
     modules: (project.value.modules || []).map(m => ({ ...m, tasks: (m.tasks || []).map(t => ({ ...t })) })),
     specs: (project.value.specs || []).map(s => ({ ...s })),
@@ -1053,6 +1132,11 @@ async function openEditModal() {
     } catch {}
   }
   showEditModal.value = true
+  // Scroll modal body to top after render (fixes UX bug where users see Modules first)
+  nextTick(() => {
+    const body = document.querySelector('.modal-edit .modal-body')
+    if (body) body.scrollTop = 0
+  })
 }
 
 async function saveEdit() {
@@ -1068,6 +1152,7 @@ async function saveEdit() {
       startDate: editForm.value.startDate || null,
       deadline: editForm.value.deadline || null,
       contractDesc: editForm.value.contractDesc || "",
+      description: editForm.value.description || "",
       status: editForm.value.status,
       modules: editForm.value.modules.map(m => ({
         name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
@@ -1093,6 +1178,7 @@ async function saveEdit() {
 
 async function loadProject() {
   project.value = await store.fetchProject(route.params.id)
+  descriptionDraft.value = (project.value && project.value.description) || ''
 }
 
 function editAddModule() {

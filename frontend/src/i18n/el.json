@@ -72,7 +72,9 @@
     "createProject": "Δημιουργία Project",
     "required": "* υποχρεωτικό",
     "errRequired": "Τίτλος, Εταιρεία και Κατηγορία είναι υποχρεωτικά.",
-    "errCreate": "Αποτυχία δημιουργίας project."
+    "errCreate": "Αποτυχία δημιουργίας project.",
+    "description": "Περιγραφή Project",
+    "descriptionPlaceholder": "Γενική περιγραφή project (τι είναι, σκοπός, κλπ.)..."
   },
   "mfa": {
     "disabled": "MFA απενεργοποιημένο",
@@ -420,7 +422,11 @@
       "openFailed": "Σφάλμα κατά το άνοιγμα του αρχείου.",
       "titleRequired": "Ο τίτλος είναι υποχρεωτικός."
     },
-    "startDateLabel": "Ημ. Έναρξης"
+    "startDateLabel": "Ημ. Έναρξης",
+    "descriptionTitle": "📝 Περιγραφή Project",
+    "descriptionLabel": "Περιγραφή Project",
+    "descriptionPlaceholder": "Γράψε μια μόνιμη περιγραφή του project...",
+    "descriptionEmpty": "Δεν έχει οριστεί περιγραφή."
   },
   "guide": {
     "title": "🔐 Οδηγός Χρήσης",

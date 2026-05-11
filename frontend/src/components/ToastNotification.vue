@@ -29,7 +29,7 @@ function dismiss(id) {
 
 function iconFor(type) {
   const icons = {
-    CREATED: '+', UPDATED: '~', DELETED: 'x',
+    CREATED: '+', UPDATED: '~', DELETED: 'x', DESCRIPTION_UPDATED: '~',
     TASK_ADDED: '+', TASK_REMOVED: 'x', TASK_COMPLETED: '\u2713',
     TASK_REOPENED: '\u21BA', TASK_PROGRESS: '%', TASK_REASSIGNED: '\u2192',
     TASK_BLOCKED: '!', TASK_UNBLOCKED: '\u2713',
