@@ -590,6 +590,7 @@ async function saveTaskEdit() {
       startDate: project.value.startDate || null,
       deadline: project.value.deadline || null,
       contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '',
       status: project.value.status,
       specs: (project.value.specs || []).map(s => ({
         description: s.description, isDone: s.isDone,
@@ -641,6 +642,7 @@ async function deleteTaskFromModal() {
       startDate: project.value.startDate || null,
       deadline: project.value.deadline || null,
       contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '',
       status: project.value.status,
       specs: (project.value.specs || []).map(s => ({
         description: s.description, isDone: s.isDone,
@@ -870,6 +872,7 @@ async function toggleTask(t) {
       startDate: project.value.startDate || null,
       deadline: project.value.deadline || null,
       contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '',
       status: project.value.status,
       specs: (project.value.specs || []).map(s => ({
         description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
@@ -906,6 +909,7 @@ async function toggleSpec(s) {
       startDate: project.value.startDate || null,
       deadline: project.value.deadline || null,
       contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '',
       status: project.value.status,
       specs: (project.value.specs || []).map(s2 => ({
         description: s2.description, isDone: s2.isDone, sortOrder: s2.sortOrder || 0,
@@ -945,7 +949,8 @@ async function confirmDeleteModule(m) {
       title: project.value.title, companyId: project.value.companyId,
       category: project.value.category, budget: project.value.budget || 0,
       startDate: project.value.startDate || null, deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '', status: project.value.status,
+      contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '', description: project.value.description || '', status: project.value.status,
       specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
       modules: (project.value.modules || []).map(m2 => ({
         name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
@@ -965,7 +970,8 @@ async function confirmDeleteTask(t, m) {
       title: project.value.title, companyId: project.value.companyId,
       category: project.value.category, budget: project.value.budget || 0,
       startDate: project.value.startDate || null, deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '', status: project.value.status,
+      contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '', description: project.value.description || '', status: project.value.status,
       specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
       modules: (project.value.modules || []).map(m2 => ({
         name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
@@ -1004,6 +1010,7 @@ async function saveSpecDetail() {
       startDate: project.value.startDate || null,
       deadline: project.value.deadline || null,
       contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '',
       status: project.value.status,
       specs: (project.value.specs || []).map(s => ({
         description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
@@ -1082,6 +1089,7 @@ async function saveDescription() {
       startDate: project.value.startDate || null,
       deadline: project.value.deadline || null,
       contractDesc: project.value.contractDesc || '',
+      description: project.value.description || '',
       description: descriptionDraft.value || '',
       status: project.value.status,
       specs: (project.value.specs || []).map(s => ({
