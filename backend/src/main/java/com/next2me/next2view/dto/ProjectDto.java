@@ -21,6 +21,7 @@ public record ProjectDto(
     LocalDate startDate,
     LocalDate deadline,
     String contractDesc,
+    String description,
     int completion,
     int tasksTotal,
     int tasksDone,

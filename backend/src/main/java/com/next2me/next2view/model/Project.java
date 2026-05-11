@@ -46,6 +46,9 @@ public class Project extends BaseEntity {
     @Column(name = "contract_desc", columnDefinition = "TEXT")
     private String contractDesc;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     @Builder.Default
@@ -95,6 +98,9 @@ public class Project extends BaseEntity {
     private void sanitizeHtmlContent() {
         if (this.contractDesc != null) {
             this.contractDesc = HtmlSanitizer.clean(this.contractDesc);
+        }
+        if (this.description != null) {
+            this.description = HtmlSanitizer.clean(this.description);
         }
     }
 }
