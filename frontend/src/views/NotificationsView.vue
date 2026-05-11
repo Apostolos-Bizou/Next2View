@@ -156,11 +156,11 @@ onUnmounted(() => {
 })
 
 function actionIcon(type) {
-  return { CREATED: '➕', UPDATED: '✏️', DELETED: '🗑️', COMPLETED: '✅', UPLOADED: '📎', COMMENTED: '💬', STATUS_CHANGED: '🔄', DESCRIPTION_UPDATED: '📝', TASK_ADDED: '➕', TASK_REMOVED: '🗑️', TASK_COMPLETED: '✅', TASK_REOPENED: '🔄', TASK_PROGRESS: '📊', TASK_REASSIGNED: '👤', TASK_BLOCKED: '🚫', TASK_UNBLOCKED: '✅' }[type] || '📌'
+  return { CREATED: '➕', UPDATED: '✏️', DELETED: '🗑️', COMPLETED: '✅', UPLOADED: '📎', COMMENTED: '💬', STATUS_CHANGED: '🔄', DESCRIPTION_UPDATED: '📝', TASK_DESCRIPTION_UPDATED: '📝', TASK_ADDED: '➕', TASK_REMOVED: '🗑️', TASK_COMPLETED: '✅', TASK_REOPENED: '🔄', TASK_PROGRESS: '📊', TASK_REASSIGNED: '👤', TASK_BLOCKED: '🚫', TASK_UNBLOCKED: '✅' }[type] || '📌'
 }
 
 function actionLabel(type) {
-  return { CREATED: 'created', UPDATED: 'updated', DELETED: 'deleted', COMPLETED: 'completed', UPLOADED: 'uploaded', COMMENTED: 'commented on', STATUS_CHANGED: 'changed status of', DESCRIPTION_UPDATED: 'updated description of', TASK_ADDED: 'added task in', TASK_REMOVED: 'removed task from', TASK_COMPLETED: 'completed task in', TASK_REOPENED: 'reopened task in', TASK_PROGRESS: 'changed progress in', TASK_REASSIGNED: 'reassigned task in', TASK_BLOCKED: 'blocked task in', TASK_UNBLOCKED: 'unblocked task in' }[type] || type
+  return { CREATED: 'created', UPDATED: 'updated', DELETED: 'deleted', COMPLETED: 'completed', UPLOADED: 'uploaded', COMMENTED: 'commented on', STATUS_CHANGED: 'changed status of', DESCRIPTION_UPDATED: 'updated description of', TASK_DESCRIPTION_UPDATED: 'updated description of task in', TASK_ADDED: 'added task in', TASK_REMOVED: 'removed task from', TASK_COMPLETED: 'completed task in', TASK_REOPENED: 'reopened task in', TASK_PROGRESS: 'changed progress in', TASK_REASSIGNED: 'reassigned task in', TASK_BLOCKED: 'blocked task in', TASK_UNBLOCKED: 'unblocked task in' }[type] || type
 }
 
 function entityLabel(type) {

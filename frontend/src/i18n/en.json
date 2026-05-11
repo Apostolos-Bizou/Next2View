@@ -426,7 +426,9 @@
     "descriptionTitle": "📝 Project Description",
     "descriptionLabel": "Project Description",
     "descriptionPlaceholder": "Write a permanent description of the project...",
-    "descriptionEmpty": "No description set."
+    "descriptionEmpty": "No description set.",
+    "taskDescription": "Task Description",
+    "taskDescriptionPlaceholder": "Permanent description of the task (what it includes, goals, etc.)..."
   },
   "guide": {
     "title": "🔐 User Guide",
