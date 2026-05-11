@@ -39,6 +39,9 @@ public class Task extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
     private LocalDate deadline;
 
     @Column(name = "start_week")
@@ -79,6 +82,9 @@ public class Task extends BaseEntity {
         }
         if (this.blockNote != null) {
             this.blockNote = HtmlSanitizer.clean(this.blockNote);
+        }
+        if (this.description != null) {
+            this.description = HtmlSanitizer.clean(this.description);
         }
     }
 }
