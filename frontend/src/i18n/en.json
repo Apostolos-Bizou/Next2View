@@ -72,7 +72,9 @@
     "createProject": "Create Project",
     "required": "* required",
     "errRequired": "Title, Company and Category are required.",
-    "errCreate": "Failed to create project."
+    "errCreate": "Failed to create project.",
+    "description": "Project Description",
+    "descriptionPlaceholder": "General description of the project (what it is, purpose, etc.)..."
   },
   "mfa": {
     "disabled": "MFA disabled",
@@ -420,7 +422,11 @@
       "openFailed": "Error opening file.",
       "titleRequired": "Title is required."
     },
-    "startDateLabel": "Start Date"
+    "startDateLabel": "Start Date",
+    "descriptionTitle": "📝 Project Description",
+    "descriptionLabel": "Project Description",
+    "descriptionPlaceholder": "Write a permanent description of the project...",
+    "descriptionEmpty": "No description set."
   },
   "guide": {
     "title": "🔐 User Guide",

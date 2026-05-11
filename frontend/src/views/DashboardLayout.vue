@@ -147,6 +147,10 @@
             <label>{{ tt('form.title') }} *</label>
             <input v-model="form.title" :placeholder="tt('form.titlePlaceholder')" class="form-input" />
           </div>
+          <div class="form-group">
+            <label>{{ tt('form.description') }}</label>
+            <RichTextEditor v-model="form.description" :placeholder="tt('form.descriptionPlaceholder')" min-height="100px" />
+          </div>
           <div class="form-row">
             <div class="form-group">
               <label>{{ tt('form.company') }} *</label>
@@ -542,7 +546,7 @@ const formError = ref('')
 
 const emptyForm = () => ({
   title: '', companyId: '', category: '', budget: '', startDate: '', deadline: '',
-  contractDesc: '', specs: [], modules: []
+  contractDesc: '', description: '', specs: [], modules: []
 })
 const form = ref(emptyForm())
 
@@ -597,6 +601,7 @@ async function submitProject() {
       budget: form.value.budget ? Number(form.value.budget) : null,
       deadline: form.value.deadline || null,
       contractDesc: form.value.contractDesc || null,
+      description: form.value.description || null,
       specs: form.value.specs.filter(s => s.description.trim()).map(s => ({
         description: s.description,
         isDone: s.isDone,
