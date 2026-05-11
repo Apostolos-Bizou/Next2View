@@ -32,7 +32,7 @@ public record ProjectRequest(
     public record TaskRequest(
         String name, String assignee, int progress,
         boolean isDone, boolean isBlocked,
-        String blockNote, String comment,
+        String blockNote, String comment, String description,
         LocalDate startDate,
     LocalDate deadline, Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress, LocalDate endDate,
         int sortOrder

@@ -242,6 +242,7 @@ public class ProjectService {
                     t.setIsBlocked(tr.isBlocked());
                     t.setBlockNote(tr.blockNote());
                     t.setComment(tr.comment());
+                    t.setDescription(tr.description());
                     t.setDeadline(tr.deadline());
                     t.setStartWeek(tr.startWeek());
                     t.setDurationWeeks(tr.durationWeeks() != null ? tr.durationWeeks() : 1);
@@ -299,7 +300,7 @@ public class ProjectService {
             var tasks = m.getTasks().stream().map(t -> new ProjectDto.TaskDto(
                     t.getId(), t.getName(), t.getAssignee(), t.getProgress(),
                     t.getIsDone(), t.getIsBlocked(), t.getBlockNote(),
-                    t.getComment(), t.getDeadline(), t.getStartWeek(), t.getDurationWeeks(), t.getStartDay(), t.getDurationDays(), t.getManualProgress(), t.getStartDate(), t.getEndDate()
+                    t.getComment(), t.getDescription(), t.getDeadline(), t.getStartWeek(), t.getDurationWeeks(), t.getStartDay(), t.getDurationDays(), t.getManualProgress(), t.getStartDate(), t.getEndDate()
             )).toList();
             return new ProjectDto.ModuleDto(m.getId(), m.getName(), m.getColor(), mc, tasks);
         }).toList();
@@ -323,14 +324,14 @@ public class ProjectService {
 
     // ── Task-level diff support ──
 
-    private record TaskSnapshot(String name, String assignee, int progress, boolean isDone, boolean isBlocked, String moduleName) {}
+    private record TaskSnapshot(String name, String assignee, int progress, boolean isDone, boolean isBlocked, String moduleName, String description) {}
 
     private Map<String, TaskSnapshot> snapshotTasks(Project p) {
         Map<String, TaskSnapshot> map = new LinkedHashMap<>();
         for (var m : p.getModules()) {
             for (var t : m.getTasks()) {
                 String key = m.getName() + "::" + t.getName();
-                map.put(key, new TaskSnapshot(t.getName(), t.getAssignee(), t.getProgress(), t.getIsDone(), t.getIsBlocked(), m.getName()));
+                map.put(key, new TaskSnapshot(t.getName(), t.getAssignee(), t.getProgress(), t.getIsDone(), t.getIsBlocked(), m.getName(), t.getDescription()));
             }
         }
         return map;
@@ -387,6 +388,22 @@ public class ProjectService {
                 activityLogService.logActivity(actor, "TASK_PROGRESS", ActivityLogService.PROJECT,
                         projectId, projectTitle, category, companyId,
                         actorName + " changed progress of '" + newT.name() + "' from " + oldT.progress() + "% to " + newT.progress() + "% in " + newT.moduleName());
+            }
+
+            // Description changed
+            if (!java.util.Objects.equals(
+                    oldT.description() == null ? "" : oldT.description(),
+                    newT.description() == null ? "" : newT.description())) {
+                Map<String, Object> taskDescMeta = new LinkedHashMap<>();
+                taskDescMeta.put("taskName", newT.name());
+                taskDescMeta.put("moduleName", newT.moduleName());
+                taskDescMeta.put("oldDescription", oldT.description() == null ? "" : oldT.description());
+                taskDescMeta.put("newDescription", newT.description() == null ? "" : newT.description());
+                activityLogService.logActivity(actor,
+                        ActivityLogService.TASK_DESCRIPTION_UPDATED, ActivityLogService.PROJECT,
+                        projectId, projectTitle, category, companyId,
+                        actorName + " updated description of task '" + newT.name() + "' in " + newT.moduleName(),
+                        taskDescMeta);
             }
 
             // Assignee changed
