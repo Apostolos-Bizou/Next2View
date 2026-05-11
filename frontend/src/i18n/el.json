@@ -426,7 +426,9 @@
     "descriptionTitle": "📝 Περιγραφή Project",
     "descriptionLabel": "Περιγραφή Project",
     "descriptionPlaceholder": "Γράψε μια μόνιμη περιγραφή του project...",
-    "descriptionEmpty": "Δεν έχει οριστεί περιγραφή."
+    "descriptionEmpty": "Δεν έχει οριστεί περιγραφή.",
+    "taskDescription": "Περιγραφή Task",
+    "taskDescriptionPlaceholder": "Μόνιμη περιγραφή του task (τι περιλαμβάνει, στόχοι, κλπ.)..."
   },
   "guide": {
     "title": "🔐 Οδηγός Χρήσης",

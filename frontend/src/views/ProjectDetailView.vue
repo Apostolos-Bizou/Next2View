@@ -241,6 +241,16 @@
             <input type="text" v-model="editingTask.name" :disabled="editingTaskSaving" />
           </div>
 
+          <div class="te-field">
+            <label>{{ tt('pd.taskDescription') }}</label>
+            <RichTextEditor
+              v-model="editingTask.description"
+              :placeholder="tt('pd.taskDescriptionPlaceholder')"
+              :disabled="editingTaskSaving"
+              min-height="100px"
+            />
+          </div>
+
           <div class="te-row">
             <div class="te-field">
               <label>Assignee</label>
@@ -452,7 +462,7 @@
               </div>
             </div>
           </div>
-          <button @click="m.tasks.push({name:'',assignee:'',progress:0,isDone:false,isBlocked:false,blockNote:'',comment:'',deadline:null,startWeek:mi+1,durationWeeks:1,sortOrder:m.tasks.length})"
+          <button @click="m.tasks.push({name:'',assignee:'',progress:0,isDone:false,isBlocked:false,blockNote:'',comment:'',description:'',deadline:null,startWeek:mi+1,durationWeeks:1,sortOrder:m.tasks.length})"
             style="font-size:11px;padding:3px 10px;background:var(--surface3);color:var(--text-mid);border:1px solid var(--border-bright);border-radius:5px;cursor:pointer;margin-left:12px;">
             + Task
           </button>
@@ -602,7 +612,7 @@ async function saveTaskEdit() {
         tasks: (m2.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, deadline: t.deadline,
+          comment: t.comment, description: t.description || '', deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks,
           startDay: t.startDay, durationDays: t.durationDays,
           sortOrder: t.sortOrder || 0,
@@ -654,7 +664,7 @@ async function deleteTaskFromModal() {
         tasks: (m2.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, deadline: t.deadline,
+          comment: t.comment, description: t.description || '', deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks,
           startDay: t.startDay, durationDays: t.durationDays,
           sortOrder: t.sortOrder || 0,
@@ -920,7 +930,7 @@ async function toggleSpec(s) {
         tasks: (m.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, deadline: t.deadline,
+          comment: t.comment, description: t.description || '', deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks,
           startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0, startDate: t.startDate || null, endDate: t.endDate || null
         }))
@@ -1021,7 +1031,7 @@ async function saveSpecDetail() {
         tasks: (m.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, deadline: t.deadline,
+          comment: t.comment, description: t.description || '', deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks,
           startDay: t.startDay, durationDays: t.durationDays,
           sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false,
@@ -1115,7 +1125,7 @@ async function saveDescription() {
         tasks: (m.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, deadline: t.deadline,
+          comment: t.comment, description: t.description || '', deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks,
           startDay: t.startDay, durationDays: t.durationDays,
           sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false,
@@ -1181,7 +1191,7 @@ async function saveEdit() {
         tasks: (m.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, deadline: t.deadline,
+          comment: t.comment, description: t.description || '', deadline: t.deadline,
           startWeek: t.startWeek, durationWeeks: t.durationWeeks, sortOrder: t.sortOrder || 0,
           startDate: t.startDate || null, endDate: t.endDate || null
         }))
