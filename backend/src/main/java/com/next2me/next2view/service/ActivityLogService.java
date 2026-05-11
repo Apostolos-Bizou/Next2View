@@ -245,6 +245,7 @@ public class ActivityLogService {
     public static final String UPLOADED       = "UPLOADED";
     public static final String COMMENTED      = "COMMENTED";
     public static final String STATUS_CHANGED = "STATUS_CHANGED";
+    public static final String DESCRIPTION_UPDATED = "DESCRIPTION_UPDATED";
 
     // Entity types
     public static final String PROJECT = "PROJECT";

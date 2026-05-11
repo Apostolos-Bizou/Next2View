@@ -93,6 +93,7 @@ public class ProjectService {
                 .startDate(req.startDate())
                 .deadline(req.deadline())
                 .contractDesc(req.contractDesc())
+                .description(req.description())
                 .status(Project.Status.on_track)
                 .active(true)
                 .createdBy(actor)
@@ -124,6 +125,7 @@ public class ProjectService {
 
         Map<String, Object> oldVal = Map.of("title", p.getTitle());
         Map<String, TaskSnapshot> oldTasks = snapshotTasks(p);
+        String oldDescription = p.getDescription();
 
         Company company = companyRepository.findById(req.companyId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company not found"));
@@ -137,6 +139,7 @@ public class ProjectService {
         p.setStartDate(req.startDate());
         p.setDeadline(req.deadline());
         p.setContractDesc(req.contractDesc());
+        p.setDescription(req.description());
         p.setLastUpdatedBy(actor);
 
         p.getSpecs().clear();
@@ -157,6 +160,22 @@ public class ProjectService {
         activityLogService.logActivity(actor, ActivityLogService.UPDATED, ActivityLogService.PROJECT,
                 p.getId(), p.getTitle(), p.getCategory().name(),
                 p.getCompany().getId(), actor.getFullName() + " updated project '" + p.getTitle() + "'");
+
+        // Description-level logging (separate audit trail for permanent project description)
+        String newDescription = p.getDescription();
+        if (!java.util.Objects.equals(
+                oldDescription == null ? "" : oldDescription,
+                newDescription == null ? "" : newDescription)) {
+            Map<String, Object> descMetadata = new LinkedHashMap<>();
+            descMetadata.put("oldDescription", oldDescription == null ? "" : oldDescription);
+            descMetadata.put("newDescription", newDescription == null ? "" : newDescription);
+            activityLogService.logActivity(actor,
+                    ActivityLogService.DESCRIPTION_UPDATED, ActivityLogService.PROJECT,
+                    p.getId(), p.getTitle(), p.getCategory().name(),
+                    p.getCompany().getId(),
+                    actor.getFullName() + " updated description of project '" + p.getTitle() + "'",
+                    descMetadata);
+        }
 
         // Granular task-level logging
         logTaskDiffs(actor, p, oldTasks);
@@ -296,6 +315,7 @@ public class ProjectService {
                 p.getCategory(), p.getStatus(),
                 p.getBudget(), p.getPaid(), p.getInvoiced(),
                 p.getStartDate(), p.getDeadline(), p.getContractDesc(),
+                p.getDescription(),
                 completion, (int) tasksTotal, (int) tasksDone,
                 updatedAgo, modules, specs
         );

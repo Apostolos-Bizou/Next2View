@@ -20,6 +20,7 @@ public record ProjectRequest(
     LocalDate startDate,
     LocalDate deadline,
     String contractDesc,
+    String description,
     List<SpecRequest> specs,
     List<ModuleRequest> modules
 ) {
