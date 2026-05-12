@@ -298,8 +298,36 @@ public class ProjectService {
         return (int) tasks.stream().mapToInt(Task::getProgress).average().orElse(0);
     }
 
+    // v5.2.0: deadline-anchored completion for the DTO layer only.
+    // updateStatus() still uses calcCompletion(p) above, so on_track / at_risk /
+    // delayed transitions are unchanged for legacy projects.
+    // Behavior:
+    //   - Tasks with endDate strictly after project.deadline are excluded.
+    //   - Tasks with null endDate are kept (intent unknown; legacy data).
+    //   - If project.deadline is null, behaves identically to calcCompletion.
+    private int calcCompletionWithinDeadline(Project p) {
+        var allTasks = p.getModules().stream()
+                .flatMap(m -> m.getTasks().stream()).toList();
+        if (allTasks.isEmpty()) return 0;
+        var countable = (p.getDeadline() == null)
+                ? allTasks
+                : allTasks.stream()
+                        .filter(t -> t.getEndDate() == null || !t.getEndDate().isAfter(p.getDeadline()))
+                        .toList();
+        if (countable.isEmpty()) return 0;
+        return (int) countable.stream().mapToInt(Task::getProgress).average().orElse(0);
+    }
+
     private ProjectDto toDto(Project p) {
-        int completion = calcCompletion(p);
+        // v5.2.0: deadline-anchored completion (does not affect updateStatus()).
+        int completion = calcCompletionWithinDeadline(p);
+        // v5.2.0: tasks whose endDate is strictly after the project deadline.
+        // Null endDate or null deadline => not overdue (cannot determine).
+        int overdueTaskCount = (p.getDeadline() == null) ? 0 :
+                (int) p.getModules().stream()
+                        .flatMap(m -> m.getTasks().stream())
+                        .filter(t -> t.getEndDate() != null && t.getEndDate().isAfter(p.getDeadline()))
+                        .count();
         long tasksTotal = p.getModules().stream().mapToLong(m -> m.getTasks().size()).sum();
         long tasksDone  = p.getModules().stream()
                 .flatMap(m -> m.getTasks().stream()).filter(Task::getIsDone).count();
@@ -330,7 +358,7 @@ public class ProjectService {
                 p.getStartDate(), p.getDeadline(), p.getContractDesc(),
                 p.getDescription(),
                 completion, (int) tasksTotal, (int) tasksDone,
-                updatedAgo, modules, specs
+                updatedAgo, overdueTaskCount, modules, specs
         );
     }
 
