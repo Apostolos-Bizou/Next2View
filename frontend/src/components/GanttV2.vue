@@ -67,6 +67,7 @@
           </div>
           <div class="ganttv2-timeline" :style="{ minWidth: totalWidth + 'px' }">
             <div v-if="todayX !== null" class="ganttv2-today-line" :style="{ left: todayX + 'px' }"></div>
+            <div v-if="deadlineX !== null" class="ganttv2-deadline-line" :style="{ left: deadlineX + 'px' }" :title="tt('ganttv2.deadlineLineTip') || 'Deadline'"></div>
             <div
               v-if="projectBar.show"
               class="ganttv2-project-bar"
@@ -175,7 +176,7 @@
                     :class="[
                       'ganttv2-task-bar',
                       m.color || project.category,
-                      { done: t.isDone, blocked: t.isBlocked }
+                      { done: t.isDone, blocked: t.isBlocked, overdue: isOverdueTask(t) }
                     ]"
                     :title="`${t.name} — ${t.progress || 0}%${t.startDate ? ' (' + t.startDate + (t.endDate ? ' → ' + t.endDate : '') + ')' : ''}${t.assignee ? ' — ' + t.assignee : ''}${t.blockNote ? ' — BLOCKED: ' + t.blockNote : ''}`"
                     @click.stop="emit('task-click', t.id)"
@@ -396,6 +397,26 @@ const todayX = computed(() => {
   if (t < rangeStart.value || t > rangeEnd.value) return null
   return dateToX(t)
 })
+
+// v5.2.1 B2: pixel position of project.deadline in the Gantt grid.
+// Null if deadline missing or outside the visible range.
+const deadlineX = computed(() => {
+  const d = props.project?.deadline
+  if (!d) return null
+  const dl = new Date(d); dl.setHours(0,0,0,0)
+  if (dl < rangeStart.value || dl > rangeEnd.value) return null
+  return dateToX(dl)
+})
+
+// v5.2.1 B2: a task is "overdue" iff it has an endDate strictly after the
+// project deadline. Tasks with null endDate are not considered overdue.
+function isOverdueTask(t) {
+  const dl = props.project?.deadline
+  if (!dl || !t?.endDate) return false
+  const dlMs = new Date(dl).getTime()
+  const eMs = new Date(t.endDate).getTime()
+  return eMs > dlMs
+}
 
 // ═══════════════════ HEADER CELLS ═══════════════════
 function getWeekNum(d) {
@@ -952,6 +973,43 @@ onMounted(async () => {
   box-shadow: 0 0 8px rgba(220,38,38,0.4);
 }
 .ganttv2-today-line.faded { opacity: 0.3; }
+
+/* v5.2.1 B2: project deadline marker (orange, dashed) */
+.ganttv2-deadline-line {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    #f59e0b 0,
+    #f59e0b 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  z-index: 3;
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(245,158,11,0.35);
+}
+
+/* v5.2.1 B2: task bars whose endDate is past the project deadline */
+.ganttv2-task-bar.overdue {
+  outline: 2px solid #dc2626;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.35), 0 0 8px rgba(220,38,38,0.45);
+}
+.ganttv2-task-bar.overdue::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(220,38,38,0.15) 0,
+    rgba(220,38,38,0.15) 4px,
+    transparent 4px,
+    transparent 10px
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
 
 /* ════════ BARS ════════ */
 .ganttv2-task-bar {
