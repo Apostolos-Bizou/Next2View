@@ -180,6 +180,7 @@
   },
   "ganttv2": {
     "title": "Project Timeline",
+    "overdueBadge": "{n} overdue",
     "moduleTask": "MODULE / TASK",
     "specifications": "Specifications",
     "monthsFull": {

@@ -6,6 +6,11 @@
         <div class="ganttv2-ph-title">📊 Project Timeline</div>
         <div class="ganttv2-ph-sub">
           {{ project.title }} · {{ rangeLabel }} · {{ tt('ganttv2.zoom.' + resolvedZoom) }}
+          <span
+            v-if="overdueCount > 0"
+            class="ganttv2-overdue-badge"
+            :title="tt('ganttv2.overdueBadge', { n: overdueCount })"
+          >⚠ {{ tt('ganttv2.overdueBadge', { n: overdueCount }) }}</span>
         </div>
       </div>
       <div class="ganttv2-zoom-controls" role="tablist" aria-label="Zoom level">
@@ -417,6 +422,14 @@ function isOverdueTask(t) {
   const eMs = new Date(t.endDate).getTime()
   return eMs > dlMs
 }
+
+// v5.2.1 B3: total count of overdue tasks across all modules.
+const overdueCount = computed(() => {
+  const mods = props.project?.modules || []
+  let n = 0
+  for (const m of mods) for (const t of (m.tasks || [])) if (isOverdueTask(t)) n++
+  return n
+})
 
 // ═══════════════════ HEADER CELLS ═══════════════════
 function getWeekNum(d) {
@@ -1009,6 +1022,23 @@ onMounted(async () => {
   );
   border-radius: inherit;
   pointer-events: none;
+}
+
+/* v5.2.1 B3: overdue tasks summary pill in the Gantt header */
+.ganttv2-overdue-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 10px;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(220,38,38,0.35);
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 /* ════════ BARS ════════ */
