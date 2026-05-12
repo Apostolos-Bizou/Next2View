@@ -74,7 +74,7 @@
             >
               <div class="ganttv2-project-bar-fill" :style="{ width: (project.completion || 0) + '%' }"></div>
               <span class="ganttv2-project-bar-label">
-                {{ fmtShort(rangeStart) }} → {{ fmtShort(rangeEnd) }}
+                {{ fmtShort(rangeStart) }} → {{ fmtShort(headerEndDate) }}
               </span>
             </div>
           </div>
