@@ -26,6 +26,7 @@ public record ProjectDto(
     int tasksTotal,
     int tasksDone,
     long updatedAgo,
+    Integer overdueTaskCount,
     List<ModuleDto> modules,
     List<SpecDto> specs
 ) {
