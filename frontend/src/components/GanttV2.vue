@@ -360,7 +360,15 @@ const resolvedZoom = computed(() => {
 
 const cellWidth = computed(() => CELL_W[resolvedZoom.value] || 80)
 
-const rangeLabel = computed(() => fmtLong(rangeStart.value) + ' → ' + fmtLong(rangeEnd.value))
+// v5.2.1 B1: header text uses project.deadline when available, else falls back
+// to the padded rangeEnd. The visible X-axis range is NOT changed here, so tasks
+// that extend past the deadline still render fully in the timeline area.
+const headerEndDate = computed(() => {
+  const d = props.project?.deadline
+  return d ? new Date(d) : rangeEnd.value
+})
+
+const rangeLabel = computed(() => fmtLong(rangeStart.value) + ' → ' + fmtLong(headerEndDate.value))
 
 // Pixel position for a given date
 function dateToX(d) {
