@@ -46,3 +46,7 @@ fix_*.js
 *.bak
 *.bak2
 .backup-c8/
+
+# Local dev backups from patch scripts
+*.backup-*
+application-local.yml.backup-*

@@ -3,7 +3,9 @@ package com.next2me.next2view.security;
 import com.next2me.next2view.model.Project;
 import com.next2me.next2view.model.User;
 import com.next2me.next2view.model.UserPermission;
+import com.next2me.next2view.repository.UserCompanyScopeRepository;
 import com.next2me.next2view.repository.UserPermissionRepository;
+import com.next2me.next2view.repository.UserProjectScopeRepository;
 import com.next2me.next2view.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,6 +34,8 @@ public class PermissionEvaluator {
 
     private final UserRepository userRepository;
     private final UserPermissionRepository userPermissionRepository;
+    private final UserCompanyScopeRepository userCompanyScopeRepository;
+    private final UserProjectScopeRepository userProjectScopeRepository;
 
     public User requireUser(UUID userId) {
         if (userId == null) {
@@ -95,12 +99,36 @@ public class PermissionEvaluator {
 
     /**
      * Can this user READ this project?
+     * Three-layer check:
+     *   1. CEO bypass
+     *   2. Category permission (existing logic)
+     *   3. Company scope (NEW - empty = no restriction)
+     *   4. Project scope (NEW - empty = no restriction)
      */
     public boolean canRead(User user, Project project) {
         if (isCeo(user)) return true;
         if (project == null) return false;
-        // No company restriction: access is determined by department/category only.
-        return allowedCategories(user).contains(project.getCategory());
+
+        // Layer 2: Category check (existing behavior)
+        if (!allowedCategories(user).contains(project.getCategory())) {
+            return false;
+        }
+
+        // Layer 3: Company scope (opt-in restriction; empty set = no restriction)
+        Set<UUID> companyScope = allowedCompanyIds(user);
+        if (!companyScope.isEmpty()
+                && project.getCompany() != null
+                && !companyScope.contains(project.getCompany().getId())) {
+            return false;
+        }
+
+        // Layer 4: Project scope (opt-in restriction; empty set = no restriction)
+        Set<UUID> projectScope = allowedProjectIds(user);
+        if (!projectScope.isEmpty() && !projectScope.contains(project.getId())) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -115,14 +143,22 @@ public class PermissionEvaluator {
 
     /**
      * Can this user CREATE a new project with the given company and category?
+     * Adds company-scope respect: if the user is restricted to specific companies,
+     * they cannot create projects outside that scope.
      */
     public boolean canCreateInScope(User user, UUID targetCompanyId, Project.Category targetCategory) {
         if (isCeo(user)) return true;
         if (user.getRole() == User.Role.VIEWER) return false;
         if (targetCompanyId == null || targetCategory == null) return false;
-        // No company restriction: DEPT_HEAD can create projects for any company,
-        // as long as the category falls within their allowed categories.
-        return allowedCategories(user).contains(targetCategory);
+        if (!allowedCategories(user).contains(targetCategory)) return false;
+
+        // NEW: Respect company scope on creation (empty set = no restriction)
+        Set<UUID> companyScope = allowedCompanyIds(user);
+        if (!companyScope.isEmpty() && !companyScope.contains(targetCompanyId)) {
+            return false;
+        }
+
+        return true;
     }
 
     public void requireMfaForLegal(Project project, boolean mfaVerified) {
@@ -182,6 +218,28 @@ public class PermissionEvaluator {
             case marketing -> Project.Category.marketing;
             case management -> null; // management is not a project category
         };
+    }
+
+    /**
+     * Returns the set of company IDs this user is scoped to.
+     * Empty set = no company restriction (user can see all companies within category perms).
+     * Non-empty set = user is restricted to exactly these companies.
+     * CEO always gets empty set (= no restriction).
+     */
+    public Set<UUID> allowedCompanyIds(User user) {
+        if (user == null || isCeo(user)) return java.util.Collections.emptySet();
+        return userCompanyScopeRepository.findCompanyIdsByUserId(user.getId());
+    }
+
+    /**
+     * Returns the set of project IDs this user is scoped to.
+     * Empty set = no project restriction (user can see all projects within category + company perms).
+     * Non-empty set = user is restricted to exactly these projects.
+     * CEO always gets empty set (= no restriction).
+     */
+    public Set<UUID> allowedProjectIds(User user) {
+        if (user == null || isCeo(user)) return java.util.Collections.emptySet();
+        return userProjectScopeRepository.findProjectIdsByUserId(user.getId());
     }
 
     // ═══════════════════════════════════════════════════════════════
