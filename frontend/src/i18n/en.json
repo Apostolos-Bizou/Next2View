@@ -339,7 +339,22 @@
       "viewFinancials": "View Financial data",
       "viewCeoNotes": "View CEO Notes",
       "createProject": "Create Project",
-      "editProject": "Edit Project"
+      "editProject": "Edit Project",
+      "scope": {
+        "companiesTitle": "🏢 COMPANIES",
+        "projectsTitle": "📋 PROJECTS",
+        "all": "All",
+        "selected": "Selected",
+        "allHint": "User will see everything (within their allowed categories)",
+        "counter": "{selected} of {total} selected",
+        "searchPlaceholder": "Search by title...",
+        "allCategories": "All categories",
+        "allCompanies": "All companies",
+        "outsideCompanyScope": "outside company scope",
+        "noProjects": "No projects match the filters",
+        "autoIncludeNote": "New projects are auto-included if they belong to a selected company",
+        "noCompanies": "No companies match user’s allowed categories"
+      }
     },
     "err": {
       "nameEmailRole": "Name, Email and Role are required.",

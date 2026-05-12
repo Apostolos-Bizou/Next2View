@@ -1,9 +1,7 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { resolve } from "path";
-
 const AZURE_BACKEND = "https://next2view-api.politefield-8c14abcc.northeurope.azurecontainerapps.io";
-
 export default defineConfig({
   plugins: [vue()],
   resolve: {
@@ -18,6 +16,7 @@ export default defineConfig({
         target: AZURE_BACKEND,
         changeOrigin: true,
         secure: true,
+        // rewrite removed: backend already serves under /api (per commit 8689c22)
       },
     },
   },
@@ -37,5 +36,4 @@ export default defineConfig({
   },
 });
 // emergency rollback - 2026-04-28 13:27:13
-
 // rollback trigger 2
