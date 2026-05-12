@@ -339,7 +339,22 @@
       "viewFinancials": "Βλέπει Financial data",
       "viewCeoNotes": "Βλέπει CEO Notes",
       "createProject": "Δημιουργία Project",
-      "editProject": "Επεξεργασία Project"
+      "editProject": "Επεξεργασία Project",
+      "scope": {
+        "companiesTitle": "🏢 ΕΤΑΙΡΕΙΕΣ",
+        "projectsTitle": "📋 ΠΡΟΤΖΕΚΤ",
+        "all": "Όλες",
+        "selected": "Επιλεγμένες",
+        "allHint": "Ο χρήστης θα βλέπει όλα (εντός των κατηγοριών που έχει)",
+        "counter": "{selected} από {total} επιλεγμένα",
+        "searchPlaceholder": "Αναζήτηση με τίτλο...",
+        "allCategories": "Όλες οι κατηγορίες",
+        "allCompanies": "Όλες οι εταιρείες",
+        "outsideCompanyScope": "εκτός company scope",
+        "noProjects": "Δεν υπάρχουν πρότζεκτ για τα φίλτρα",
+        "autoIncludeNote": "Νέα πρότζεκτ προστίθενται αυτόματα αν ανήκουν σε επιλεγμένη εταιρεία",
+        "noCompanies": "Δεν υπάρχουν εταιρείες για τις κατηγορίες του user"
+      }
     },
     "err": {
       "nameEmailRole": "Όνομα, Email και Role είναι υποχρεωτικά.",

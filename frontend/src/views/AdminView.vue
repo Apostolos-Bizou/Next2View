@@ -211,6 +211,87 @@
             </label>
           </div>
         </div>
+        <!-- ===== COMPANY SCOPE ===== -->
+        <div class="perm-section scope-section">
+          <div class="perm-section-title">{{ t('admin.perm.scope.companiesTitle') }}</div>
+          <div class="scope-mode">
+            <label class="scope-radio">
+              <input type="radio" value="all" v-model="scopeForm.companyMode" />
+              <span>{{ t('admin.perm.scope.all') }}</span>
+            </label>
+            <label class="scope-radio">
+              <input type="radio" value="selected" v-model="scopeForm.companyMode" />
+              <span>{{ t('admin.perm.scope.selected') }}</span>
+            </label>
+          </div>
+          <div v-if="scopeForm.companyMode === 'selected'" class="scope-picker">
+            <div class="scope-counter">
+              {{ t('admin.perm.scope.counter', { selected: scopeForm.companyIds.length, total: filteredCompanies.length }) }}
+            </div>
+            <div class="scope-list">
+              <label v-for="c in filteredCompanies" :key="c.id" class="scope-item">
+                <input type="checkbox" :value="c.id" v-model="scopeForm.companyIds" />
+                <span class="scope-color-dot" :style="{ background: c.color || '#999' }"></span>
+                <span class="scope-name">{{ c.name }}</span>
+                <span class="scope-code">{{ c.code }}</span>
+              </label>
+              <div v-if="filteredCompanies.length === 0" class="scope-empty">
+                {{ t('admin.perm.scope.noCompanies') }}
+              </div>
+            </div>
+          </div>
+          <div v-else class="scope-hint">{{ t('admin.perm.scope.allHint') }}</div>
+        </div>
+
+        <!-- ===== PROJECT SCOPE ===== -->
+        <div class="perm-section scope-section">
+          <div class="perm-section-title">{{ t('admin.perm.scope.projectsTitle') }}</div>
+          <div class="scope-mode">
+            <label class="scope-radio">
+              <input type="radio" value="all" v-model="scopeForm.projectMode" />
+              <span>{{ t('admin.perm.scope.all') }}</span>
+            </label>
+            <label class="scope-radio">
+              <input type="radio" value="selected" v-model="scopeForm.projectMode" />
+              <span>{{ t('admin.perm.scope.selected') }}</span>
+            </label>
+          </div>
+          <div v-if="scopeForm.projectMode === 'selected'" class="scope-picker">
+            <div class="scope-counter">
+              {{ t('admin.perm.scope.counter', { selected: scopeForm.projectIds.length, total: projectsInAllowedCategories.length }) }}
+            </div>
+            <div class="scope-filters">
+              <input type="text" v-model="projectSearch" class="scope-search"
+                     :placeholder="t('admin.perm.scope.searchPlaceholder')" />
+              <select v-model="projectFilterCategory" class="scope-filter-select">
+                <option value="">{{ t('admin.perm.scope.allCategories') }}</option>
+                <option v-for="cat in userAllowedCategories" :key="cat" :value="cat">{{ cat }}</option>
+              </select>
+              <select v-model="projectFilterCompany" class="scope-filter-select">
+                <option value="">{{ t('admin.perm.scope.allCompanies') }}</option>
+                <option v-for="c in filteredCompanies" :key="c.id" :value="c.id">{{ c.name }}</option>
+              </select>
+            </div>
+            <div class="scope-list">
+              <label v-for="p in filteredProjects" :key="p.id"
+                     class="scope-item"
+                     :class="{ 'scope-warning': isProjectOutsideCompanyScope(p) }">
+                <input type="checkbox" :value="p.id" v-model="scopeForm.projectIds" />
+                <span class="scope-name">{{ p.title }}</span>
+                <span class="scope-badge">{{ p.category }} · {{ companyNameFor(p) }}</span>
+                <span v-if="isProjectOutsideCompanyScope(p)" class="scope-warn-badge">
+                  {{ t('admin.perm.scope.outsideCompanyScope') }}
+                </span>
+              </label>
+              <div v-if="filteredProjects.length === 0" class="scope-empty">
+                {{ t('admin.perm.scope.noProjects') }}
+              </div>
+            </div>
+            <div class="scope-autoinclude-note">{{ t('admin.perm.scope.autoIncludeNote') }}</div>
+          </div>
+          <div v-else class="scope-hint">{{ t('admin.perm.scope.allHint') }}</div>
+        </div>
+
         <div class="perm-shortcuts">
           <button class="perm-shortcut" @click="setAll(true)">{{ t('admin.perm.enableAll') }}</button>
           <button class="perm-shortcut" @click="setAll(false)">{{ t('admin.perm.disableAll') }}</button>
@@ -264,7 +345,7 @@ const editCo = ref(null)
 const coForm = ref({})
 
 onMounted(async () => {
-  await Promise.all([loadUsers(), loadCompanies()])
+  await Promise.all([loadUsers(), loadCompanies(), loadProjects()])
 })
 
 async function loadUsers() {
@@ -414,6 +495,82 @@ async function deleteCompany(co) {
 
 
 // ════ PERMISSIONS ════
+// --- Per-user scope state ---
+const projects = ref([])
+const scopeForm = ref({ companyMode: 'all', projectMode: 'all', companyIds: [], projectIds: [] })
+const projectSearch = ref('')
+const projectFilterCategory = ref('')
+const projectFilterCompany = ref('')
+
+// Computes the set of categories this user is allowed to see, based on permForm checkboxes.
+// Defaults to ALL categories if permForm is not yet loaded (modal is opening).
+const userAllowedCategories = computed(() => {
+  const f = permForm.value || {}
+  const cats = []
+  if (f.viewFinance) cats.push('finance')
+  if (f.viewLegal) cats.push('legal')
+  if (f.viewDev) cats.push('dev')
+  if (f.viewMarketing) cats.push('marketing')
+  return cats
+})
+
+// Projects this user could ever see, given their category permissions.
+// Used as the base set for the project picker AND to determine which companies have visible projects.
+const projectsInAllowedCategories = computed(() => {
+  const allowed = userAllowedCategories.value
+  if (allowed.length === 0) return []
+  return (projects.value || []).filter(p => allowed.includes(p.category))
+})
+
+// Companies that have at least one project in an allowed category.
+// If the user has no categories, no companies show.
+const filteredCompanies = computed(() => {
+  const allowedCompanyIds = new Set(
+    projectsInAllowedCategories.value
+      .map(p => p.company?.id || p.companyId)
+      .filter(Boolean)
+  )
+  return (companies.value || []).filter(c => allowedCompanyIds.has(c.id))
+})
+
+const filteredProjects = computed(() => {
+  let list = projectsInAllowedCategories.value
+  if (projectFilterCategory.value) {
+    list = list.filter(p => p.category === projectFilterCategory.value)
+  }
+  if (projectFilterCompany.value) {
+    list = list.filter(p => (p.company?.id || p.companyId) === projectFilterCompany.value)
+  }
+  if (projectSearch.value) {
+    const q = projectSearch.value.toLowerCase()
+    list = list.filter(p => (p.title || '').toLowerCase().includes(q))
+  }
+  return list
+})
+
+function companyNameFor(p) {
+  const cid = p.company?.id || p.companyId
+  const c = companies.value.find(c => c.id === cid)
+  return c ? c.name : '—'
+}
+
+function isProjectOutsideCompanyScope(p) {
+  if (scopeForm.value.companyMode !== 'selected') return false
+  if (scopeForm.value.companyIds.length === 0) return false
+  const cid = p.company?.id || p.companyId
+  return cid && !scopeForm.value.companyIds.includes(cid)
+}
+
+async function loadProjects() {
+  try {
+    const res = await api.get('/projects')
+    projects.value = res.data || []
+  } catch (err) {
+    console.warn('Failed to load projects for scope picker', err)
+    projects.value = []
+  }
+}
+
 const showPermModal = ref(false)
 const permUser = ref(null)
 const permForm = ref({})
@@ -451,9 +608,27 @@ async function openPermModal(u) {
   permUser.value = u
   permError.value = ''
   permSaving.value = false
+  // Reset scope form to defaults
+  scopeForm.value = { companyMode: 'all', projectMode: 'all', companyIds: [], projectIds: [] }
+  projectSearch.value = ''
+  projectFilterCategory.value = ''
+  projectFilterCompany.value = ''
   try {
-    const res = await api.get(`/permissions/users/${u.id}`)
-    permForm.value = { ...res.data }
+    // Parallel fetch of permissions + scopes for performance
+    const [permsRes, scopesRes] = await Promise.all([
+      api.get(`/permissions/users/${u.id}`),
+      api.get(`/scopes/users/${u.id}`).catch(() => ({ data: { companyScope: [], projectScope: [] } }))
+    ])
+    permForm.value = { ...permsRes.data }
+    const sd = scopesRes.data || {}
+    const cs = sd.companyScope || []
+    const ps = sd.projectScope || []
+    scopeForm.value = {
+      companyMode: cs.length > 0 ? 'selected' : 'all',
+      projectMode: ps.length > 0 ? 'selected' : 'all',
+      companyIds: [...cs],
+      projectIds: [...ps]
+    }
   } catch {
     permForm.value = {
       viewFinance: false, viewLegal: false, viewDev: false, viewMarketing: false,
@@ -473,7 +648,16 @@ async function savePermissions() {
   permSaving.value = true
   permError.value = ''
   try {
+    // 1. Save permission flags (existing behavior)
     await api.put(`/permissions/users/${permUser.value.id}`, permForm.value)
+
+    // 2. Save scope - 'all' mode means empty list (no restriction)
+    const scopeDto = {
+      companyScope: scopeForm.value.companyMode === 'selected' ? scopeForm.value.companyIds : [],
+      projectScope: scopeForm.value.projectMode === 'selected' ? scopeForm.value.projectIds : []
+    }
+    await api.put(`/scopes/users/${permUser.value.id}`, scopeDto)
+
     showPermModal.value = false
   } catch (e) {
     permError.value = e.response?.data?.message || t('admin.err.saveError')
@@ -488,6 +672,30 @@ function coShort(name) {
 </script>
 
 <style scoped>
+/* ===== Per-user scope styles ===== */
+.scope-section { background: rgba(99,102,241,.04); border: 1px solid rgba(99,102,241,.15); border-radius: 8px; padding: 14px; margin-top: 12px; }
+.scope-mode { display: flex; gap: 16px; margin: 8px 0 12px; }
+.scope-radio { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px; }
+.scope-radio input { cursor: pointer; }
+.scope-picker { background: white; border-radius: 6px; padding: 10px; }
+.scope-counter { font-size: 12px; color: #6366f1; font-weight: 600; margin-bottom: 8px; }
+.scope-hint { font-size: 12px; color: #6b7280; font-style: italic; padding: 4px 0; }
+.scope-filters { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+.scope-search { flex: 1; min-width: 140px; padding: 5px 8px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; }
+.scope-filter-select { padding: 5px 6px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; background: white; }
+.scope-list { max-height: 220px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px; padding: 4px; background: #fafafa; }
+.scope-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px; cursor: pointer; font-size: 13px; }
+.scope-item:hover { background: rgba(99,102,241,.06); }
+.scope-item input { cursor: pointer; }
+.scope-item.scope-warning { background: rgba(251,191,36,.10); }
+.scope-color-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.scope-name { flex: 1; }
+.scope-code { font-size: 11px; color: #6b7280; font-family: monospace; }
+.scope-badge { font-size: 11px; color: #6b7280; padding: 2px 6px; background: white; border-radius: 3px; border: 1px solid #e5e7eb; }
+.scope-warn-badge { font-size: 11px; color: #92400e; padding: 2px 6px; background: #fef3c7; border-radius: 3px; }
+.scope-empty { padding: 16px; text-align: center; color: #9ca3af; font-size: 13px; }
+.scope-autoinclude-note { font-size: 11px; color: #6b7280; font-style: italic; margin-top: 8px; padding: 6px; background: rgba(99,102,241,.05); border-radius: 4px; }
+
 .content { padding: 26px 32px; overflow-y: auto; flex: 1; }
 .admin-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
 .admin-tab { padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border-bright); background: var(--surface2); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.15s; color: var(--text-mid); }
