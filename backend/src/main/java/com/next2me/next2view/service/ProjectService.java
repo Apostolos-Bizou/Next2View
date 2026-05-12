@@ -64,7 +64,19 @@ public class ProjectService {
 
         boolean useCatFilter = !permissions.isCeo(actor) || requestedCategory != null;
         List<Project> projects = projectRepository.findForScope(scopedCompany, useCatFilter, allowedCats);
-        return projects.stream().map(this::toDto).toList();
+
+        // v5.1.1 fix: apply company + project scopes (mirrors canRead logic)
+        // Without this, findAll only filtered by category, ignoring the new
+        // user_company_scope and user_project_scope tables.
+        java.util.Set<UUID> companyScope = permissions.allowedCompanyIds(actor);
+        java.util.Set<UUID> projectScope = permissions.allowedProjectIds(actor);
+
+        return projects.stream()
+                .filter(p -> companyScope.isEmpty()
+                          || (p.getCompany() != null && companyScope.contains(p.getCompany().getId())))
+                .filter(p -> projectScope.isEmpty() || projectScope.contains(p.getId()))
+                .map(this::toDto)
+                .toList();
     }
 
     @Transactional(readOnly = true)

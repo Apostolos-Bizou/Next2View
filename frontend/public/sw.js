@@ -1,26 +1,38 @@
-const CACHE_NAME = "next2view-v1";
-const urlsToCache = ["/", "/index.html"];
+// sw.js - Service Worker
+// On localhost: self-destruct (unregister + clear caches) to avoid blocking dev/preview testing.
+// On production: legitimate fetch handler (no-op passthrough).
 
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
-  );
-  self.skipWaiting();
-});
+const isLocalhost = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
 
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
+if (isLocalhost) {
+  // SELF-DESTRUCT MODE for localhost
+  self.addEventListener('install', (event) => {
+    self.skipWaiting();
+  });
 
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    fetch(event.request).catch(() =>
-      caches.match(event.request)
-    )
-  );
-});
+  self.addEventListener('activate', (event) => {
+    event.waitUntil(
+      (async () => {
+        // Delete all caches
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map(name => caches.delete(name)));
+        // Unregister self
+        await self.registration.unregister();
+        // Force all clients to reload
+        const clients = await self.clients.matchAll({ type: 'window' });
+        clients.forEach(client => client.navigate(client.url));
+      })()
+    );
+  });
+} else {
+  // PRODUCTION: legitimate passthrough
+  self.addEventListener('install', (event) => {
+    self.skipWaiting();
+  });
+
+  self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+  });
+
+  // No fetch interception - let all requests pass through normally
+}
