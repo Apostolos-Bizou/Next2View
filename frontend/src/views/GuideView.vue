@@ -837,6 +837,69 @@
           </div>
         </div>
 
+      <!-- ═══ v5.1: Per-User Company + Project Scoping ═══ -->
+      <div class="g-subsection" style="margin-top: 32px;">🔑 Per-User Scoping (v5.1)</div>
+      <div class="g-explainer-box" style="background: rgba(46,117,182,0.06); border-color: rgba(46,117,182,0.35);">
+        <div class="g-explainer-title" style="color: #1d4f8f;">🎯 Πιο στενός έλεγχος πρόσβασης ανά χρήστη</div>
+        <div class="g-explainer-text">
+          Πέρα από το department και τα permission flags, ο CEO μπορεί να <strong>περιορίσει περαιτέρω</strong> τι βλέπει ένας χρήστης — επιλέγοντας <strong>συγκεκριμένες εταιρείες</strong> ή/και <strong>συγκεκριμένα projects</strong>.
+        </div>
+        <div class="g-explainer-text" style="margin-top: 12px;">
+          Η πρόσβαση πλέον δουλεύει σε <strong>3 επίπεδα</strong> (όλα πρέπει να επιτρέπουν για να δει ο user ένα project):
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">1️⃣ Κατηγορία (Category)</div>
+        <div class="g-explainer-text">
+          Από το department του και τα <strong>view*</strong> permissions (viewLegal, viewFinance, viewDeveloping, viewMarketing). <em>Πρώτο φίλτρο.</em>
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 8px;">
+        <div class="g-explainer-title">2️⃣ Εταιρεία (Company Scope) <span style="font-weight: normal; color: #6b7280; font-size: 0.9em;">— ΝΕΟ</span></div>
+        <div class="g-explainer-text">
+          <strong>"Όλες"</strong> (default): καμία επιπλέον στένωση. <strong>"Επιλεγμένες"</strong>: μόνο οι εταιρείες που έχει επιλέξει ο CEO. <em>Δεύτερο φίλτρο.</em>
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 8px;">
+        <div class="g-explainer-title">3️⃣ Project (Project Scope) <span style="font-weight: normal; color: #6b7280; font-size: 0.9em;">— ΝΕΟ</span></div>
+        <div class="g-explainer-text">
+          <strong>"Όλα"</strong> (default): καμία επιπλέον στένωση. <strong>"Επιλεγμένα"</strong>: μόνο τα συγκεκριμένα projects που έχει επιλέξει ο CEO. <em>Τρίτο και τελικό φίλτρο.</em>
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 16px;">
+        <div class="g-explainer-example">
+          📌 <strong>Παράδειγμα:</strong> Η Μαριάννα είναι Legal DEPT_HEAD. Κανονικά θα έβλεπε <em>όλα</em> τα legal projects σε όλες τις εταιρείες του ομίλου. Ο CEO όμως, στο modal δικαιωμάτων της, επιλέγει στο Company Scope μόνο "Crossworld Marine" και "Polaris Financial".
+        </div>
+        <div class="g-explainer-note" style="margin-top: 10px;">
+          ✨ <strong>Αποτέλεσμα:</strong> Η Μαριάννα βλέπει legal projects <strong>μόνο</strong> από αυτές τις 2 εταιρείες — όχι από τις υπόλοιπες 15 του ομίλου, ακόμα κι αν έχουν legal projects.
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px; background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.35);">
+        <div class="g-explainer-title" style="color: #92400e;">⚙️ Πώς το ρυθμίζει ο CEO</div>
+        <div class="g-explainer-text">
+          <strong>1.</strong> Admin Panel → Χρήστες → πάτα το <strong>🔑</strong> δίπλα στον χρήστη<br>
+          <strong>2.</strong> Scroll στο modal κάτω από τα permissions → δες τα νέα sections <strong>🏢 Εταιρείες</strong> και <strong>📋 Πρότζεκτ</strong><br>
+          <strong>3.</strong> Διάλεξε <em>"Όλες/Όλα"</em> (default — καμία στένωση) ή <em>"Επιλεγμένες/Επιλεγμένα"</em> και τσέκαρε όσες θέλεις<br>
+          <strong>4.</strong> Πάτα <strong>Αποθήκευση</strong> — η αλλαγή εφαρμόζεται αμέσως στο επόμενο login/refresh του χρήστη
+        </div>
+        <div class="g-explainer-note" style="margin-top: 10px;">
+          💡 <strong>Tip:</strong> Όταν αλλάζεις permissions στις κατηγορίες, η λίστα projects στο 3ο section <em>φιλτράρεται αυτόματα</em> για να βλέπεις μόνο projects των κατηγοριών που μπορεί όντως να δει ο user.
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px; background: rgba(107,114,128,0.08);">
+        <div class="g-explainer-title" style="color: #4b5563;">👑 Σημείωση για CEO users</div>
+        <div class="g-explainer-text">
+          Ο CEO <strong>παρακάμπτει</strong> και τα δύο νέα φίλτρα (company + project scope). Βλέπει πάντα τα πάντα.
+        </div>
+      </div>
+
+
       <div class="g-subsection">➕ Πώς προσθέτω νέο χρήστη</div>
       <div class="g-steps">
         <div class="g-step"><span class="g-step-num">1</span><div>Πάτα <strong>"+ User"</strong> στο sidebar.</div></div>
@@ -986,6 +1049,69 @@
           The company the user belongs to is only <em>HR info</em> — it does not restrict which projects they can see.
         </div>
       </div>
+
+      <!-- ═══ v5.1: Per-User Company + Project Scoping ═══ -->
+      <div class="g-subsection" style="margin-top: 32px;">🔑 Per-User Scoping (v5.1)</div>
+      <div class="g-explainer-box" style="background: rgba(46,117,182,0.06); border-color: rgba(46,117,182,0.35);">
+        <div class="g-explainer-title" style="color: #1d4f8f;">🎯 Finer-grained access control per user</div>
+        <div class="g-explainer-text">
+          Beyond department and permission flags, the CEO can <strong>further restrict</strong> what a user sees — by selecting <strong>specific companies</strong> and/or <strong>specific projects</strong>.
+        </div>
+        <div class="g-explainer-text" style="margin-top: 12px;">
+          Access now works on <strong>3 layers</strong> (all must allow for the user to see a project):
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px;">
+        <div class="g-explainer-title">1️⃣ Category</div>
+        <div class="g-explainer-text">
+          Derived from the user's department and their <strong>view*</strong> permissions (viewLegal, viewFinance, viewDeveloping, viewMarketing). <em>First filter.</em>
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 8px;">
+        <div class="g-explainer-title">2️⃣ Company Scope <span style="font-weight: normal; color: #6b7280; font-size: 0.9em;">— NEW</span></div>
+        <div class="g-explainer-text">
+          <strong>"All"</strong> (default): no extra restriction. <strong>"Selected"</strong>: only the companies the CEO has explicitly picked. <em>Second filter.</em>
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 8px;">
+        <div class="g-explainer-title">3️⃣ Project Scope <span style="font-weight: normal; color: #6b7280; font-size: 0.9em;">— NEW</span></div>
+        <div class="g-explainer-text">
+          <strong>"All"</strong> (default): no extra restriction. <strong>"Selected"</strong>: only the specific projects the CEO has picked. <em>Third and final filter.</em>
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 16px;">
+        <div class="g-explainer-example">
+          📌 <strong>Example:</strong> Marianna is a Legal DEPT_HEAD. Normally she would see <em>all</em> legal projects across all companies in the group. But the CEO, in her permissions modal, picks only "Crossworld Marine" and "Polaris Financial" in Company Scope.
+        </div>
+        <div class="g-explainer-note" style="margin-top: 10px;">
+          ✨ <strong>Result:</strong> Marianna now sees legal projects <strong>only</strong> from those 2 companies — not from the other 15 in the group, even if they have legal projects.
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px; background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.35);">
+        <div class="g-explainer-title" style="color: #92400e;">⚙️ How the CEO sets it up</div>
+        <div class="g-explainer-text">
+          <strong>1.</strong> Admin Panel → Users → click the <strong>🔑</strong> next to the user<br>
+          <strong>2.</strong> Scroll past permissions to find the new <strong>🏢 Companies</strong> and <strong>📋 Projects</strong> sections<br>
+          <strong>3.</strong> Pick <em>"All"</em> (default — no extra restriction) or <em>"Selected"</em> and check the ones you want<br>
+          <strong>4.</strong> Click <strong>Save</strong> — the change takes effect on the user's next login/refresh
+        </div>
+        <div class="g-explainer-note" style="margin-top: 10px;">
+          💡 <strong>Tip:</strong> When you toggle category permissions, the project list in section 3 <em>auto-filters</em> to show only projects in categories the user can actually access.
+        </div>
+      </div>
+
+      <div class="g-explainer-box" style="margin-top: 12px; background: rgba(107,114,128,0.08);">
+        <div class="g-explainer-title" style="color: #4b5563;">👑 Note for CEO users</div>
+        <div class="g-explainer-text">
+          The CEO <strong>bypasses</strong> both new filters (company + project scope). The CEO always sees everything.
+        </div>
+      </div>
+
 
       <div class="g-subsection">➕ How to add a new user</div>
       <div class="g-steps">
