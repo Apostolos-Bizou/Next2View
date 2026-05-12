@@ -49,10 +49,19 @@ public class CompanyService {
         // 2. Empty companies (0 total projects) + manageCompanies -> visible
         //    (orphan protection: newly-created companies don't disappear)
         // 3. Companies with projects ONLY in other categories -> hidden
+        // v5.1.2 fix: apply company + project scope to sidebar listing.
+        // Mirrors the 3-layer canRead model so the sidebar reflects exactly
+        // what the user is actually allowed to see (no leak of other
+        // companies' existence or inflated project counts).
         java.util.Set<Project.Category> allowedCats = permissions.allowedCategories(actor);
+        java.util.Set<UUID> companyScope = permissions.allowedCompanyIds(actor);
+        java.util.Set<UUID> projectScope = permissions.allowedProjectIds(actor);
         boolean canManage = permissions.canManageCompanies(actorId.toString());
+
         return companies.stream()
-                .map(c -> toDto(c, allowedCats))
+                // Layer: company scope — drop companies the user is not scoped to
+                .filter(c -> companyScope.isEmpty() || companyScope.contains(c.getId()))
+                .map(c -> toDto(c, allowedCats, projectScope))
                 .filter(dto -> {
                     if (dto.projectCount() > 0) return true;
                     if (!canManage) return false;
@@ -152,6 +161,32 @@ public class CompanyService {
             activityLogService.logActivity(actor, ActivityLogService.DELETED, ActivityLogService.COMPANY,
                 c.getId(), c.getName(), null,
                 null, actor.getFullName() + " deleted company '" + c.getName() + "'")
+        );
+    }
+
+    // v5.1.2: overload that also applies project scope to the visible project list.
+    // projectScope empty = no project-level restriction (uses categoryFilter only).
+    private CompanyDto toDto(Company c, java.util.Set<Project.Category> categoryFilter, java.util.Set<UUID> projectScope) {
+        var allProjects = projectRepository.findAllByCompanyIdAndActiveTrue(c.getId());
+        var projects = allProjects.stream()
+                .filter(p -> categoryFilter == null || categoryFilter.contains(p.getCategory()))
+                .filter(p -> projectScope == null || projectScope.isEmpty() || projectScope.contains(p.getId()))
+                .toList();
+        int avg = projects.isEmpty() ? 0 :
+                (int) projects.stream()
+                        .mapToInt(p -> {
+                            var mods = p.getModules();
+                            if (mods.isEmpty()) return 0;
+                            return (int) mods.stream()
+                                    .flatMap(m -> m.getTasks().stream())
+                                    .mapToInt(t -> t.getProgress())
+                                    .average().orElse(0);
+                        })
+                        .average().orElse(0);
+        return new CompanyDto(
+                c.getId(), c.getName(), c.getCode(),
+                c.getColor(), c.getDescription(),
+                projects.size(), avg
         );
     }
 
