@@ -33,6 +33,12 @@ public class ContractFile {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    // v5.4.0 TASKFILES: optional task association (V27).
+    // NULL = project-level file (existing behaviour); NOT NULL = task-level attachment.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "task_id")
+    private Task task;
+
     @Column(name = "file_name", nullable = false, length = 255)
     private String fileName;
 

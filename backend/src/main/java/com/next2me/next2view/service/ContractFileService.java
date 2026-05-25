@@ -7,6 +7,7 @@ import com.next2me.next2view.model.AuditLog;
 import com.next2me.next2view.model.ContractFile;
 import com.next2me.next2view.model.Project;
 import com.next2me.next2view.model.User;
+import com.next2me.next2view.model.Task;
 import com.next2me.next2view.repository.AuditLogRepository;
 import com.next2me.next2view.service.ActivityLogService;
 import com.next2me.next2view.repository.ContractFileRepository;
@@ -161,6 +162,108 @@ public class ContractFileService {
                 project.getId(), cf.getId(), file.getSize());
 
         return cf;
+    }
+
+    // =================================================================
+    // v5.4.0 TASKFILES: TASK-LEVEL UPLOAD + LIST
+    // Reuses the SAME encryption, blob, and audit flow as project files.
+    // The parent project (task -> module -> project) is still recorded so
+    // the MFA gate and category scoping behave identically.
+    // =================================================================
+
+    /**
+     * Encrypts a file and uploads it attached to a TASK (and its parent project).
+     * Dedup is scoped per-task. Blob path: {projectId}/tasks/{taskId}/{uuid}/{name}.enc
+     */
+    @Transactional
+    public ContractFile uploadEncryptedForTask(
+            MultipartFile file,
+            Task task,
+            User uploader,
+            String sanitizedFilename
+    ) {
+        requireVaultConfigured();
+
+        Project project = task.getModule().getProject();
+
+        byte[] plaintext;
+        try {
+            plaintext = file.getBytes();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not read file");
+        }
+
+        // Duplicate detection via SHA-256 (scoped to this task)
+        String sha256 = crypto.sha256Hex(plaintext);
+        contractFileRepository.findByTaskIdAndSha256(task.getId(), sha256).ifPresent(existing -> {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "An identical file already exists for this task (" + existing.getFileName() + ")");
+        });
+
+        // Encrypt (wraps DEK via Key Vault)
+        LegalVaultCrypto.EncryptionResult enc = crypto.encrypt(plaintext, legalKekCryptoClient);
+
+        // Build blob path: {projectId}/tasks/{taskId}/{uuid}/{name}.enc
+        UUID fileUuid = UUID.randomUUID();
+        String blobName = project.getId() + "/tasks/" + task.getId() + "/" + fileUuid + "/" + sanitizedFilename + ".enc";
+
+        // Upload ciphertext to Blob
+        try {
+            BlobClient blob = legalBlobContainerClient.getBlobClient(blobName);
+            blob.upload(new ByteArrayInputStream(enc.ciphertext()), enc.ciphertext().length, true);
+        } catch (Exception e) {
+            log.error("Blob upload failed (task): {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Upload to storage failed");
+        }
+
+        // Persist metadata (records BOTH project and task)
+        ContractFile cf = ContractFile.builder()
+                .project(project)
+                .task(task)
+                .fileName(sanitizedFilename)
+                .blobPath(blobName)
+                .contentType(file.getContentType())
+                .fileSizeBytes(file.getSize())
+                .uploadedBy(uploader)
+                .encryptedDek(enc.encryptedDek())
+                .iv(enc.iv())
+                .authTag(enc.authTag())
+                .sha256(enc.sha256Hex())
+                .encryptionAlgo("AES-256-GCM")
+                .kekKeyId(enc.kekKeyId())
+                .storageAccount(storageAccountName)
+                .containerName(containerName)
+                .build();
+        cf = contractFileRepository.save(cf);
+
+        // Audit
+        auditLogRepository.save(AuditLog.builder()
+                .userEmail(uploader.getEmail())
+                .action("TASK_FILE_UPLOAD_ENCRYPTED")
+                .entityType("contract_files")
+                .entityId(cf.getId())
+                .newValue(Map.of(
+                        "fileName", sanitizedFilename,
+                        "taskId", task.getId().toString(),
+                        "projectId", project.getId().toString(),
+                        "sizeBytes", file.getSize(),
+                        "sha256", enc.sha256Hex(),
+                        "algo", "AES-256-GCM"))
+                .build());
+
+        activityLogService.logActivity(uploader, ActivityLogService.UPLOADED, ActivityLogService.FILE,
+                cf.getId(), sanitizedFilename, project.getCategory().name(),
+                project.getCompany().getId(), project.getId(), uploader.getFullName() + " uploaded file \"" + sanitizedFilename + "\" to a task");
+
+        log.info("Encrypted task file uploaded: taskId={}, projectId={}, fileId={}, size={}B",
+                task.getId(), project.getId(), cf.getId(), file.getSize());
+
+        return cf;
+    }
+
+    /** Active (non-soft-deleted) files for a TASK, newest first. */
+    public List<ContractFile> listActiveForTask(UUID taskId) {
+        return contractFileRepository.findActiveByTaskId(taskId);
     }
 
     // =================================================================
