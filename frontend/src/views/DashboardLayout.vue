@@ -119,6 +119,32 @@
           <div class="page-title">{{ pageTitle }}</div>
           <div class="page-subtitle">{{ pageSubtitle }}</div>
         </div>
+        <!-- v5.3.0 SEARCH: global project search -->
+        <div class="topbar-search" v-click-outside-search="closeSearch">
+          <span class="topbar-search-ico">&#128269;</span>
+          <input
+            v-model="searchQuery"
+            class="topbar-search-input"
+            :placeholder="tt('nav.search')"
+            @focus="searchOpen = true"
+            @keydown.esc="closeSearch"
+            @keydown.enter="gotoFirstResult"
+          />
+          <button v-if="searchQuery" class="topbar-search-clear" @click="clearSearch" title="Clear">&times;</button>
+          <div v-if="searchOpen && searchQuery" class="topbar-search-dropdown">
+            <div
+              v-for="r in searchResults"
+              :key="r.id"
+              class="topbar-search-item"
+              @click="openResult(r)"
+            >
+              <span class="tss-dot" :style="`background:var(--${r.category});`"></span>
+              <span class="tss-title">{{ r.title }}</span>
+              <span class="tss-co">{{ r.companyName }}</span>
+            </div>
+            <div v-if="!searchResults.length" class="topbar-search-empty">{{ tt('projects.noProjects') }}</div>
+          </div>
+        </div>
         <button v-if="permStore.isCEO() || permStore.can('createProject')" class="topbar-btn" @click="openNewProject">+ New Project</button>
       </div>
       <router-view />
@@ -748,6 +774,42 @@ function renderMarkdown(text) {
       line.startsWith('<') ? line : (line ? '<p>' + line + '</p>' : '')
     ).join('')
 }
+
+// v5.3.0 SEARCH: global project search (frontend-only, reads scoped store.projects)
+const searchQuery = ref('')
+const searchOpen = ref(false)
+const searchResults = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return []
+  return store.projects
+    .filter(p => permStore.canViewCategory(p.category))
+    .filter(p =>
+      (p.title || '').toLowerCase().includes(q) ||
+      (p.companyName || '').toLowerCase().includes(q)
+    )
+    .slice(0, 8)
+})
+function openResult(r) {
+  closeSearch()
+  router.push(`/projects/${r.id}`)
+}
+function gotoFirstResult() {
+  if (searchResults.value.length) openResult(searchResults.value[0])
+}
+function clearSearch() {
+  searchQuery.value = ''
+  searchOpen.value = false
+}
+function closeSearch() {
+  searchOpen.value = false
+}
+const vClickOutsideSearch = {
+  mounted(el, binding) {
+    el.__cos__ = (e) => { if (!el.contains(e.target)) binding.value() }
+    document.addEventListener('mousedown', el.__cos__)
+  },
+  unmounted(el) { document.removeEventListener('mousedown', el.__cos__) }
+}
 </script>
 
 <style scoped>
@@ -786,6 +848,21 @@ function renderMarkdown(text) {
 .page-subtitle { font-size: 12px; color: var(--text-dim); font-family: 'Nunito Sans', sans-serif; margin-top: 3px; font-weight: 600; }
 .topbar-btn { padding: 8px 18px; background: var(--accent); border: none; border-radius: 7px; color: #fff; font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
 .topbar-btn:hover { background: #2563eb; }
+/* v5.3.0 SEARCH */
+.topbar-search { position: relative; flex: 1; max-width: 420px; margin: 0 20px; display: flex; align-items: center; }
+.topbar-search-ico { position: absolute; left: 12px; font-size: 13px; opacity: 0.5; pointer-events: none; }
+.topbar-search-input { width: 100%; padding: 8px 32px 8px 34px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-family: 'Nunito Sans', sans-serif; font-size: 13px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.topbar-search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); }
+.topbar-search-clear { position: absolute; right: 8px; background: none; border: none; color: var(--text-dim); font-size: 18px; line-height: 1; cursor: pointer; padding: 2px 4px; }
+.topbar-search-clear:hover { color: var(--text); }
+.topbar-search-dropdown { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,0.14); max-height: 340px; overflow-y: auto; z-index: 1200; padding: 4px; }
+.topbar-search-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 7px; cursor: pointer; transition: background 0.12s; }
+.topbar-search-item:hover { background: var(--surface2, rgba(0,0,0,0.04)); }
+.tss-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.tss-title { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tss-co { font-size: 11px; color: var(--text-dim); margin-left: auto; flex-shrink: 0; }
+.topbar-search-empty { padding: 14px 10px; font-size: 12px; color: var(--text-dim); text-align: center; }
+@media (max-width: 768px) { .topbar-search { display: none; } }
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
 .modal { background: var(--surface); border-radius: 14px; width: 540px; max-width: 95vw; max-height: 90vh; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; }
 .modal-lg { width: 700px; }
