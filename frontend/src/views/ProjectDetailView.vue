@@ -321,6 +321,31 @@
               min-height="90px"
             />
           </div>
+
+          <!-- v5.4.0 TASKFILES: task file attachments (saved tasks only) -->
+          <div class="te-field">
+            <div class="tf-header">
+              <label>{{ tt('pd.taskFilesTitle') }}</label>
+              <label v-if="editingTask.id && (permStore.isCEO() || permStore.can('uploadFiles'))" class="files-upload-btn" :class="{uploading: taskFileUploading}">
+                <input type="file" @change="uploadTaskFile" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="taskFileUploading" />
+                {{ taskFileUploading ? tt('pd.uploading') : tt('pd.upload') }}
+              </label>
+            </div>
+            <div v-if="!editingTask.id" class="tf-hint">{{ tt('pd.taskFilesSaveFirst') }}</div>
+            <div v-else>
+              <div v-if="taskFiles.length" class="files-list tf-list">
+                <div v-for="f in taskFiles" :key="f.id" class="file-item" @click="openTaskFile(f)" style="cursor:pointer;" :title="tt('pd.clickToOpen')">
+                  <div class="file-info">
+                    <div class="file-name">{{ f.fileName }}</div>
+                    <div class="file-meta">{{ formatSize(f.fileSizeBytes) }} · {{ f.uploadedBy }} · {{ formatInstant(f.uploadedAt) }}</div>
+                  </div>
+                  <button class="file-del" @click.stop="deleteTaskFile(f.id)" :title="tt('pd.delete')">✕</button>
+                </div>
+              </div>
+              <div v-else-if="!taskFileUploading" class="files-empty">{{ tt('pd.noFiles') }}</div>
+              <div v-if="taskFileError" class="files-error">{{ taskFileError }}</div>
+            </div>
+          </div>
         </div>
         <div class="modal-footer te-footer">
           <button class="te-btn te-btn-danger" @click="deleteTaskFromModal" :disabled="editingTaskSaving">
@@ -1415,6 +1440,77 @@ function formatDate(iso) {
   const m = Array.from({length:12}, (_, mi) => tt('months.' + mi))
   return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()}`
 }
+
+// v5.4.0 TASKFILES: task file attachments (reuses same encrypted backend, scoped per task)
+const taskFiles = ref([])
+const taskFileUploading = ref(false)
+const taskFileError = ref('')
+
+async function loadTaskFiles() {
+  const id = editingTask.value && editingTask.value.id
+  if (!id) { taskFiles.value = []; return }
+  taskFileError.value = ''
+  try {
+    const res = await api.get(`/tasks/${id}/files`)
+    taskFiles.value = res.data
+  } catch (e) {
+    if (isMfaError(e)) { taskFileError.value = '\u{1F512} ' + tt('pd.mfaFiles') }
+    else { taskFiles.value = [] }
+  }
+}
+
+async function uploadTaskFile(event) {
+  const file = event.target.files[0]
+  const id = editingTask.value && editingTask.value.id
+  if (!file || !id) return
+  taskFileUploading.value = true
+  taskFileError.value = ''
+  try {
+    const fd = new FormData()
+    fd.append('file', file)
+    await api.post(`/tasks/${id}/files`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    await loadTaskFiles()
+  } catch (e) {
+    taskFileError.value = isMfaError(e) ? '\u{1F512} ' + tt('pd.mfaFiles') : (e.response?.data?.message || tt('pd.err.uploadFailed'))
+  } finally {
+    taskFileUploading.value = false
+    if (event && event.target) event.target.value = ''
+  }
+}
+
+async function openTaskFile(f) {
+  const id = editingTask.value && editingTask.value.id
+  if (!id) return
+  try {
+    const res = await api.get(`/tasks/${id}/files/${f.id}/content`, { responseType: 'blob' })
+    const url = window.URL.createObjectURL(new Blob([res.data]))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = f.fileName
+    document.body.appendChild(a); a.click(); a.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (e) {
+    taskFileError.value = isMfaError(e) ? '\u{1F512} ' + tt('pd.mfaFiles') : tt('pd.err.openFailed')
+  }
+}
+
+async function deleteTaskFile(fileId) {
+  if (!confirm(tt('pd.confirmDeleteFile'))) return
+  const id = editingTask.value && editingTask.value.id
+  if (!id) return
+  try {
+    await api.delete(`/tasks/${id}/files/${fileId}`)
+    await loadTaskFiles()
+  } catch (e) {
+    if (isMfaError(e)) { taskFileError.value = '\u{1F512} ' + tt('pd.mfaFiles') }
+  }
+}
+
+// Load task files whenever the edit modal opens on a saved task
+watch(editingTask, (t) => {
+  taskFileError.value = ''
+  if (t && t.id) { loadTaskFiles() } else { taskFiles.value = [] }
+})
 </script>
 
 <style scoped>
@@ -1725,6 +1821,12 @@ function formatDate(iso) {
   cursor: not-allowed;
 }
 .te-field textarea { resize: vertical; min-height: 64px; font-family: inherit; }
+/* v5.4.0 TASKFILES */
+.tf-header { display: flex; align-items: center; justify-content: space-between; }
+.tf-hint { font-size: 11px; color: var(--text-dim); font-style: italic; padding: 4px 0; }
+.tf-list { padding: 0; }
+.file-del { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 13px; padding: 2px 6px; border-radius: 4px; }
+.file-del:hover { color: var(--red); background: var(--red-dim); }
 
 .te-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .te-row .te-field { min-width: 0; }

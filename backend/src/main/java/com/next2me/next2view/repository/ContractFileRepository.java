@@ -40,4 +40,19 @@ public interface ContractFileRepository extends JpaRepository<ContractFile, UUID
     @Query("SELECT COUNT(f) FROM ContractFile f WHERE f.project.id = :projectId " +
            "AND f.isActive = true AND f.deletedAt IS NULL")
     long countActiveByProjectId(@Param("projectId") UUID projectId);
+
+    // v5.4.0 TASKFILES: task-level file queries (V27)
+
+    /** All active (non-soft-deleted) files for a TASK, newest first. */
+    @Query("SELECT f FROM ContractFile f WHERE f.task.id = :taskId " +
+           "AND f.isActive = true AND f.deletedAt IS NULL " +
+           "ORDER BY f.uploadedAt DESC")
+    List<ContractFile> findActiveByTaskId(@Param("taskId") UUID taskId);
+
+    /** Duplicate detection by SHA-256 hash (within a task). */
+    @Query("SELECT f FROM ContractFile f WHERE f.task.id = :taskId " +
+           "AND f.sha256 = :sha256 AND f.deletedAt IS NULL")
+    Optional<ContractFile> findByTaskIdAndSha256(
+            @Param("taskId") UUID taskId,
+            @Param("sha256") String sha256);
 }
