@@ -155,9 +155,9 @@ public class ProjectService {
         p.setLastUpdatedBy(actor);
 
         p.getSpecs().clear();
-        p.getModules().clear();
         applySpecs(p, req.specs());
-        applyModules(p, req.modules());
+        // v5.4.1 TASKMERGE: merge modules/tasks in-place (preserve IDs so attached files survive)
+        mergeModules(p, req.modules());
 
         updateStatus(p);
         projectRepository.save(p);
@@ -231,6 +231,73 @@ public class ProjectService {
             spec.setSortOrder(i);
             p.getSpecs().add(spec);
         });
+    }
+
+    // v5.4.1 TASKMERGE: In-place merge of modules and tasks, matched by sortOrder/index.
+    // Existing rows are UPDATED (keeping their DB id); extra incoming rows are added;
+    // leftover existing rows are removed (orphanRemoval deletes them).
+    // This preserves task IDs across saves, so files attached to a task are not orphaned.
+    private void mergeModules(Project p, List<ProjectRequest.ModuleRequest> modules) {
+        if (modules == null) modules = new ArrayList<>();
+
+        List<com.next2me.next2view.model.Module> existingModules = new ArrayList<>(p.getModules());
+
+        // Remove modules beyond the incoming count
+        for (int i = existingModules.size() - 1; i >= modules.size(); i--) {
+            p.getModules().remove(existingModules.get(i));
+        }
+
+        for (int mi = 0; mi < modules.size(); mi++) {
+            var mr = modules.get(mi);
+            com.next2me.next2view.model.Module m;
+            if (mi < existingModules.size()) {
+                m = existingModules.get(mi);   // reuse existing module (keeps id)
+            } else {
+                m = new com.next2me.next2view.model.Module();
+                m.setProject(p);
+                p.getModules().add(m);
+            }
+            m.setName(mr.name());
+            m.setColor(mr.color() != null ? mr.color() : p.getCategory().name());
+            m.setSortOrder(mi);
+
+            List<ProjectRequest.TaskRequest> trs = mr.tasks() != null ? mr.tasks() : new ArrayList<>();
+            List<Task> existingTasks = new ArrayList<>(m.getTasks());
+
+            // Remove tasks beyond the incoming count
+            for (int i = existingTasks.size() - 1; i >= trs.size(); i--) {
+                m.getTasks().remove(existingTasks.get(i));
+            }
+
+            for (int ti = 0; ti < trs.size(); ti++) {
+                var tr = trs.get(ti);
+                Task t;
+                if (ti < existingTasks.size()) {
+                    t = existingTasks.get(ti);   // reuse existing task (KEEPS id -> files survive)
+                } else {
+                    t = new Task();
+                    t.setModule(m);
+                    m.getTasks().add(t);
+                }
+                t.setName(tr.name());
+                t.setAssignee(tr.assignee());
+                t.setProgress(tr.progress());
+                t.setIsDone(tr.isDone() || tr.progress() == 100);
+                t.setIsBlocked(tr.isBlocked());
+                t.setBlockNote(tr.blockNote());
+                t.setComment(tr.comment());
+                t.setDescription(tr.description());
+                t.setDeadline(tr.deadline());
+                t.setStartWeek(tr.startWeek());
+                t.setDurationWeeks(tr.durationWeeks() != null ? tr.durationWeeks() : 1);
+                t.setStartDay(tr.startDay());
+                t.setDurationDays(tr.durationDays());
+                t.setManualProgress(tr.manualProgress() != null ? tr.manualProgress() : false);
+                t.setStartDate(tr.startDate());
+                t.setEndDate(tr.endDate());
+                t.setSortOrder(ti);
+            }
+        }
     }
 
     private void applyModules(Project p, List<ProjectRequest.ModuleRequest> modules) {
