@@ -140,6 +140,12 @@
       <div class="g-subsection">✏ Πώς επεξεργάζομαι project</div>
       <div class="g-desc">Από το <strong>Project Detail</strong> (κλικ σε project) → πάτα το ✎ εικονίδιο πάνω δεξιά στο contract header. Ανοίγει το ίδιο form με όλα τα στοιχεία προγεμισμένα.</div>
 
+      <div class="g-subsection">🖥 Full-screen επεξεργασία</div>
+      <div class="g-desc">Το form επεξεργασίας ανοίγει πλέον σε <strong>πλήρη οθόνη</strong> — πιο εύκολη ανάγνωση και διαχείριση όταν το project έχει πολλά modules &amp; tasks.</div>
+
+      <div class="g-subsection">▦ Περιγραφή ανά module</div>
+      <div class="g-desc">Κάθε <strong>module</strong> έχει τώρα δικό του πεδίο <strong>περιγραφής</strong> (rich text), όπως και το project. Τη γράφεις στο form επεξεργασίας και εμφανίζεται κάτω από τον τίτλο του module στο Project Detail.</div>
+
       <div class="g-subsection">🔍 Πώς φιλτράρω projects</div>
       <div class="g-desc">Στο "All Projects" view υπάρχουν 2 dropdowns πάνω δεξιά: ένα για κατηγορία και ένα για εταιρεία. Μπορείς επίσης να κάνεις κλικ σε κατηγορία ή εταιρεία από το sidebar.</div>
 
@@ -174,6 +180,12 @@
 
       <div class="g-subsection">✏ How to edit a project</div>
       <div class="g-desc">From <strong>Project Detail</strong> (click on a project) → click the ✎ icon at the top right of the contract header. The same form opens with all fields pre-filled.</div>
+
+      <div class="g-subsection">🖥 Full-screen editing</div>
+      <div class="g-desc">The edit form now opens in <strong>full screen</strong> — easier to read and manage when a project has many modules &amp; tasks.</div>
+
+      <div class="g-subsection">▦ Description per module</div>
+      <div class="g-desc">Each <strong>module</strong> now has its own <strong>description</strong> field (rich text), just like the project. You write it in the edit form and it appears below the module title in Project Detail.</div>
 
       <div class="g-subsection">🔍 How to filter projects</div>
       <div class="g-desc">In the "All Projects" view there are 2 dropdowns at the top right: one for category and one for company. You can also click a category or company from the sidebar.</div>
@@ -302,6 +314,12 @@
 
       <div class="g-subsection">🚫 Πώς σημαδεύω ένα task ως Blocked</div>
       <div class="g-desc">Στο Edit Project → βάλε στο task note τη λέξη "BLOCK" και την αιτία (π.χ. "BLOCK — αναμένει έγγραφα από Flag State"). Το task εμφανίζεται με κόκκινο εικονίδιο και το project περνά σε status "At Risk".</div>
+
+      <div class="g-subsection">📎 Αρχεία ανά task</div>
+      <div class="g-desc">Κάθε <strong>task</strong> μπορεί να έχει δικά του αρχεία, ξεχωριστά από τα αρχεία σε επίπεδο project. Στο form επεξεργασίας, κάθε αποθηκευμένο task έχει block <strong>"Αρχεία Task"</strong> για ανέβασμα, άνοιγμα και διαγραφή.</div>
+      <div class="g-tip">🔒 Τα αρχεία προστατεύονται με <strong>MFA</strong>. Αν δεν έχεις ενεργό MFA, ενεργοποίησέ το από <strong>Profile → Security</strong>.</div>
+      <div class="g-tip">💡 Σε νέο task, αποθήκευσε πρώτα το project· μετά εμφανίζεται η δυνατότητα ανεβάσματος αρχείων.</div>
+
       <div class="g-tip">💡 Ένα task με 100% θεωρείται αυτόματα ✓ Done. Δεν χρειάζεται να κάνεις τίποτα άλλο.</div>
     </div>
 
@@ -420,6 +438,12 @@
 
       <div class="g-subsection">🚫 How to mark a task as Blocked</div>
       <div class="g-desc">In Edit Project → add the word "BLOCK" and the reason in the task note (e.g. "BLOCK — awaiting documents from Flag State"). The task displays a red icon and the project status changes to "At Risk".</div>
+
+      <div class="g-subsection">📎 Files per task</div>
+      <div class="g-desc">Each <strong>task</strong> can have its own files, separate from project-level files. In the edit form, every saved task has a <strong>"Task files"</strong> block to upload, open and delete.</div>
+      <div class="g-tip">🔒 Files are protected with <strong>MFA</strong>. If you don't have MFA enabled, turn it on from <strong>Profile → Security</strong>.</div>
+      <div class="g-tip">💡 For a new task, save the project first; the file-upload option appears afterwards.</div>
+
       <div class="g-tip">💡 A task with 100% is automatically considered ✓ Done. No further action needed.</div>
     </div>
 
