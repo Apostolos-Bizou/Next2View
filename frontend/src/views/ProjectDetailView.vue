@@ -457,7 +457,7 @@
 
         <!-- MODULES SECTION (same single scroll body) -->
         <div class="form-section-title form-section-title--modules" style="display:flex;justify-content:space-between;align-items:center;">
-          MODULES & TASKS
+          Modules &amp; Tasks
           <button @click="editAddModule" style="font-size:11px;padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;">+ Module</button>
         </div>
         <div v-for="(m, mi) in editForm.modules" :key="mi" style="margin-bottom:16px;background:var(--surface2);border-radius:8px;padding:12px;">
@@ -498,7 +498,7 @@
                     <span class="etf-caret">{{ openTaskFilePanels[t.id] ? '▲' : '▼' }}</span>
                   </button>
                   <div v-if="openTaskFilePanels[t.id]" class="etf-panel">
-                    <label v-if="permStore.isCEO() || permStore.can('uploadFiles')" class="files-upload-btn etf-upload" :class="{uploading: editTaskUploading[t.id]}">
+                    <label v-if="t.id && (permStore.isCEO() || permStore.can('uploadFiles'))" class="files-upload-btn etf-upload" :class="{uploading: editTaskUploading[t.id]}">
                       <input type="file" @change="uploadEditTaskFile($event, t.id)" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="editTaskUploading[t.id]" />
                       {{ editTaskUploading[t.id] ? tt('pd.uploading') : tt('pd.upload') }}
                     </label>
