@@ -27,6 +27,7 @@ public record ProjectRequest(
     public record SpecRequest(String description, boolean isDone, int sortOrder, LocalDate startDate, LocalDate endDate) {}
     public record ModuleRequest(
         String name, String color, int sortOrder,
+        String description,
         List<TaskRequest> tasks
     ) {}
     public record TaskRequest(

@@ -446,6 +446,8 @@
     "descriptionLabel": "Περιγραφή Project",
     "descriptionPlaceholder": "Γράψε μια μόνιμη περιγραφή του project...",
     "descriptionEmpty": "Δεν έχει οριστεί περιγραφή.",
+    "moduleDescLabel": "Περιγραφή module",
+    "moduleDescPlaceholder": "Γράψε μια περιγραφή για αυτό το module...",
     "taskDescription": "Περιγραφή Task",
     "taskDescriptionPlaceholder": "Μόνιμη περιγραφή του task (τι περιλαμβάνει, στόχοι, κλπ.)..."
   },
