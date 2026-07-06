@@ -400,15 +400,12 @@
       </div>
       <div class="modal-body">
         <div class="form-section-title">{{ tt('pd.basicInfo') }}</div>
-        <div class="form-group">
-          <label>{{ tt('pd.titleReq') }}</label>
-          <input v-model="editForm.title" type="text" class="form-input" :placeholder="tt('pd.titlePlaceholder')" />
-        </div>
-        <div class="form-group">
-          <label>{{ tt('pd.descriptionLabel') }}</label>
-          <RichTextEditor v-model="editForm.description" :placeholder="tt('pd.descriptionPlaceholder')" min-height="100px" />
-        </div>
-        <div class="form-row">
+        <!-- scalar basic fields: responsive grid, all visible together -->
+        <div class="basic-grid">
+          <div class="form-group basic-grid__full">
+            <label>{{ tt('pd.titleReq') }}</label>
+            <input v-model="editForm.title" type="text" class="form-input" :placeholder="tt('pd.titlePlaceholder')" />
+          </div>
           <div class="form-group">
             <label>{{ tt('pd.companyReq') }}</label>
             <select v-model="editForm.companyId" class="form-input">
@@ -424,8 +421,6 @@
               <option value="marketing">Marketing</option>
             </select>
           </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label>Budget (€)</label>
             <input v-model="editForm.budget" type="number" class="form-input" />
@@ -438,25 +433,29 @@
             <label>Deadline</label>
             <input v-model="editForm.deadline" type="date" class="form-input" />
           </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select v-model="editForm.status" class="form-input">
+              <option value="on_track">On Track</option>
+              <option value="at_risk">At Risk</option>
+              <option value="delayed">Delayed</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <!-- rich text fields: full width -->
+        <div class="form-group">
+          <label>{{ tt('pd.descriptionLabel') }}</label>
+          <RichTextEditor v-model="editForm.description" :placeholder="tt('pd.descriptionPlaceholder')" min-height="100px" />
         </div>
         <div class="form-group">
           <label>{{ tt('pd.contractDescLabel') }}</label>
           <RichTextEditor v-model="editForm.contractDesc" :placeholder="tt('pd.briefDesc')" min-height="100px" />
         </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select v-model="editForm.status" class="form-input">
-            <option value="on_track">On Track</option>
-            <option value="at_risk">At Risk</option>
-            <option value="delayed">Delayed</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
         <div v-if="editError" class="form-error">{{ editError }}</div>
-      </div>
-      <!-- MODULES SECTION -->
-      <div class="modal-body" style="border-top:1px solid var(--border);padding-top:20px;">
-        <div class="form-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+
+        <!-- MODULES SECTION (same single scroll body) -->
+        <div class="form-section-title form-section-title--modules" style="display:flex;justify-content:space-between;align-items:center;">
           MODULES & TASKS
           <button @click="editAddModule" style="font-size:11px;padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;">+ Module</button>
         </div>
@@ -1714,8 +1713,17 @@ watch(editingTask, (t) => {
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 .form-error { color: var(--red); font-size: 12px; margin-top: 8px; }
 .form-section-title { font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.modal-edit { width: 620px; max-height: 85vh; }
-.form-section-title { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+/* ---- FULL-SCREEN edit project modal (single scroll body, sticky header/footer via flex) ---- */
+.modal-edit { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; border-radius: 0; }
+.modal-edit .modal-header, .modal-edit .modal-footer { flex-shrink: 0; }
+.modal-edit .modal-body { padding: 22px 32px; }
+/* larger, bolder section headings with a thin divider underneath */
+.modal-edit .form-section-title { font-size: 15px; font-weight: 800; letter-spacing: 0.3px; text-transform: none; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border-bright); }
+.modal-edit .form-section-title--modules { margin-top: 30px; }
+/* basic fields: responsive grid — all visible together at the top */
+.basic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 4px 16px; align-items: start; }
+.basic-grid .form-group { margin-bottom: 10px; }
+.basic-grid__full { grid-column: 1 / -1; }
 .files-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .files-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
 .files-title { font-size: 13px; font-weight: 800; }
@@ -1743,6 +1751,10 @@ watch(editingTask, (t) => {
   .modal { width: 95vw !important; max-width: 95vw !important; }
   .modal-body { padding: 14px !important; }
   .form-row { grid-template-columns: 1fr !important; }
+  /* full-screen edit modal stays edge-to-edge on mobile */
+  .modal-edit { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; }
+  .modal-edit .modal-body { padding: 14px !important; }
+  .basic-grid { grid-template-columns: 1fr !important; }
   .contract-header { padding: 16px 14px; border-radius: 10px; }
   .contract-kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .kpi-box { padding: 12px 10px; }
