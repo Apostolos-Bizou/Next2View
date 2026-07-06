@@ -260,6 +260,7 @@ public class ProjectService {
             m.setName(mr.name());
             m.setColor(mr.color() != null ? mr.color() : p.getCategory().name());
             m.setSortOrder(mi);
+            m.setDescription(mr.description());
 
             List<ProjectRequest.TaskRequest> trs = mr.tasks() != null ? mr.tasks() : new ArrayList<>();
             List<Task> existingTasks = new ArrayList<>(m.getTasks());
@@ -309,6 +310,7 @@ public class ProjectService {
             m.setName(mr.name());
             m.setColor(mr.color() != null ? mr.color() : p.getCategory().name());
             m.setSortOrder(mi);
+            m.setDescription(mr.description());
             if (mr.tasks() != null) {
                 IntStream.range(0, mr.tasks().size()).forEach(ti -> {
                     var tr = mr.tasks().get(ti);
@@ -409,7 +411,7 @@ public class ProjectService {
                     t.getIsDone(), t.getIsBlocked(), t.getBlockNote(),
                     t.getComment(), t.getDescription(), t.getDeadline(), t.getStartWeek(), t.getDurationWeeks(), t.getStartDay(), t.getDurationDays(), t.getManualProgress(), t.getStartDate(), t.getEndDate()
             )).toList();
-            return new ProjectDto.ModuleDto(m.getId(), m.getName(), m.getColor(), mc, tasks);
+            return new ProjectDto.ModuleDto(m.getId(), m.getName(), m.getColor(), mc, m.getDescription(), tasks);
         }).toList();
 
         var specs = p.getSpecs().stream().map(s ->

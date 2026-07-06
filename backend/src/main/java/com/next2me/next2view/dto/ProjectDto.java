@@ -32,6 +32,7 @@ public record ProjectDto(
 ) {
     public record ModuleDto(
         UUID id, String name, String color, int completion,
+        String description,
         List<TaskDto> tasks
     ) {}
     public record TaskDto(

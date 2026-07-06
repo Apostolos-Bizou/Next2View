@@ -99,6 +99,7 @@
               <span class="mg-tasks">{{ m.tasks.filter(t=>t.isDone).length }}/{{ m.tasks.length }}</span>
             </div>
           </div>
+          <div v-if="m.description" class="module-desc-display rte-display" v-html="sanitizeHtml(m.description)"></div>
           <div v-if="openAcc.has(m.id)" class="task-list">
             <div v-for="t in m.tasks" :key="t.id+'acc'" class="task-item">
               <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
@@ -400,15 +401,12 @@
       </div>
       <div class="modal-body">
         <div class="form-section-title">{{ tt('pd.basicInfo') }}</div>
-        <div class="form-group">
-          <label>{{ tt('pd.titleReq') }}</label>
-          <input v-model="editForm.title" type="text" class="form-input" :placeholder="tt('pd.titlePlaceholder')" />
-        </div>
-        <div class="form-group">
-          <label>{{ tt('pd.descriptionLabel') }}</label>
-          <RichTextEditor v-model="editForm.description" :placeholder="tt('pd.descriptionPlaceholder')" min-height="100px" />
-        </div>
-        <div class="form-row">
+        <!-- scalar basic fields: responsive grid, all visible together -->
+        <div class="basic-grid">
+          <div class="form-group basic-grid__full">
+            <label>{{ tt('pd.titleReq') }}</label>
+            <input v-model="editForm.title" type="text" class="form-input" :placeholder="tt('pd.titlePlaceholder')" />
+          </div>
           <div class="form-group">
             <label>{{ tt('pd.companyReq') }}</label>
             <select v-model="editForm.companyId" class="form-input">
@@ -424,8 +422,6 @@
               <option value="marketing">Marketing</option>
             </select>
           </div>
-        </div>
-        <div class="form-row">
           <div class="form-group">
             <label>Budget (€)</label>
             <input v-model="editForm.budget" type="number" class="form-input" />
@@ -438,26 +434,30 @@
             <label>Deadline</label>
             <input v-model="editForm.deadline" type="date" class="form-input" />
           </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select v-model="editForm.status" class="form-input">
+              <option value="on_track">On Track</option>
+              <option value="at_risk">At Risk</option>
+              <option value="delayed">Delayed</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <!-- rich text fields: full width -->
+        <div class="form-group">
+          <label>{{ tt('pd.descriptionLabel') }}</label>
+          <RichTextEditor v-model="editForm.description" :placeholder="tt('pd.descriptionPlaceholder')" min-height="100px" />
         </div>
         <div class="form-group">
           <label>{{ tt('pd.contractDescLabel') }}</label>
           <RichTextEditor v-model="editForm.contractDesc" :placeholder="tt('pd.briefDesc')" min-height="100px" />
         </div>
-        <div class="form-group">
-          <label>Status</label>
-          <select v-model="editForm.status" class="form-input">
-            <option value="on_track">On Track</option>
-            <option value="at_risk">At Risk</option>
-            <option value="delayed">Delayed</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
         <div v-if="editError" class="form-error">{{ editError }}</div>
-      </div>
-      <!-- MODULES SECTION -->
-      <div class="modal-body" style="border-top:1px solid var(--border);padding-top:20px;">
-        <div class="form-section-title" style="display:flex;justify-content:space-between;align-items:center;">
-          MODULES & TASKS
+
+        <!-- MODULES SECTION (same single scroll body) -->
+        <div class="form-section-title form-section-title--modules" style="display:flex;justify-content:space-between;align-items:center;">
+          Modules &amp; Tasks
           <button @click="editAddModule" style="font-size:11px;padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;">+ Module</button>
         </div>
         <div v-for="(m, mi) in editForm.modules" :key="mi" style="margin-bottom:16px;background:var(--surface2);border-radius:8px;padding:12px;">
@@ -470,6 +470,10 @@
               <option value="marketing">Marketing</option>
             </select>
             <button @click="editForm.modules.splice(mi,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 8px;cursor:pointer;">✕</button>
+          </div>
+          <div class="module-desc-field">
+            <label class="module-desc-label">{{ tt('pd.moduleDescLabel') }}</label>
+            <RichTextEditor v-model="m.description" :placeholder="tt('pd.moduleDescPlaceholder')" min-height="70px" />
           </div>
           <div v-for="(t, ti) in m.tasks" :key="ti" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;padding-left:12px;">
             <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
@@ -484,6 +488,33 @@
                 <input v-model="t.startDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
                 <label style="font-size:10px;color:var(--text-dim);min-width:35px;">{{ tt('pd.end') }}</label>
                 <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
+              </div>
+              <!-- per-task files: saved tasks get list/upload/open/delete (lazy-loaded on expand); new tasks get a hint -->
+              <div class="etf-wrap">
+                <div v-if="!t.id" class="etf-hint">📎 {{ tt('pd.taskFilesSaveFirst') }}</div>
+                <div v-else>
+                  <button type="button" class="etf-toggle" @click="toggleTaskFilePanel(t.id)">
+                    📎 {{ tt('pd.taskFilesTitle') }}
+                    <span class="etf-caret">{{ openTaskFilePanels[t.id] ? '▲' : '▼' }}</span>
+                  </button>
+                  <div v-if="openTaskFilePanels[t.id]" class="etf-panel">
+                    <label v-if="t.id && (permStore.isCEO() || permStore.can('uploadFiles'))" class="files-upload-btn etf-upload" :class="{uploading: editTaskUploading[t.id]}">
+                      <input type="file" @change="uploadEditTaskFile($event, t.id)" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="editTaskUploading[t.id]" />
+                      {{ editTaskUploading[t.id] ? tt('pd.uploading') : tt('pd.upload') }}
+                    </label>
+                    <div v-if="(editTaskFiles[t.id] || []).length" class="files-list etf-list">
+                      <div v-for="f in editTaskFiles[t.id]" :key="f.id" class="file-item" @click="openEditTaskFile(t.id, f)" style="cursor:pointer;" :title="tt('pd.clickToOpen')">
+                        <div class="file-info">
+                          <div class="file-name">{{ f.fileName }}</div>
+                          <div class="file-meta">{{ formatSize(f.fileSizeBytes) }} · {{ f.uploadedBy }} · {{ formatInstant(f.uploadedAt) }}</div>
+                        </div>
+                        <button class="file-del" @click.stop="deleteEditTaskFile(t.id, f.id)" :title="tt('pd.delete')">✕</button>
+                      </div>
+                    </div>
+                    <div v-else-if="!editTaskUploading[t.id] && !editTaskFileErr[t.id]" class="files-empty etf-empty">{{ tt('pd.noFiles') }}</div>
+                    <div v-if="editTaskFileErr[t.id]" class="files-error">{{ editTaskFileErr[t.id] }}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -709,7 +740,7 @@ async function deleteTaskFromModal() {
 
 
 
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
@@ -1169,6 +1200,7 @@ async function saveDescription() {
 
 async function openEditModal() {
   editError.value = ""
+  resetEditTaskFileState()
   editForm.value = {
     title: project.value.title || "",
     companyId: project.value.companyId || "",
@@ -1213,6 +1245,7 @@ async function saveEdit() {
       status: editForm.value.status,
       modules: editForm.value.modules.map(m => ({
         name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+        description: m.description || '',
         tasks: (m.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
@@ -1241,7 +1274,7 @@ async function loadProject() {
 function editAddModule() {
   editForm.value.modules.push({
     name: '', color: editForm.value.category || 'dev', sortOrder: editForm.value.modules.length,
-    tasks: []
+    description: '', tasks: []
   })
 }
 
@@ -1511,6 +1544,85 @@ watch(editingTask, (t) => {
   taskFileError.value = ''
   if (t && t.id) { loadTaskFiles() } else { taskFiles.value = [] }
 })
+
+// ════ PER-TASK FILES inside the full-screen EDIT view ════
+// Separate, edit-view-scoped state keyed by task id. Reuses the existing
+// /tasks/{id}/files endpoints WITHOUT touching the single-task editor state
+// or its MFA gating. Files are lazy-loaded on demand (per-task expand), never
+// all-at-once on mount.
+const editTaskFiles = reactive({})       // taskId -> files[]
+const editTaskUploading = reactive({})   // taskId -> bool
+const editTaskFileErr = reactive({})     // taskId -> string
+const openTaskFilePanels = reactive({})  // taskId -> bool (panel expanded)
+
+function resetEditTaskFileState() {
+  ;[editTaskFiles, editTaskUploading, editTaskFileErr, openTaskFilePanels]
+    .forEach(map => Object.keys(map).forEach(k => delete map[k]))
+}
+
+function toggleTaskFilePanel(taskId) {
+  if (!taskId) return
+  const open = !openTaskFilePanels[taskId]
+  openTaskFilePanels[taskId] = open
+  // lazy: fetch only the first time this task's panel is opened
+  if (open && editTaskFiles[taskId] === undefined) loadEditTaskFiles(taskId)
+}
+
+async function loadEditTaskFiles(taskId) {
+  if (!taskId) return
+  editTaskFileErr[taskId] = ''
+  try {
+    const res = await api.get(`/tasks/${taskId}/files`)
+    editTaskFiles[taskId] = res.data
+  } catch (e) {
+    if (isMfaError(e)) { editTaskFileErr[taskId] = '\u{1F512} ' + tt('pd.mfaFiles') }
+    else { editTaskFiles[taskId] = [] }
+  }
+}
+
+async function uploadEditTaskFile(event, taskId) {
+  const file = event.target.files[0]
+  if (!file || !taskId) return
+  editTaskUploading[taskId] = true
+  editTaskFileErr[taskId] = ''
+  try {
+    const fd = new FormData()
+    fd.append('file', file)
+    await api.post(`/tasks/${taskId}/files`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    await loadEditTaskFiles(taskId)
+  } catch (e) {
+    editTaskFileErr[taskId] = isMfaError(e) ? '\u{1F512} ' + tt('pd.mfaFiles') : (e.response?.data?.message || tt('pd.err.uploadFailed'))
+  } finally {
+    editTaskUploading[taskId] = false
+    if (event && event.target) event.target.value = ''
+  }
+}
+
+async function openEditTaskFile(taskId, f) {
+  if (!taskId) return
+  try {
+    const res = await api.get(`/tasks/${taskId}/files/${f.id}/content`, { responseType: 'blob' })
+    const url = window.URL.createObjectURL(new Blob([res.data]))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = f.fileName
+    document.body.appendChild(a); a.click(); a.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (e) {
+    editTaskFileErr[taskId] = isMfaError(e) ? '\u{1F512} ' + tt('pd.mfaFiles') : tt('pd.err.openFailed')
+  }
+}
+
+async function deleteEditTaskFile(taskId, fileId) {
+  if (!confirm(tt('pd.confirmDeleteFile'))) return
+  if (!taskId) return
+  try {
+    await api.delete(`/tasks/${taskId}/files/${fileId}`)
+    await loadEditTaskFiles(taskId)
+  } catch (e) {
+    if (isMfaError(e)) { editTaskFileErr[taskId] = '\u{1F512} ' + tt('pd.mfaFiles') }
+  }
+}
 </script>
 
 <style scoped>
@@ -1714,8 +1826,34 @@ watch(editingTask, (t) => {
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 .form-error { color: var(--red); font-size: 12px; margin-top: 8px; }
 .form-section-title { font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
-.modal-edit { width: 620px; max-height: 85vh; }
-.form-section-title { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+/* ---- FULL-SCREEN edit project modal (single scroll body, sticky header/footer via flex) ---- */
+.modal-edit { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; border-radius: 0; }
+.modal-edit .modal-header, .modal-edit .modal-footer { flex-shrink: 0; }
+.modal-edit .modal-body { padding: 22px 32px; }
+/* larger, bolder section headings with a thin divider underneath */
+.modal-edit .form-section-title { font-size: 15px; font-weight: 800; letter-spacing: 0.3px; text-transform: none; color: var(--text); margin: 2px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border-bright); }
+.modal-edit .form-section-title--modules { margin-top: 30px; }
+/* basic fields: responsive grid — all visible together at the top */
+.basic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 4px 16px; align-items: start; }
+.basic-grid .form-group { margin-bottom: 10px; }
+.basic-grid__full { grid-column: 1 / -1; }
+/* per-module description (edit form) */
+.module-desc-field { margin: 0 0 10px; padding-left: 4px; }
+.module-desc-label { display: block; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+/* per-module description (read view) */
+.module-desc-display { font-size: 13px; color: var(--text-mid); line-height: 1.5; padding: 6px 12px 10px 26px; }
+/* per-task files (edit view) */
+.etf-wrap { padding-left: 4px; margin-top: 2px; }
+.etf-hint { font-family: 'Nunito Sans', sans-serif; font-size: 10px; color: var(--text-dim); font-style: italic; }
+.etf-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface3); border: 1px solid var(--border-bright); border-radius: 5px; color: var(--text-mid); font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 10px; cursor: pointer; }
+.etf-toggle:hover { border-color: var(--accent); color: var(--text); }
+.etf-caret { font-size: 8px; color: var(--text-dim); }
+.etf-panel { margin: 6px 0 2px; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+.etf-upload { font-size: 10px; padding: 4px 10px; }
+.etf-list { padding: 4px 0 0; }
+.etf-list .file-item { padding: 8px; }
+.etf-list .file-name { font-size: 12px; }
+.etf-empty { padding: 10px; font-size: 11px; }
 .files-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .files-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
 .files-title { font-size: 13px; font-weight: 800; }
@@ -1743,6 +1881,10 @@ watch(editingTask, (t) => {
   .modal { width: 95vw !important; max-width: 95vw !important; }
   .modal-body { padding: 14px !important; }
   .form-row { grid-template-columns: 1fr !important; }
+  /* full-screen edit modal stays edge-to-edge on mobile */
+  .modal-edit { width: 100vw !important; max-width: 100vw !important; height: 100vh !important; max-height: 100vh !important; }
+  .modal-edit .modal-body { padding: 14px !important; }
+  .basic-grid { grid-template-columns: 1fr !important; }
   .contract-header { padding: 16px 14px; border-radius: 10px; }
   .contract-kpis { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .kpi-box { padding: 12px 10px; }
