@@ -489,6 +489,33 @@
                 <label style="font-size:10px;color:var(--text-dim);min-width:35px;">{{ tt('pd.end') }}</label>
                 <input v-model="t.endDate" type="date" class="form-input" style="flex:1;font-size:11px;padding:4px 6px;" />
               </div>
+              <!-- per-task files: saved tasks get list/upload/open/delete (lazy-loaded on expand); new tasks get a hint -->
+              <div class="etf-wrap">
+                <div v-if="!t.id" class="etf-hint">📎 {{ tt('pd.taskFilesSaveFirst') }}</div>
+                <div v-else>
+                  <button type="button" class="etf-toggle" @click="toggleTaskFilePanel(t.id)">
+                    📎 {{ tt('pd.taskFilesTitle') }}
+                    <span class="etf-caret">{{ openTaskFilePanels[t.id] ? '▲' : '▼' }}</span>
+                  </button>
+                  <div v-if="openTaskFilePanels[t.id]" class="etf-panel">
+                    <label v-if="permStore.isCEO() || permStore.can('uploadFiles')" class="files-upload-btn etf-upload" :class="{uploading: editTaskUploading[t.id]}">
+                      <input type="file" @change="uploadEditTaskFile($event, t.id)" accept=".pdf,.doc,.docx,.xlsx,.png,.jpg" style="display:none" :disabled="editTaskUploading[t.id]" />
+                      {{ editTaskUploading[t.id] ? tt('pd.uploading') : tt('pd.upload') }}
+                    </label>
+                    <div v-if="(editTaskFiles[t.id] || []).length" class="files-list etf-list">
+                      <div v-for="f in editTaskFiles[t.id]" :key="f.id" class="file-item" @click="openEditTaskFile(t.id, f)" style="cursor:pointer;" :title="tt('pd.clickToOpen')">
+                        <div class="file-info">
+                          <div class="file-name">{{ f.fileName }}</div>
+                          <div class="file-meta">{{ formatSize(f.fileSizeBytes) }} · {{ f.uploadedBy }} · {{ formatInstant(f.uploadedAt) }}</div>
+                        </div>
+                        <button class="file-del" @click.stop="deleteEditTaskFile(t.id, f.id)" :title="tt('pd.delete')">✕</button>
+                      </div>
+                    </div>
+                    <div v-else-if="!editTaskUploading[t.id] && !editTaskFileErr[t.id]" class="files-empty etf-empty">{{ tt('pd.noFiles') }}</div>
+                    <div v-if="editTaskFileErr[t.id]" class="files-error">{{ editTaskFileErr[t.id] }}</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <button @click="m.tasks.push({name:'',assignee:'',progress:0,isDone:false,isBlocked:false,blockNote:'',comment:'',description:'',deadline:null,startWeek:mi+1,durationWeeks:1,sortOrder:m.tasks.length})"
@@ -713,7 +740,7 @@ async function deleteTaskFromModal() {
 
 
 
-import { ref, computed, onMounted, nextTick, watch } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/services/api'
 import { useRoute, useRouter } from 'vue-router'
@@ -1173,6 +1200,7 @@ async function saveDescription() {
 
 async function openEditModal() {
   editError.value = ""
+  resetEditTaskFileState()
   editForm.value = {
     title: project.value.title || "",
     companyId: project.value.companyId || "",
@@ -1516,6 +1544,85 @@ watch(editingTask, (t) => {
   taskFileError.value = ''
   if (t && t.id) { loadTaskFiles() } else { taskFiles.value = [] }
 })
+
+// ════ PER-TASK FILES inside the full-screen EDIT view ════
+// Separate, edit-view-scoped state keyed by task id. Reuses the existing
+// /tasks/{id}/files endpoints WITHOUT touching the single-task editor state
+// or its MFA gating. Files are lazy-loaded on demand (per-task expand), never
+// all-at-once on mount.
+const editTaskFiles = reactive({})       // taskId -> files[]
+const editTaskUploading = reactive({})   // taskId -> bool
+const editTaskFileErr = reactive({})     // taskId -> string
+const openTaskFilePanels = reactive({})  // taskId -> bool (panel expanded)
+
+function resetEditTaskFileState() {
+  ;[editTaskFiles, editTaskUploading, editTaskFileErr, openTaskFilePanels]
+    .forEach(map => Object.keys(map).forEach(k => delete map[k]))
+}
+
+function toggleTaskFilePanel(taskId) {
+  if (!taskId) return
+  const open = !openTaskFilePanels[taskId]
+  openTaskFilePanels[taskId] = open
+  // lazy: fetch only the first time this task's panel is opened
+  if (open && editTaskFiles[taskId] === undefined) loadEditTaskFiles(taskId)
+}
+
+async function loadEditTaskFiles(taskId) {
+  if (!taskId) return
+  editTaskFileErr[taskId] = ''
+  try {
+    const res = await api.get(`/tasks/${taskId}/files`)
+    editTaskFiles[taskId] = res.data
+  } catch (e) {
+    if (isMfaError(e)) { editTaskFileErr[taskId] = '\u{1F512} ' + tt('pd.mfaFiles') }
+    else { editTaskFiles[taskId] = [] }
+  }
+}
+
+async function uploadEditTaskFile(event, taskId) {
+  const file = event.target.files[0]
+  if (!file || !taskId) return
+  editTaskUploading[taskId] = true
+  editTaskFileErr[taskId] = ''
+  try {
+    const fd = new FormData()
+    fd.append('file', file)
+    await api.post(`/tasks/${taskId}/files`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+    await loadEditTaskFiles(taskId)
+  } catch (e) {
+    editTaskFileErr[taskId] = isMfaError(e) ? '\u{1F512} ' + tt('pd.mfaFiles') : (e.response?.data?.message || tt('pd.err.uploadFailed'))
+  } finally {
+    editTaskUploading[taskId] = false
+    if (event && event.target) event.target.value = ''
+  }
+}
+
+async function openEditTaskFile(taskId, f) {
+  if (!taskId) return
+  try {
+    const res = await api.get(`/tasks/${taskId}/files/${f.id}/content`, { responseType: 'blob' })
+    const url = window.URL.createObjectURL(new Blob([res.data]))
+    const a = document.createElement('a')
+    a.href = url
+    a.download = f.fileName
+    document.body.appendChild(a); a.click(); a.remove()
+    window.URL.revokeObjectURL(url)
+  } catch (e) {
+    editTaskFileErr[taskId] = isMfaError(e) ? '\u{1F512} ' + tt('pd.mfaFiles') : tt('pd.err.openFailed')
+  }
+}
+
+async function deleteEditTaskFile(taskId, fileId) {
+  if (!confirm(tt('pd.confirmDeleteFile'))) return
+  if (!taskId) return
+  try {
+    await api.delete(`/tasks/${taskId}/files/${fileId}`)
+    await loadEditTaskFiles(taskId)
+  } catch (e) {
+    if (isMfaError(e)) { editTaskFileErr[taskId] = '\u{1F512} ' + tt('pd.mfaFiles') }
+  }
+}
 </script>
 
 <style scoped>
@@ -1735,6 +1842,18 @@ watch(editingTask, (t) => {
 .module-desc-label { display: block; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
 /* per-module description (read view) */
 .module-desc-display { font-size: 13px; color: var(--text-mid); line-height: 1.5; padding: 6px 12px 10px 26px; }
+/* per-task files (edit view) */
+.etf-wrap { padding-left: 4px; margin-top: 2px; }
+.etf-hint { font-family: 'Nunito Sans', sans-serif; font-size: 10px; color: var(--text-dim); font-style: italic; }
+.etf-toggle { display: inline-flex; align-items: center; gap: 6px; background: var(--surface3); border: 1px solid var(--border-bright); border-radius: 5px; color: var(--text-mid); font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 10px; cursor: pointer; }
+.etf-toggle:hover { border-color: var(--accent); color: var(--text); }
+.etf-caret { font-size: 8px; color: var(--text-dim); }
+.etf-panel { margin: 6px 0 2px; padding: 8px 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; }
+.etf-upload { font-size: 10px; padding: 4px 10px; }
+.etf-list { padding: 4px 0 0; }
+.etf-list .file-item { padding: 8px; }
+.etf-list .file-name { font-size: 12px; }
+.etf-empty { padding: 10px; font-size: 11px; }
 .files-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .files-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
 .files-title { font-size: 13px; font-weight: 800; }
