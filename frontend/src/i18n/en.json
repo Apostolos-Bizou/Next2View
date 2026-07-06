@@ -446,6 +446,8 @@
     "descriptionLabel": "Project Description",
     "descriptionPlaceholder": "Write a permanent description of the project...",
     "descriptionEmpty": "No description set.",
+    "moduleDescLabel": "Module description",
+    "moduleDescPlaceholder": "Write a description for this module...",
     "taskDescription": "Task Description",
     "taskDescriptionPlaceholder": "Permanent description of the task (what it includes, goals, etc.)..."
   },

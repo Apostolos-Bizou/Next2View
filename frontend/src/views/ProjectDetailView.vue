@@ -99,6 +99,7 @@
               <span class="mg-tasks">{{ m.tasks.filter(t=>t.isDone).length }}/{{ m.tasks.length }}</span>
             </div>
           </div>
+          <div v-if="m.description" class="module-desc-display rte-display" v-html="sanitizeHtml(m.description)"></div>
           <div v-if="openAcc.has(m.id)" class="task-list">
             <div v-for="t in m.tasks" :key="t.id+'acc'" class="task-item">
               <div :class="`task-check ${t.isDone?'done':t.isBlocked?'block':''}`" @click.stop="toggleTask(t)" style="cursor:pointer;">{{ t.isDone?'✓':'' }}</div>
@@ -469,6 +470,10 @@
               <option value="marketing">Marketing</option>
             </select>
             <button @click="editForm.modules.splice(mi,1)" style="background:var(--red-dim);color:var(--red);border:none;border-radius:5px;padding:4px 8px;cursor:pointer;">✕</button>
+          </div>
+          <div class="module-desc-field">
+            <label class="module-desc-label">{{ tt('pd.moduleDescLabel') }}</label>
+            <RichTextEditor v-model="m.description" :placeholder="tt('pd.moduleDescPlaceholder')" min-height="70px" />
           </div>
           <div v-for="(t, ti) in m.tasks" :key="ti" style="display:flex;gap:6px;align-items:center;margin-bottom:6px;padding-left:12px;">
             <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
@@ -1212,6 +1217,7 @@ async function saveEdit() {
       status: editForm.value.status,
       modules: editForm.value.modules.map(m => ({
         name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+        description: m.description || '',
         tasks: (m.tasks || []).map(t => ({
           name: t.name, assignee: t.assignee, progress: t.progress,
           isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
@@ -1240,7 +1246,7 @@ async function loadProject() {
 function editAddModule() {
   editForm.value.modules.push({
     name: '', color: editForm.value.category || 'dev', sortOrder: editForm.value.modules.length,
-    tasks: []
+    description: '', tasks: []
   })
 }
 
@@ -1724,6 +1730,11 @@ watch(editingTask, (t) => {
 .basic-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 4px 16px; align-items: start; }
 .basic-grid .form-group { margin-bottom: 10px; }
 .basic-grid__full { grid-column: 1 / -1; }
+/* per-module description (edit form) */
+.module-desc-field { margin: 0 0 10px; padding-left: 4px; }
+.module-desc-label { display: block; font-family: 'Nunito Sans', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 5px; }
+/* per-module description (read view) */
+.module-desc-display { font-size: 13px; color: var(--text-mid); line-height: 1.5; padding: 6px 12px 10px 26px; }
 .files-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 .files-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
 .files-title { font-size: 13px; font-weight: 800; }
