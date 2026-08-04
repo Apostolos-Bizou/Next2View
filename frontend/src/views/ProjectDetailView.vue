@@ -625,6 +625,45 @@ function closeTaskEdit() {
   editingTaskSaving.value = false
 }
 
+/**
+ * Single source of truth for PUT /projects/{id} payloads.
+ * @param {object} source     project.value OR editForm.value (same shape: scalar fields + modules + specs)
+ * @param {object} overrides  shallow overrides for project-level fields (spread last)
+ */
+function buildProjectPayload(source, overrides = {}) {
+  return {
+    title: source.title,
+    companyId: source.companyId,
+    category: source.category,
+    budget: source.budget || 0,
+    startDate: source.startDate || null,
+    deadline: source.deadline || null,
+    contractDesc: source.contractDesc || '',
+    description: source.description || '',
+    status: source.status,
+    specs: (source.specs || []).map(s => ({
+      description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
+      startDate: s.startDate || null, endDate: s.endDate || null
+    })),
+    modules: (source.modules || []).map(m => ({
+      name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
+      description: m.description || '',
+      tasks: (m.tasks || []).map(t => ({
+        name: t.name, assignee: t.assignee, progress: t.progress,
+        isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
+        comment: t.comment, description: t.description || '',
+        deadline: t.deadline,
+        startWeek: t.startWeek, durationWeeks: t.durationWeeks,
+        startDay: t.startDay, durationDays: t.durationDays,
+        manualProgress: t.manualProgress || false,
+        sortOrder: t.sortOrder || 0,
+        startDate: t.startDate || null, endDate: t.endDate || null
+      }))
+    })),
+    ...overrides
+  }
+}
+
 async function saveTaskEdit() {
   if (!editingTask.value || !editingTaskModule.value) return
   editingTaskSaving.value = true
@@ -648,34 +687,7 @@ async function saveTaskEdit() {
   Object.assign(project.value.modules[modIdx].tasks[taskIdx], edited)
 
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title,
-      companyId: project.value.companyId,
-      category: project.value.category,
-      budget: project.value.budget || 0,
-      startDate: project.value.startDate || null,
-      deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '',
-      status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({
-        description: s.description, isDone: s.isDone,
-        sortOrder: s.sortOrder || 0,
-        startDate: s.startDate || null, endDate: s.endDate || null
-      })),
-      modules: (project.value.modules || []).map(m2 => ({
-        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
-        tasks: (m2.tasks || []).map(t => ({
-          name: t.name, assignee: t.assignee, progress: t.progress,
-          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, description: t.description || '', deadline: t.deadline,
-          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
-          startDay: t.startDay, durationDays: t.durationDays,
-          sortOrder: t.sortOrder || 0,
-          startDate: t.startDate || null, endDate: t.endDate || null
-        }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value))
     closeTaskEdit()
     await loadProject()
   } catch (e) {
@@ -700,34 +712,7 @@ async function deleteTaskFromModal() {
   project.value.modules[modIdx].tasks.splice(taskIdx, 1)
 
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title,
-      companyId: project.value.companyId,
-      category: project.value.category,
-      budget: project.value.budget || 0,
-      startDate: project.value.startDate || null,
-      deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '',
-      status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({
-        description: s.description, isDone: s.isDone,
-        sortOrder: s.sortOrder || 0,
-        startDate: s.startDate || null, endDate: s.endDate || null
-      })),
-      modules: (project.value.modules || []).map(m2 => ({
-        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
-        tasks: (m2.tasks || []).map(t => ({
-          name: t.name, assignee: t.assignee, progress: t.progress,
-          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, description: t.description || '', deadline: t.deadline,
-          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
-          startDay: t.startDay, durationDays: t.durationDays,
-          sortOrder: t.sortOrder || 0,
-          startDate: t.startDate || null, endDate: t.endDate || null
-        }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value))
     closeTaskEdit()
     await loadProject()
   } catch (e) {
@@ -930,33 +915,7 @@ async function toggleTask(t) {
   t.progress = t.isDone ? 100 : 0
   t.manualProgress = true
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title,
-      companyId: project.value.companyId,
-      category: project.value.category,
-      budget: project.value.budget || 0,
-      startDate: project.value.startDate || null,
-      deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '',
-      status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({
-        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
-        startDate: s.startDate || null, endDate: s.endDate || null
-      })),
-      modules: (project.value.modules || []).map(m => ({
-        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
-        tasks: (m.tasks || []).map(t2 => ({
-          name: t2.name, assignee: t2.assignee, progress: t2.progress,
-          isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote,
-          comment: t2.comment, deadline: t2.deadline,
-          startWeek: t2.startWeek, durationWeeks: t2.durationWeeks,
-          startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0, manualProgress: t2.manualProgress || false,
-          startDate: t2.startDate || null, endDate: t2.endDate || null,
-
-        }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value))
   } catch(e) {
     t.isDone = prev
     t.progress = prevPct
@@ -967,31 +926,7 @@ async function toggleSpec(s) {
   const prev = s.isDone
   s.isDone = !s.isDone
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title,
-      companyId: project.value.companyId,
-      category: project.value.category,
-      budget: project.value.budget || 0,
-      startDate: project.value.startDate || null,
-      deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '',
-      status: project.value.status,
-      specs: (project.value.specs || []).map(s2 => ({
-        description: s2.description, isDone: s2.isDone, sortOrder: s2.sortOrder || 0,
-        startDate: s2.startDate || null, endDate: s2.endDate || null
-      })),
-      modules: (project.value.modules || []).map(m => ({
-        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
-        tasks: (m.tasks || []).map(t => ({
-          name: t.name, assignee: t.assignee, progress: t.progress,
-          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, description: t.description || '', deadline: t.deadline,
-          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
-          startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0, startDate: t.startDate || null, endDate: t.endDate || null
-        }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value))
   } catch(e) {
     s.isDone = prev
   }
@@ -1011,18 +946,7 @@ async function confirmDeleteModule(m) {
   if (idx === -1) return
   project.value.modules.splice(idx, 1)
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title, companyId: project.value.companyId,
-      category: project.value.category, budget: project.value.budget || 0,
-      startDate: project.value.startDate || null, deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '', description: project.value.description || '', status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
-      modules: (project.value.modules || []).map(m2 => ({
-        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
-        tasks: (m2.tasks || []).map(t => ({ name: t.name, assignee: t.assignee, progress: t.progress, isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote, comment: t.comment, deadline: t.deadline, startWeek: t.startWeek, durationWeeks: t.durationWeeks, startDay: t.startDay, durationDays: t.durationDays, sortOrder: t.sortOrder || 0, startDate: t.startDate || null, endDate: t.endDate || null }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value))
   } catch(e) { await loadProject() }
 }
 
@@ -1032,18 +956,7 @@ async function confirmDeleteTask(t, m) {
   if (tidx === -1) return
   m.tasks.splice(tidx, 1)
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title, companyId: project.value.companyId,
-      category: project.value.category, budget: project.value.budget || 0,
-      startDate: project.value.startDate || null, deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '', description: project.value.description || '', status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({ description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0, startDate: s.startDate || null, endDate: s.endDate || null })),
-      modules: (project.value.modules || []).map(m2 => ({
-        name: m2.name, color: m2.color, sortOrder: m2.sortOrder || 0,
-        tasks: (m2.tasks || []).map(t2 => ({ name: t2.name, assignee: t2.assignee, progress: t2.progress, isDone: t2.isDone, isBlocked: t2.isBlocked, blockNote: t2.blockNote, comment: t2.comment, deadline: t2.deadline, startWeek: t2.startWeek, durationWeeks: t2.durationWeeks, startDay: t2.startDay, durationDays: t2.durationDays, sortOrder: t2.sortOrder || 0, manualProgress: t2.manualProgress || false }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value))
   } catch(e) { await loadProject() }
 }
 
@@ -1068,33 +981,7 @@ async function saveSpecDetail() {
     project.value.specs[idx] = { ...selectedSpec.value }
   }
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title,
-      companyId: project.value.companyId,
-      category: project.value.category,
-      budget: project.value.budget || 0,
-      startDate: project.value.startDate || null,
-      deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '',
-      status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({
-        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
-        startDate: s.startDate || null, endDate: s.endDate || null
-      })),
-      modules: (project.value.modules || []).map(m => ({
-        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
-        tasks: (m.tasks || []).map(t => ({
-          name: t.name, assignee: t.assignee, progress: t.progress,
-          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, description: t.description || '', deadline: t.deadline,
-          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
-          startDay: t.startDay, durationDays: t.durationDays,
-          sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false,
-          startDate: t.startDate || null, endDate: t.endDate || null
-        }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value))
     showSpecModal.value = false
   } catch(e) {
     specSaveError.value = tt('pd.err.saveFailed')
@@ -1161,34 +1048,7 @@ async function saveDescription() {
   descriptionSaving.value = true
   descriptionError.value = ''
   try {
-    await api.put('/projects/' + project.value.id, {
-      title: project.value.title,
-      companyId: project.value.companyId,
-      category: project.value.category,
-      budget: project.value.budget || 0,
-      startDate: project.value.startDate || null,
-      deadline: project.value.deadline || null,
-      contractDesc: project.value.contractDesc || '',
-      description: project.value.description || '',
-      description: descriptionDraft.value || '',
-      status: project.value.status,
-      specs: (project.value.specs || []).map(s => ({
-        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
-        startDate: s.startDate || null, endDate: s.endDate || null
-      })),
-      modules: (project.value.modules || []).map(m => ({
-        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
-        tasks: (m.tasks || []).map(t => ({
-          name: t.name, assignee: t.assignee, progress: t.progress,
-          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, description: t.description || '', deadline: t.deadline,
-          startWeek: t.startWeek, durationWeeks: t.durationWeeks,
-          startDay: t.startDay, durationDays: t.durationDays,
-          sortOrder: t.sortOrder || 0, manualProgress: t.manualProgress || false,
-          startDate: t.startDate || null, endDate: t.endDate || null
-        }))
-      }))
-    })
+    await api.put('/projects/' + project.value.id, buildProjectPayload(project.value, { description: descriptionDraft.value || '' }))
     await loadProject()
     descriptionDraft.value = (project.value && project.value.description) || ''
   } catch (e) {
@@ -1233,32 +1093,7 @@ async function saveEdit() {
   editSaving.value = true
   editError.value = ""
   try {
-    await api.put(`/projects/${project.value.id}`, {
-      title: editForm.value.title,
-      companyId: editForm.value.companyId,
-      category: editForm.value.category,
-      budget: editForm.value.budget || 0,
-      startDate: editForm.value.startDate || null,
-      deadline: editForm.value.deadline || null,
-      contractDesc: editForm.value.contractDesc || "",
-      description: editForm.value.description || "",
-      status: editForm.value.status,
-      modules: editForm.value.modules.map(m => ({
-        name: m.name, color: m.color, sortOrder: m.sortOrder || 0,
-        description: m.description || '',
-        tasks: (m.tasks || []).map(t => ({
-          name: t.name, assignee: t.assignee, progress: t.progress,
-          isDone: t.isDone, isBlocked: t.isBlocked, blockNote: t.blockNote,
-          comment: t.comment, description: t.description || '', deadline: t.deadline,
-          startWeek: t.startWeek, durationWeeks: t.durationWeeks, sortOrder: t.sortOrder || 0,
-          startDate: t.startDate || null, endDate: t.endDate || null
-        }))
-      })),
-      specs: editForm.value.specs.map(s => ({
-        description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
-        startDate: s.startDate || null, endDate: s.endDate || null
-      }))
-    })
+    await api.put(`/projects/${project.value.id}`, buildProjectPayload(editForm.value))
     showEditModal.value = false
     await loadProject()
   } catch (e) {
