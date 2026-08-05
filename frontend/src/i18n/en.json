@@ -485,5 +485,18 @@
     "undo": "Undo",
     "redo": "Redo",
     "clearFormatting": "Clear formatting"
+  },
+  "workPlan": {
+    "title": "Work Plan",
+    "from": "From",
+    "to": "To",
+    "days": "Days",
+    "task": "Task",
+    "environment": "Environment",
+    "teams": "Team(s)",
+    "status": "Status",
+    "gate": "Sign-off gate",
+    "nextDay": "+1 day",
+    "noTasks": "No tasks"
   }
 }

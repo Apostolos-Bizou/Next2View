@@ -118,6 +118,9 @@
         </div>
       </div>
 
+      <!-- WORK PLAN (6a: read-only, renders only when project.workPlanEnabled) -->
+      <WorkPlanPanel :project="project" />
+
       <!-- SPECS -->
       <div v-if="project.specs && project.specs.length" class="specs-panel" style="margin-top:14px;">
         <div class="specs-title" style="display:flex;align-items:center;justify-content:space-between;">📋 Specifications <button @click="quickAddModule" style="font-size:11px;padding:4px 12px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;font-weight:700;">+ Module</button></div>
@@ -737,6 +740,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useProjectStore } from '@/stores/projects'
 import { usePermissionStore } from '@/stores/permissions'
 import RichTextEditor from '@/components/RichTextEditor.vue'
+import WorkPlanPanel from '@/components/WorkPlanPanel.vue'
 import DOMPurify from 'dompurify'
 
 const { t: tt } = useI18n()
