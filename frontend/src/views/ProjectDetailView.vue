@@ -644,7 +644,10 @@ function buildProjectPayload(source, overrides = {}) {
     contractDesc: source.contractDesc || '',
     description: source.description || '',
     status: source.status,
-    workPlanEnabled: source.workPlanEnabled ?? false,
+    // workPlanEnabled is deliberately NOT part of the default payload.
+    // Every PUT sends the whole project, so a stale client (loaded before
+    // the flag changed) would echo the old value back and silently clear it.
+    // Toggle it explicitly via overrides when that is the intent.
     specs: (source.specs || []).map(s => ({
       description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
       startDate: s.startDate || null, endDate: s.endDate || null
