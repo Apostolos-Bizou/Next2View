@@ -497,6 +497,10 @@
     "status": "Status",
     "gate": "Sign-off gate",
     "nextDay": "+1 day",
-    "noTasks": "No tasks"
+    "noTasks": "No tasks",
+    "taskFields": "Work Plan",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "workDays": "Working days"
   }
 }

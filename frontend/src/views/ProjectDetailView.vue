@@ -295,6 +295,39 @@
             </div>
           </div>
 
+          <!-- WORK PLAN fields (step 7) — visible only when the project has the work plan enabled -->
+          <template v-if="project && project.workPlanEnabled">
+            <div class="te-field">
+              <label>{{ tt('workPlan.taskFields') }}</label>
+            </div>
+            <div class="te-row">
+              <div class="te-field">
+                <label>{{ tt('workPlan.startTime') }}</label>
+                <input type="time" v-model="editingTaskStartTime" :disabled="editingTaskSaving" />
+              </div>
+              <div class="te-field">
+                <label>{{ tt('workPlan.endTime') }}</label>
+                <input type="time" v-model="editingTaskEndTime" :disabled="editingTaskSaving" />
+              </div>
+            </div>
+            <div class="te-row">
+              <div class="te-field">
+                <label>{{ tt('workPlan.workDays') }}</label>
+                <input type="number" step="0.05" min="0" v-model.number="editingTaskWorkDays" :disabled="editingTaskSaving" />
+              </div>
+              <div class="te-field">
+                <label>{{ tt('workPlan.environment') }}</label>
+                <input type="text" maxlength="40" v-model="editingTask.environment" :disabled="editingTaskSaving" />
+              </div>
+            </div>
+            <div class="te-toggles">
+              <label class="te-toggle">
+                <input type="checkbox" v-model="editingTask.isGate" :disabled="editingTaskSaving" />
+                <span>◆ {{ tt('workPlan.gate') }}</span>
+              </label>
+            </div>
+          </template>
+
           <div class="te-toggles">
             <label class="te-toggle">
               <input type="checkbox" v-model="editingTask.isDone" :disabled="editingTaskSaving" />
@@ -605,6 +638,22 @@ const editingTask = ref(null)           // the task being edited (cloned)
 const editingTaskModule = ref(null)     // the module that owns it
 const editingTaskSaving = ref(false)
 const editingTaskError = ref('')
+
+// Backend LocalTime serializes as "HH:MM:SS" but <input type="time"> wants "HH:MM".
+// These computed bridges convert in BOTH directions; clearing the input stores null.
+const editingTaskStartTime = computed({
+  get: () => editingTask.value && editingTask.value.startTime ? String(editingTask.value.startTime).slice(0, 5) : '',
+  set: (v) => { if (editingTask.value) editingTask.value.startTime = v ? v + ':00' : null },
+})
+const editingTaskEndTime = computed({
+  get: () => editingTask.value && editingTask.value.endTime ? String(editingTask.value.endTime).slice(0, 5) : '',
+  set: (v) => { if (editingTask.value) editingTask.value.endTime = v ? v + ':00' : null },
+})
+// Empty number input must store null, never 0 (v-model.number yields '' or NaN when cleared).
+const editingTaskWorkDays = computed({
+  get: () => (editingTask.value && editingTask.value.workDays !== null && editingTask.value.workDays !== undefined) ? editingTask.value.workDays : null,
+  set: (v) => { if (editingTask.value) editingTask.value.workDays = (v === '' || v === null || v === undefined || Number.isNaN(v)) ? null : v },
+})
 
 function handleGanttTaskClick(taskId) {
   if (!taskId) return
@@ -1785,6 +1834,8 @@ async function deleteEditTaskFile(taskId, fileId) {
 }
 .te-field input[type="text"],
 .te-field input[type="date"],
+.te-field input[type="time"],
+.te-field input[type="number"],
 .te-field textarea {
   padding: 10px 12px;
   border: 1px solid var(--border);
@@ -1799,6 +1850,8 @@ async function deleteEditTaskFile(taskId, fileId) {
 }
 .te-field input[type="text"]:focus,
 .te-field input[type="date"]:focus,
+.te-field input[type="time"]:focus,
+.te-field input[type="number"]:focus,
 .te-field textarea:focus {
   outline: none;
   border-color: var(--accent, #3b82f6);
