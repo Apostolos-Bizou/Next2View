@@ -152,7 +152,10 @@ public class ProjectService {
         p.setDeadline(req.deadline());
         p.setContractDesc(req.contractDesc());
         p.setDescription(req.description());
-        p.setWorkPlanEnabled(req.workPlanEnabled() != null ? req.workPlanEnabled() : false);
+        // Absent key means "leave as is", not "turn off". Same pattern as paid/invoiced
+        // above. A ternary defaulting to false silently cleared the flag on every save
+        // once the frontend stopped sending the key.
+        if (req.workPlanEnabled() != null) p.setWorkPlanEnabled(req.workPlanEnabled());
         p.setLastUpdatedBy(actor);
 
         p.getSpecs().clear();
