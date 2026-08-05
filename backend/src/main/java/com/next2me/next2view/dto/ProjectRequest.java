@@ -22,7 +22,8 @@ public record ProjectRequest(
     String contractDesc,
     String description,
     List<SpecRequest> specs,
-    List<ModuleRequest> modules
+    List<ModuleRequest> modules,
+    Boolean workPlanEnabled
 ) {
     public record SpecRequest(String description, boolean isDone, int sortOrder, LocalDate startDate, LocalDate endDate) {}
     public record ModuleRequest(
@@ -36,6 +37,8 @@ public record ProjectRequest(
         String blockNote, String comment, String description,
         LocalDate startDate,
     LocalDate deadline, Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress, LocalDate endDate,
-        int sortOrder
+        int sortOrder,
+        java.time.LocalTime startTime, java.time.LocalTime endTime,
+        String environment, java.math.BigDecimal workDays, Boolean isGate
     ) {}
 }

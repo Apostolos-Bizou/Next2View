@@ -71,6 +71,23 @@ public class Task extends BaseEntity {
     @Builder.Default
     private Integer sortOrder = 0;
 
+    // v29-workplan fields
+    @Column(name = "start_time")
+    private java.time.LocalTime startTime;
+
+    @Column(name = "end_time")
+    private java.time.LocalTime endTime;
+
+    @Column(length = 40)
+    private String environment;
+
+    @Column(name = "work_days", precision = 6, scale = 2)
+    private java.math.BigDecimal workDays;
+
+    @Column(name = "is_gate", nullable = false)
+    @Builder.Default
+    private Boolean isGate = false;
+
     /**
      * Sanitize HTML content before persisting (defense-in-depth XSS protection).
      */

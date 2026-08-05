@@ -641,6 +641,7 @@ function buildProjectPayload(source, overrides = {}) {
     contractDesc: source.contractDesc || '',
     description: source.description || '',
     status: source.status,
+    workPlanEnabled: source.workPlanEnabled ?? false,
     specs: (source.specs || []).map(s => ({
       description: s.description, isDone: s.isDone, sortOrder: s.sortOrder || 0,
       startDate: s.startDate || null, endDate: s.endDate || null
@@ -657,7 +658,11 @@ function buildProjectPayload(source, overrides = {}) {
         startDay: t.startDay, durationDays: t.durationDays,
         manualProgress: t.manualProgress || false,
         sortOrder: t.sortOrder || 0,
-        startDate: t.startDate || null, endDate: t.endDate || null
+        startDate: t.startDate || null, endDate: t.endDate || null,
+        startTime: t.startTime || null, endTime: t.endTime || null,
+        environment: t.environment || null,
+        workDays: t.workDays ?? null,
+        isGate: t.isGate || false
       }))
     })),
     ...overrides

@@ -152,6 +152,7 @@ public class ProjectService {
         p.setDeadline(req.deadline());
         p.setContractDesc(req.contractDesc());
         p.setDescription(req.description());
+        p.setWorkPlanEnabled(req.workPlanEnabled() != null ? req.workPlanEnabled() : false);
         p.setLastUpdatedBy(actor);
 
         p.getSpecs().clear();
@@ -297,6 +298,11 @@ public class ProjectService {
                 t.setStartDate(tr.startDate());
                 t.setEndDate(tr.endDate());
                 t.setSortOrder(ti);
+                t.setStartTime(tr.startTime());
+                t.setEndTime(tr.endTime());
+                t.setEnvironment(tr.environment());
+                t.setWorkDays(tr.workDays());
+                t.setIsGate(tr.isGate() != null ? tr.isGate() : false);
             }
         }
     }
@@ -333,6 +339,11 @@ public class ProjectService {
                     t.setStartDate(tr.startDate());
                     t.setEndDate(tr.endDate());
                     t.setSortOrder(ti);
+                    t.setStartTime(tr.startTime());
+                    t.setEndTime(tr.endTime());
+                    t.setEnvironment(tr.environment());
+                    t.setWorkDays(tr.workDays());
+                    t.setIsGate(tr.isGate() != null ? tr.isGate() : false);
                     m.getTasks().add(t);
                 });
             }
@@ -409,7 +420,8 @@ public class ProjectService {
             var tasks = m.getTasks().stream().map(t -> new ProjectDto.TaskDto(
                     t.getId(), t.getName(), t.getAssignee(), t.getProgress(),
                     t.getIsDone(), t.getIsBlocked(), t.getBlockNote(),
-                    t.getComment(), t.getDescription(), t.getDeadline(), t.getStartWeek(), t.getDurationWeeks(), t.getStartDay(), t.getDurationDays(), t.getManualProgress(), t.getStartDate(), t.getEndDate()
+                    t.getComment(), t.getDescription(), t.getDeadline(), t.getStartWeek(), t.getDurationWeeks(), t.getStartDay(), t.getDurationDays(), t.getManualProgress(), t.getStartDate(), t.getEndDate(),
+                    t.getStartTime(), t.getEndTime(), t.getEnvironment(), t.getWorkDays(), t.getIsGate()
             )).toList();
             return new ProjectDto.ModuleDto(m.getId(), m.getName(), m.getColor(), mc, m.getDescription(), tasks);
         }).toList();
@@ -427,7 +439,8 @@ public class ProjectService {
                 p.getStartDate(), p.getDeadline(), p.getContractDesc(),
                 p.getDescription(),
                 completion, (int) tasksTotal, (int) tasksDone,
-                updatedAgo, overdueTaskCount, modules, specs
+                updatedAgo, overdueTaskCount, modules, specs,
+                p.getWorkPlanEnabled()
         );
     }
 

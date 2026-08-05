@@ -28,7 +28,8 @@ public record ProjectDto(
     long updatedAgo,
     Integer overdueTaskCount,
     List<ModuleDto> modules,
-    List<SpecDto> specs
+    List<SpecDto> specs,
+    Boolean workPlanEnabled
 ) {
     public record ModuleDto(
         UUID id, String name, String color, int completion,
@@ -39,7 +40,9 @@ public record ProjectDto(
         UUID id, String name, String assignee, int progress,
         boolean isDone, boolean isBlocked, String blockNote,
         String comment, String description, LocalDate deadline,
-        Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress, java.time.LocalDate startDate, java.time.LocalDate endDate
+        Integer startWeek, Integer durationWeeks, Integer startDay, Integer durationDays, Boolean manualProgress, java.time.LocalDate startDate, java.time.LocalDate endDate,
+        java.time.LocalTime startTime, java.time.LocalTime endTime,
+        String environment, java.math.BigDecimal workDays, Boolean isGate
     ) {}
     public record SpecDto(UUID id, String description, boolean isDone, int sortOrder, java.time.LocalDate startDate, java.time.LocalDate endDate) {}
 }

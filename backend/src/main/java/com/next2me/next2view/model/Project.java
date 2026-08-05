@@ -58,6 +58,11 @@ public class Project extends BaseEntity {
     @Builder.Default
     private Boolean active = true;
 
+    // v29-workplan
+    @Column(name = "work_plan_enabled", nullable = false)
+    @Builder.Default
+    private Boolean workPlanEnabled = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by")
     private User createdBy;
