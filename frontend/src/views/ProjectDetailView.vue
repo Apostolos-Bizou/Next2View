@@ -119,7 +119,7 @@
       </div>
 
       <!-- WORK PLAN (6a: read-only, renders only when project.workPlanEnabled) -->
-      <WorkPlanPanel :project="project" />
+      <WorkPlanPanel :project="project" @task-click="handleGanttTaskClick" />
 
       <!-- SPECS -->
       <div v-if="project.specs && project.specs.length" class="specs-panel" style="margin-top:14px;">

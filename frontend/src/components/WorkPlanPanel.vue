@@ -13,6 +13,7 @@
             <th class="col-task">{{ t('workPlan.task') }}</th>
             <th>{{ t('workPlan.environment') }}</th>
             <th>{{ t('workPlan.teams') }}</th>
+            <th class="col-remarks">{{ t('workPlan.remarks') }}</th>
             <th>{{ t('workPlan.status') }}</th>
           </tr>
         </thead>
@@ -30,6 +31,7 @@
               </td>
               <td></td>
               <td></td>
+              <td></td>
               <td>
                 <div class="wp-st">
                   <div class="wp-bar"><i :style="`width:${m.completion || 0}%;background:var(--${m.color || 'dev'});`"></i></div>
@@ -38,7 +40,7 @@
               </td>
             </tr>
             <template v-if="open.has(m.id)">
-              <tr v-for="task in m.tasks" :key="task.id" class="wp-trow">
+              <tr v-for="task in m.tasks" :key="task.id" class="wp-trow wp-clickable" @click="$emit('task-click', task.id)">
                 <td class="wp-dt">
                   {{ task.startDate ? fmtDate(task.startDate) : '—' }}
                   <span v-if="task.startTime" class="wp-tm">{{ fmtTime(task.startTime) }}</span>
@@ -66,6 +68,7 @@
                   </template>
                   <template v-else>—</template>
                 </td>
+                <td class="wp-remark" :title="remarkText(task) || null">{{ remarkShort(task) || '—' }}</td>
                 <td>
                   <div class="wp-st">
                     <div class="wp-bar"><i :style="`width:${task.progress || 0}%;background:${task.isDone ? 'var(--green)' : 'var(--' + (m.color || 'dev') + ')'};`"></i></div>
@@ -74,7 +77,7 @@
                 </td>
               </tr>
               <tr v-if="!m.tasks.length" class="wp-trow">
-                <td colspan="7" class="wp-empty">{{ t('workPlan.noTasks') }}</td>
+                <td colspan="8" class="wp-empty">{{ t('workPlan.noTasks') }}</td>
               </tr>
             </template>
           </template>
@@ -87,10 +90,13 @@
 <script setup>
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import DOMPurify from 'dompurify'
 
 const props = defineProps({
   project: { type: Object, required: true },
 })
+
+defineEmits(['task-click'])
 
 const { t } = useI18n()
 
@@ -156,6 +162,15 @@ function envsOf(task) {
 function teamsOf(task) {
   return task.assignee ? task.assignee.split(',').map(s => s.trim()).filter(Boolean) : []
 }
+// comment may be plain text (imported) or Tiptap HTML (edited via the modal) — strip to text
+function remarkText(task) {
+  if (!task.comment) return ''
+  return DOMPurify.sanitize(String(task.comment), { ALLOWED_TAGS: [], ALLOWED_ATTR: [] }).trim()
+}
+function remarkShort(task) {
+  const txt = remarkText(task)
+  return txt.length > 60 ? txt.slice(0, 60) + '…' : txt
+}
 // deterministic color from name hash over existing category/accent CSS vars — no hardcoded team list
 const TEAM_PALETTE = ['dev', 'finance', 'legal', 'marketing', 'accent']
 function teamColor(name) {
@@ -182,6 +197,10 @@ function teamColor(name) {
 .wp-table td.num { text-align: right; }
 .wp-mrow td { background: var(--surface3); cursor: pointer; user-select: none; }
 .wp-mrow:hover td { background: var(--surface2); }
+.wp-trow.wp-clickable { cursor: pointer; }
+.wp-trow.wp-clickable:hover td { background: var(--accent-dim); }
+.wp-table th.col-remarks { max-width: 220px; }
+.wp-remark { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: "Nunito Sans", sans-serif; font-size: 11.5px; color: var(--text-dim); }
 .wp-caret { display: inline-block; font-size: 10px; color: var(--text-mid); margin-right: 6px; transition: transform 0.15s; }
 .wp-caret.closed { transform: rotate(-90deg); }
 .wp-mdot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 7px; }
