@@ -184,39 +184,48 @@
       </div>
     </div>
 
-    <!-- CUTOVER RUNBOOK (6c) — modules whose non-gate steps all carry a start time, span <= 3 days -->
-    <div v-else-if="activeTab === 'cutover'" class="wp-rb">
-      <div v-for="m in cutoverModules" :key="m.id" class="wp-rb-block">
-        <div class="wp-rb-head">
-          <span class="wp-mdot" :style="`background:var(--${m.color || 'dev'});`"></span>
-          <span class="wp-mname">{{ m.name || '—' }}</span>
-          <span class="wp-rb-meta">
-            {{ m.minStart ? fmtDate(m.minStart) : '—' }} → {{ m.maxEnd ? fmtDate(m.maxEnd) : '—' }}
-            · {{ m.sumDays }}d
-            · {{ m.doneCount }}/{{ m.tasks.length }} {{ t('workPlan.runbookSteps') }}
-          </span>
-        </div>
-        <div class="wp-rb-timeline">
-          <template v-for="row in stepRows(m)" :key="row.key">
-            <div v-if="row.type === 'divider'" class="wp-rb-day">
-              <span class="wp-rb-day-label">{{ row.label }}</span>
-            </div>
-            <div v-else class="wp-rb-step" @click="$emit('task-click', row.task.id)">
-              <span :class="['wp-rb-dot', { gate: row.task.isGate === true, filled: (row.task.progress || 0) === 100 }]"></span>
-              <span class="wp-rb-time">{{ stepTime(row.task) }}</span>
-              <div class="wp-rb-body">
-                <div :class="['wp-rb-name', { done: row.task.isDone }]">
-                  <span v-if="row.task.isGate === true" class="wp-gate" :title="t('workPlan.gate')">◆</span>{{ row.task.name || '—' }}
-                </div>
-                <div v-if="teamsOf(row.task).length" class="wp-rb-teams">
-                  <span v-for="tm in teamsOf(row.task)" :key="tm" class="wp-team">
-                    <i :style="`background:var(--${teamColor(tm)});`"></i>{{ tm }}
-                  </span>
-                </div>
-                <div v-if="remarkText(row.task)" class="wp-rb-remark" :title="remarkText(row.task)">{{ remarkShort(row.task) }}</div>
+    <!-- CUTOVER RUNBOOK (6c + parity) — modules whose non-gate steps all carry a start time, span <= 3 days -->
+    <div v-else-if="activeTab === 'cutover'">
+      <div v-if="cutoverModules.length" class="wp-rb-note">{{ t('workPlan.rbNote') }}</div>
+      <div class="wp-rb">
+        <div v-for="m in cutoverModules" :key="m.id" class="wp-rb-block">
+          <div class="wp-rb-hero">
+            <h3>{{ m.name }}</h3>
+            <div class="w">{{ fmtDate(m.minStart) }} {{ shT(firstStartTime(m), shiftOf(m)) }}
+               → {{ fmtDate(m.maxEnd) }} · {{ windowHours(m) }}h</div>
+          </div>
+          <div class="wp-rb-ctrl">
+            <label>{{ t('workPlan.rbShift') }}</label>
+            <input type="number" :value="shiftOf(m)" step="30" min="-240" max="480"
+                   @input="rbShift[m.id] = Number($event.target.value) || 0"> min
+            <span class="sh">{{ shiftOf(m)
+               ? (shiftOf(m) > 0 ? '+' : '') + shiftOf(m) + ' min · ' + t('workPlan.rbRecomputed')
+               : t('workPlan.rbOnPlan') }}</span>
+          </div>
+          <div class="wp-rb-timeline">
+            <template v-for="row in stepRows(m)" :key="row.key">
+              <div v-if="row.type === 'divider'" class="wp-rb-day">
+                <span class="wp-rb-day-label">{{ row.label }}</span>
               </div>
-            </div>
-          </template>
+              <div v-else class="wp-rb-step" @click="$emit('task-click', row.task.id)">
+                <span :class="['wp-rb-dot', { gate: row.task.isGate === true, filled: (row.task.progress || 0) === 100 }]"></span>
+                <span class="wp-rb-time">{{ stepTime(row.task, shiftOf(m)) }}</span>
+                <div class="wp-rb-body">
+                  <div :class="['wp-rb-name', { done: row.task.isDone }]">
+                    <span v-if="row.task.isGate === true" class="wp-gate" :title="t('workPlan.gate')">◆</span>{{ row.task.name || '—' }}<span v-if="Number(row.task.workDays) > 0" class="wp-dur-pill">{{ row.task.workDays }}d</span>
+                  </div>
+                  <div class="wp-rb-sub">{{ fmtDate(stepDateOf(row.task)) }} ·
+                    {{ shT(row.task.startTime, shiftOf(m)) || '—' }} → {{ shT(row.task.endTime, shiftOf(m)) }}</div>
+                  <div v-if="teamsOf(row.task).length" class="wp-rb-teams">
+                    <span v-for="tm in teamsOf(row.task)" :key="tm" class="wp-team">
+                      <i :style="`background:var(--${teamColor(tm)});`"></i>{{ tm }}
+                    </span>
+                  </div>
+                  <div v-if="remarkText(row.task)" class="wp-rb-remark" :title="remarkText(row.task)">{{ remarkShort(row.task) }}</div>
+                </div>
+              </div>
+            </template>
+          </div>
         </div>
       </div>
     </div>
@@ -717,10 +726,42 @@ function sortedSteps(m) {
     return ka < kb ? -1 : ka > kb ? 1 : 0
   })
 }
+// ── cutover parity: per-window shift scenario (in-memory, like the simulator) ──
+const rbShift = ref({})   // module.id -> minutes
+function shiftOf(m) { return rbShift.value[m.id] || 0 }
+
+// 'HH:mm[:ss]' + minutes -> 'HH:mm' with a '+1' suffix when it wraps past midnight
+function shT(v, mins) {
+  if (!v) return ''
+  const [h, mi] = fmtTime(v).split(':').map(Number)
+  let x = h * 60 + mi + (mins || 0)
+  const d = Math.floor(x / 1440); x = ((x % 1440) + 1440) % 1440
+  return `${String(Math.floor(x / 60)).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}${d > 0 ? '+1' : ''}`
+}
+
+// Whole-window span in hours, min(start) -> max(end), parsed as UTC so no
+// timezone can stretch it. Missing times default to office hours (09:00/17:00).
+// Limit: an overnight task (endTime < startTime on the SAME date) would need
+// +1 day on its end stamp — no such task exists in the current cutover
+// windows (checked: Dress Rehearsal, MIG Go-Live), so it is not handled here.
+function windowHours(m) {
+  const starts = m.tasks.filter(t => t.startDate).map(t => t.startDate + 'T' + fmtTime(t.startTime || '09:00'))
+  const ends = m.tasks.filter(t => t.endDate || t.startDate).map(t => (t.endDate || t.startDate) + 'T' + fmtTime(t.endTime || '17:00'))
+  if (!starts.length || !ends.length) return 0
+  const a = starts.reduce((x, y) => (y < x ? y : x))
+  const b = ends.reduce((x, y) => (y > x ? y : x))
+  return Math.round((Date.parse(b + 'Z') - Date.parse(a + 'Z')) / 3600000)
+}
+
+// startTime of the first (chronologically sorted) step that has one
+function firstStartTime(m) {
+  const t = sortedSteps(m).find(x => x.startTime)
+  return t ? t.startTime : ''
+}
+
 // start time on the left; gates only have an end time — show that instead
-function stepTime(t) {
-  const v = t.startTime || t.endTime
-  return v ? fmtTime(v) : '—'
+function stepTime(t, shift) {
+  return shT(t.startTime || t.endTime, shift) || '—'
 }
 // Runbook rows with a day divider whenever the step date changes (incl. before the
 // first step — it marks the window start). Undated steps sort last and group under
@@ -1045,13 +1086,32 @@ function teamColor(name) {
 /* must out-rank `.wp-table th` (text-dim) — bare .wp-col-computed would lose */
 .wp-table th.wp-col-computed { color: var(--dev); }
 .wp-plan-note { padding: 8px 20px 12px; font-size: 11px; color: var(--text-dim); }
-/* cutover runbook — vertical timeline mirrors .history-timeline (existing vars only) */
-.wp-rb { padding: 14px 20px; }
-.wp-rb-block { margin-bottom: 18px; }
-.wp-rb-block:last-child { margin-bottom: 4px; }
-.wp-rb-head { display: flex; align-items: center; margin-bottom: 8px; }
-.wp-rb-meta { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); margin-left: 10px; white-space: nowrap; }
-.wp-rb-timeline { display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--border-bright); margin-left: 8px; padding-left: 18px; }
+/* cutover runbook — one panel per window, side by side (mockup .rbg) */
+.wp-rb { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 14px 20px; }
+@media (max-width: 1100px) { .wp-rb { grid-template-columns: 1fr; } }
+.wp-rb-block { margin-bottom: 0; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--surface); overflow: hidden; }
+/* Hardcoded hex: σκόπιμη εξαίρεση #2 — navy hero όπως mockup .rbh (229) */
+.wp-rb-hero { padding: 14px 20px; background: linear-gradient(90deg,#0b1a33 0%,#12264a 100%); color: #fff; }
+.wp-rb-hero h3 { font-size: 15px; font-weight: 900; margin: 0; }
+.wp-rb-hero .w { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; opacity: .75; margin-top: 3px; }
+.wp-rb-ctrl { display: flex; align-items: center; gap: 10px; padding: 10px 20px;
+  background: var(--surface2); border-bottom: 1px solid var(--border); flex-wrap: wrap;
+  font-size: 12px; color: var(--text-mid); }
+.wp-rb-ctrl label { font-family: "Nunito Sans", sans-serif; font-size: 8.5px; font-weight: 800;
+  letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-dim); }
+.wp-rb-ctrl input { font-family: "Nunito Sans", sans-serif; font-size: 12px; font-weight: 700;
+  padding: 5px 8px; border: 1px solid var(--border-bright); border-radius: 6px; width: 78px;
+  background: var(--surface); color: var(--text); }
+.wp-rb-ctrl .sh { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; color: var(--legal); }
+.wp-dur-pill { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 9px;
+  background: var(--surface3); color: var(--text-mid); font-family: "Nunito Sans", sans-serif;
+  font-size: 10px; font-weight: 800; vertical-align: 1px; }
+.wp-rb-sub { font-family: "Nunito Sans", sans-serif; font-size: 10.5px; font-weight: 600;
+  color: var(--text-dim); margin-top: 2px; }
+.wp-rb-note { padding: 10px 20px 0; font-size: 11px; color: var(--text-dim); }
+/* timeline carries its own margins now that the block is a bordered panel */
+.wp-rb-timeline { display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--border-bright); margin: 12px 20px 14px 28px; padding-left: 18px; }
 .wp-rb-step { position: relative; padding: 7px 6px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; border-radius: 6px; }
 .wp-rb-step:hover { background: var(--accent-dim); }
 .wp-rb-dot { position: absolute; left: -24px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
