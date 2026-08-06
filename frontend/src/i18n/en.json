@@ -592,6 +592,13 @@
     "byPhase": "By phase",
     "zDay": "Day",
     "zWeek": "Week",
-    "zMonth": "Month"
+    "zMonth": "Month",
+    "byTeam": "By team",
+    "byEnv": "By environment",
+    "jumpToday": "Jump to today",
+    "legendGate": "Sign-off gate",
+    "legendCut": "Cutover window",
+    "legendToday": "Today",
+    "legendZoom": "Ctrl + scroll: zoom · Pinch on touch"
   }
 }

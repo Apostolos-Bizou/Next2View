@@ -190,6 +190,8 @@
       <div class="wp-tl-ctrl">
         <div class="wp-seg">
           <button :class="['wp-seg-btn', { active: tlGroup === 'phase' }]" @click="tlGroup = 'phase'">{{ t('workPlan.byPhase') }}</button>
+          <button :class="['wp-seg-btn', { active: tlGroup === 'team' }]" @click="tlGroup = 'team'">{{ t('workPlan.byTeam') }}</button>
+          <button :class="['wp-seg-btn', { active: tlGroup === 'env' }]" @click="tlGroup = 'env'">{{ t('workPlan.byEnv') }}</button>
         </div>
         <div style="flex:1"></div>
         <div class="wp-seg">
@@ -197,9 +199,11 @@
           <button :class="['wp-seg-btn', { active: tlZoom === 14 }]" @click="tlZoom = 14">{{ t('workPlan.zWeek') }}</button>
           <button :class="['wp-seg-btn', { active: tlZoom === 7 }]" @click="tlZoom = 7">{{ t('workPlan.zMonth') }}</button>
         </div>
+        <button class="wp-mini-btn" @click="tlJumpToday">{{ t('workPlan.jumpToday') }}</button>
       </div>
       <div v-if="!tlRange.days" class="wp-sim-empty">{{ t('workPlan.noTasks') }}</div>
-      <div v-else class="wp-tl-scroll" ref="tlScroll">
+      <div v-else class="wp-tl-scroll" ref="tlScroll"
+           @wheel="tlWheel" @touchstart="tlTouchStart" @touchmove="tlTouchMove" @touchend="tlTouchEnd">
         <div class="wp-tl-table" :style="{ '--cw': tlZoom + 'px', '--tw': tlRange.days * tlZoom + 'px' }">
           <div class="wp-tl-head">
             <div class="wp-tl-head-l">{{ t('workPlan.task') }}</div>
@@ -208,12 +212,18 @@
                    :style="{ left: mo.startI * tlZoom + 'px', width: mo.span * tlZoom + 'px' }">{{ mo.label }}</div>
               <div v-for="d in tlDays" :key="d.i" :class="['wp-tl-dy', { we: d.isWe, ho: d.isHo }]"
                    :style="{ left: d.i * tlZoom + 'px', width: tlZoom + 'px' }">{{ tlZoom >= 13 ? d.dayNum : '' }}</div>
+              <div v-for="(cb, ci) in tlCutBands" :key="'cl' + ci" class="wp-tl-cutlab"
+                   :style="{ left: cb.left + 'px' }">{{ cb.label }}</div>
+              <div v-if="tlTodayIx !== null" class="wp-tl-today" :style="{ left: tlTodayIx * tlZoom + 'px' }"></div>
             </div>
           </div>
           <!-- single shaded layer behind every row — see tlBgSegments -->
           <div class="wp-tl-bg">
             <div v-for="(seg, si) in tlBgSegments" :key="si" :class="['wp-tl-bgseg', seg.cls]"
                  :style="{ left: seg.i * tlZoom + 'px', width: seg.cls === 'gl' ? '1px' : tlZoom + 'px' }"></div>
+            <div v-for="(cb, ci) in tlCutBands" :key="'cb' + ci" class="wp-tl-cutband"
+                 :style="{ left: cb.left + 'px', width: cb.width + 'px' }"></div>
+            <div v-if="tlTodayIx !== null" class="wp-tl-today fade" :style="{ left: tlTodayIx * tlZoom + 'px' }"></div>
           </div>
           <template v-for="g in tlGroups" :key="g.key">
             <div class="wp-tl-row mod">
@@ -248,6 +258,14 @@
             </div>
           </template>
         </div>
+      </div>
+      <!-- legend — dynamic from the data, never a hardcoded team list -->
+      <div v-if="tlRange.days" class="wp-tl-strip">
+        <span v-for="tm in teamOptions" :key="tm" class="wp-tl-strip-item"><i :style="`background:var(--${teamColor(tm)});`"></i>{{ tm }}</span>
+        <span class="wp-tl-strip-item"><i class="dia"></i>{{ t('workPlan.legendGate') }}</span>
+        <span v-if="tlCutBands.length" class="wp-tl-strip-item"><i class="cut"></i>{{ t('workPlan.legendCut') }}</span>
+        <span v-if="tlTodayIx !== null" class="wp-tl-strip-item"><i class="today"></i>{{ t('workPlan.legendToday') }}</span>
+        <span class="wp-tl-strip-item hint">{{ t('workPlan.legendZoom') }}</span>
       </div>
     </div>
 
@@ -482,7 +500,7 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS work_plan_enabled BOOLEAN NOT NULL
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DOMPurify from 'dompurify'
 
@@ -718,12 +736,81 @@ const tlBgSegments = computed(() => tlDays.value
   .map(d => ({ i: d.i, cls: d.isHo ? 'ho' : d.isWe ? 'we' : 'gl' })))
 
 // Groups honour the SAME filtered pipeline as the plan table (visibleModules).
+// In team/env mode a task with two teams (or envs) appears in two groups —
+// same as the mockup, no dedup. Keys come from the data, never a fixed list;
+// the trailing '—' bucket collects tasks with none. Empty groups are dropped.
 const tlGroups = computed(() => {
   if (tlGroup.value === 'phase')
     return visibleModules.value.map(m => ({ key: m.id, label: m.name,
       color: m.color || 'dev', tasks: m.visibleTasks, progress: m.completion }))
-  return []  // team/env in commit 2
+  const tasks = visibleModules.value.flatMap(m => m.visibleTasks)
+  const of = tlGroup.value === 'team' ? teamsOf : envsOf
+  const keys = [...new Set(tasks.flatMap(of))]
+  return keys.map(k => ({ key: k, label: k, color: teamColor(k), tasks: tasks.filter(t => of(t).includes(k)) }))
+    .concat([{ key: '—', label: '—', color: 'dev', tasks: tasks.filter(t => !of(t).length) }])
+    .filter(g => g.tasks.length)
+    .map(g => ({ ...g, progress: Math.round(g.tasks.reduce((s, t) => s + (t.progress || 0), 0) / g.tasks.length) }))
 })
+
+// Cutover windows as shaded bands on the shared layer + a label pill in the header.
+const tlCutBands = computed(() => cutoverModules.value
+  .filter(m => m.minStart && m.maxEnd)
+  .map(m => ({
+    left: tlIx(m.minStart) * tlZoom.value,
+    width: (tlIx(m.maxEnd) + 1 - tlIx(m.minStart)) * tlZoom.value,
+    label: m.name,
+  })))
+
+// Anchored to the asOf ref like every other computation in the panel — never a raw today.
+const tlTodayIx = computed(() => {
+  if (!tlRange.value.start) return null
+  const i = tlIx(asOf.value)
+  return (i >= 0 && i <= tlRange.value.days) ? i : null
+})
+
+function tlJumpToday() {
+  const el = tlScroll.value
+  if (!el || !tlRange.value.start) return
+  el.scrollLeft = Math.max(0, tlIx(asOf.value) * tlZoom.value - 240)
+}
+
+// Ctrl/⌘ + wheel and two-finger pinch step through the zoom levels —
+// same technique as GanttV2, adapted to our px-per-day levels.
+const TL_LEVELS = [26, 14, 7]  // day → week → month
+function tlWheel(ev) {
+  if (!(ev.ctrlKey || ev.metaKey)) return
+  ev.preventDefault()
+  let idx = TL_LEVELS.indexOf(tlZoom.value)
+  if (idx === -1) idx = 1
+  if (ev.deltaY > 0 && idx < 2) idx++
+  else if (ev.deltaY < 0 && idx > 0) idx--
+  else return
+  tlZoom.value = TL_LEVELS[idx]
+}
+let tlTouchDist = 0
+let tlTouchZoom = null
+function tlTouchStart(ev) {
+  if (ev.touches.length === 2) {
+    const dx = ev.touches[0].clientX - ev.touches[1].clientX
+    const dy = ev.touches[0].clientY - ev.touches[1].clientY
+    tlTouchDist = Math.sqrt(dx * dx + dy * dy)
+    tlTouchZoom = tlZoom.value
+  }
+}
+function tlTouchMove(ev) {
+  if (ev.touches.length === 2 && tlTouchDist > 0) {
+    const dx = ev.touches[0].clientX - ev.touches[1].clientX
+    const dy = ev.touches[0].clientY - ev.touches[1].clientY
+    const ratio = Math.sqrt(dx * dx + dy * dy) / tlTouchDist
+    // spread = zoom in = MORE px per day = lower index
+    const idx = TL_LEVELS.indexOf(tlTouchZoom)
+    let ni = idx
+    if (ratio > 1.3) ni = Math.max(idx - 1, 0)
+    else if (ratio < 0.77) ni = Math.min(idx + 1, 2)
+    if (ni !== idx && tlZoom.value !== TL_LEVELS[ni]) tlZoom.value = TL_LEVELS[ni]
+  }
+}
+function tlTouchEnd() { tlTouchDist = 0; tlTouchZoom = null }
 
 // Same "passed" rule the gates panel and KPIs use: progress at exactly 100.
 const gatePassed = g => (g.progress || 0) === 100
@@ -840,6 +927,11 @@ const INT_STEPS = [
 
 // ── 6c: cutover runbook ─────────────────────────────────────────────────────
 const activeTab = ref('plan')
+
+// timeline: auto-jump to today when the tab opens (the pane mounts via
+// v-else-if, so tlScroll only exists after nextTick). Lives here, not in the
+// 6β section — activeTab is declared at this point (const, no hoisting).
+watch(activeTab, (v) => { if (v === 'timeline') nextTick(tlJumpToday) })
 
 // A module is a cutover window when BOTH hold:
 //  (a) every non-gate task has a startTime, (b) the whole span fits in <= 3 calendar days.
@@ -1454,4 +1546,16 @@ function teamColor(name) {
 .wp-tl-dia { position: absolute; top: 9px; width: 14px; height: 14px; margin-left: -7px; background: var(--surface); border: 2.5px solid var(--dev); transform: rotate(45deg); z-index: 4; cursor: pointer; }
 .wp-tl-dia.ok { background: var(--green); border-color: var(--green); }
 .wp-tl-dia.bad { border-color: var(--red); background: var(--red-dim); }
+/* timeline commit 2 — cutover bands, today line, legend strip (mockup 208–211, 570–577) */
+.wp-tl-cutband { position: absolute; top: 0; bottom: 0; z-index: 1; background: rgba(217,119,6,.07); border-left: 2px dashed var(--legal); border-right: 2px dashed var(--legal); }
+.wp-tl-cutlab { position: absolute; top: 2px; font-family: "Nunito Sans", sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #fff; background: var(--legal); padding: 2px 7px; border-radius: 8px; white-space: nowrap; z-index: 5; }
+.wp-tl-today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--red); z-index: 4; pointer-events: none; box-shadow: 0 0 8px rgba(220,38,38,.4); }
+.wp-tl-today.fade { opacity: .3; }
+.wp-tl-strip { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; padding: 10px 20px; border-top: 1px solid var(--border); background: var(--surface2); font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); }
+.wp-tl-strip-item { display: inline-flex; align-items: center; gap: 6px; }
+.wp-tl-strip-item i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+.wp-tl-strip-item i.dia { width: 9px; height: 9px; background: var(--surface); border: 2.5px solid var(--dev); transform: rotate(45deg); border-radius: 2px; }
+.wp-tl-strip-item i.cut { background: rgba(217,119,6,.15); border: 1px dashed var(--legal); }
+.wp-tl-strip-item i.today { width: 3px; height: 12px; background: var(--red); border-radius: 1px; }
+.wp-tl-strip-item.hint { margin-left: auto; font-weight: 600; }
 </style>
