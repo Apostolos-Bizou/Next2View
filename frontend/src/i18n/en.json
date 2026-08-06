@@ -527,6 +527,14 @@
     "qRisk": "At risk",
     "qGates": "Gates",
     "qCut": "Cutover",
-    "qOpen": "Open"
+    "qOpen": "Open",
+    "colHealth": "Health",
+    "colVariance": "Var",
+    "cutBadge": "CUTOVER · Fri→Sun",
+    "hDone": "Done",
+    "hLate": "Overdue",
+    "hProg": "In progress",
+    "hSoon": "Starts soon",
+    "hTodo": "Not started"
   }
 }

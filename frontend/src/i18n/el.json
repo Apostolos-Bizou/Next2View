@@ -527,6 +527,14 @@
     "qRisk": "Σε κίνδυνο",
     "qGates": "Πύλες",
     "qCut": "Cutover",
-    "qOpen": "Ανοιχτά"
+    "qOpen": "Ανοιχτά",
+    "colHealth": "Κατάσταση",
+    "colVariance": "Απόκλ.",
+    "cutBadge": "CUTOVER · Παρ→Κυρ",
+    "hDone": "Ολοκληρώθηκε",
+    "hLate": "Εκπρόθεσμο",
+    "hProg": "Σε εξέλιξη",
+    "hSoon": "Ξεκινά σύντομα",
+    "hTodo": "Δεν ξεκίνησε"
   }
 }

@@ -85,6 +85,8 @@
             <th>{{ t('workPlan.teams') }}</th>
             <th class="col-remarks">{{ t('workPlan.remarks') }}</th>
             <th>{{ t('workPlan.status') }}</th>
+            <th>{{ t('workPlan.colHealth') }}</th>
+            <th class="num">{{ t('workPlan.colVariance') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -98,6 +100,7 @@
                 <span class="wp-mdot" :style="`background:var(--${m.color || 'dev'});`"></span>
                 <span class="wp-mname">{{ m.name || '—' }}</span>
                 <span class="wp-count">{{ m.doneCount }}/{{ m.tasks.length }}</span>
+                <span v-if="cutoverIds.has(m.id)" class="wp-cut-badge">{{ t('workPlan.cutBadge') }}</span>
               </td>
               <td></td>
               <td></td>
@@ -108,9 +111,11 @@
                   <span class="wp-pc" :style="`color:var(--${m.color || 'dev'});`">{{ m.completion || 0 }}%</span>
                 </div>
               </td>
+              <td></td>
+              <td></td>
             </tr>
             <template v-if="open.has(m.id)">
-              <tr v-for="task in m.visibleTasks" :key="task.id" class="wp-trow wp-clickable" @click="$emit('task-click', task.id)">
+              <tr v-for="task in m.visibleTasks" :key="task.id" :class="['wp-trow', 'wp-clickable', flagClass(task)]" @click="$emit('task-click', task.id)">
                 <td class="wp-dt">
                   {{ task.startDate ? fmtDate(task.startDate) : '—' }}
                   <span v-if="task.startTime" class="wp-tm">{{ fmtTime(task.startTime) }}</span>
@@ -145,9 +150,14 @@
                     <span class="wp-pc" :style="`color:${task.isDone ? 'var(--green)' : 'var(--' + (m.color || 'dev') + ')'};`">{{ task.progress || 0 }}%</span>
                   </div>
                 </td>
+                <td><span :class="['wp-hb', taskHealth(task)]">{{ t('workPlan.' + HEALTH_KEY[taskHealth(task)]) }}</span></td>
+                <td class="num">
+                  <span v-if="taskVariance(task) !== null" class="wp-var">+{{ taskVariance(task) }}d</span>
+                  <template v-else>—</template>
+                </td>
               </tr>
               <tr v-if="!m.tasks.length" class="wp-trow">
-                <td colspan="8" class="wp-empty">{{ t('workPlan.noTasks') }}</td>
+                <td colspan="10" class="wp-empty">{{ t('workPlan.noTasks') }}</td>
               </tr>
             </template>
           </template>
@@ -416,11 +426,51 @@ function stepRows(m) {
   return rows
 }
 
-// 'YYYY-MM-DD' -> 'DD/MM/YY' (string split — no timezone surprises)
+// ── phase B: health / variance / row flags ──────────────────────────────────
+const HEALTH_KEY = { done: 'hDone', late: 'hLate', prog: 'hProg', soon: 'hSoon', todo: 'hTodo' }
+
+// Calendar state machine, checked in this exact order. Tasks without dates -> 'todo'.
+// Progress above zero means work has started, whatever the dates say.
+// Some tasks carry progress without a start date, and the bar next to
+// the badge would contradict it.
+function taskHealth(task, ref = asOf.value) {
+  if ((task.progress || 0) === 100) return 'done'
+  if (task.endDate && task.endDate < ref) return 'late'
+  if ((task.progress || 0) > 0) return 'prog'
+  if (task.startDate && task.startDate <= ref) return 'prog'
+  if (task.startDate && dd(ref, task.startDate) <= 7) return 'soon'
+  return 'todo'
+}
+
+// Variance is measured against where the task should be today, not against
+// a stored baseline. A real baseline needs V30 columns.
+function taskVariance(task, ref = asOf.value) {
+  if ((task.progress || 0) === 100) return null
+  if (task.startDate && task.startDate > ref) return null
+  if (task.endDate && task.endDate < ref) return dd(task.endDate, ref)
+  if (!task.startDate || !task.endDate) return null
+  if (task.workDays === null || task.workDays === undefined) return null
+  const span = Math.max(1, dd(task.startDate, task.endDate))
+  const expected = dd(task.startDate, ref) / span
+  const actual = (task.progress || 0) / 100
+  const v = Math.round((expected - actual) * Number(task.workDays) * 10) / 10
+  return v > 0 ? v : null
+}
+
+// red (blocked) beats yellow (open question in the comment)
+function flagClass(task) {
+  if (task.isBlocked === true) return 'flag-red'
+  if (remarkText(task).includes('?')) return 'flag-yellow'
+  return ''
+}
+
+// 'YYYY-MM-DD' -> 'Δε 12/10/26' — weekday from ganttv2.daysShort (existing i18n),
+// computed via Date.UTC on the string parts so no timezone can shift the day.
 function fmtDate(s) {
   const p = String(s).split('-')
   if (p.length !== 3) return s
-  return `${p[2]}/${p[1]}/${p[0].slice(2)}`
+  const dow = new Date(Date.UTC(+p[0], +p[1] - 1, +p[2])).getUTCDay()
+  return t('ganttv2.daysShort.' + dow) + ' ' + `${p[2]}/${p[1]}/${p[0].slice(2)}`
 }
 // LocalTime 'HH:mm[:ss]' -> 'HH:mm'
 function fmtTime(s) {
@@ -460,7 +510,7 @@ function teamColor(name) {
 .wp-header { padding: 14px 20px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: space-between; }
 .wp-title { font-size: 13px; font-weight: 800; color: var(--text); }
 .wp-scroll { overflow-x: auto; }
-.wp-table { width: 100%; min-width: 900px; border-collapse: collapse; }
+.wp-table { width: 100%; min-width: 1080px; border-collapse: collapse; }
 .wp-table th { font-family: "Nunito Sans", sans-serif; font-size: 9px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-dim); text-align: left; padding: 9px 10px; background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
 .wp-table th.num { text-align: right; }
 /* fixed narrow date/days columns; Task takes the free width; Env/Team stay auto */
@@ -545,4 +595,20 @@ function teamColor(name) {
 .wp-chip { border: 1px solid var(--border-bright); background: var(--surface); border-radius: 10px; padding: 4px 11px; font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
 .wp-chip:hover { color: var(--text); border-color: var(--text-dim); }
 .wp-chip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+/* phase B — health badge (ProfileView .status-badge pattern: dim bg + var text) */
+.wp-hb { display: inline-block; font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 8px; white-space: nowrap; }
+.wp-hb.done { background: var(--green-dim); color: var(--green); }
+.wp-hb.late { background: var(--red-dim); color: var(--red); }
+.wp-hb.prog { background: var(--accent-dim); color: var(--accent); }
+.wp-hb.soon { background: var(--yellow-dim); color: var(--yellow); }
+.wp-hb.todo { background: var(--surface3); color: var(--text-dim); border: 1px solid var(--border-bright); }
+/* phase B — variance (days behind) */
+.wp-var { font-family: "Nunito Sans", sans-serif; font-size: 11.5px; font-weight: 800; color: var(--red); white-space: nowrap; }
+/* phase B — cutover badge on module rows */
+.wp-cut-badge { font-family: "Nunito Sans", sans-serif; font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 8px; background: var(--legal-dim); color: var(--legal); margin-left: 8px; white-space: nowrap; }
+/* phase B — row severity flags: 3px left stripe + light tint (hover still wins — higher specificity) */
+.wp-trow.flag-red td { background: var(--red-dim); }
+.wp-trow.flag-red td:first-child { box-shadow: inset 3px 0 0 var(--red); }
+.wp-trow.flag-yellow td { background: var(--yellow-dim); }
+.wp-trow.flag-yellow td:first-child { box-shadow: inset 3px 0 0 var(--yellow); }
 </style>
