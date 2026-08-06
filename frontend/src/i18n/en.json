@@ -565,6 +565,11 @@
     "alOpenQ": "open question",
     "alNoTeam": "no owning team",
     "alNonWork": "{date} is a non-working day",
-    "alSim": "{n} working days slip · {m} tasks affected"
+    "alSim": "{n} working days slip · {m} tasks affected",
+    "toolParity": "Excel parity",
+    "toolEnhanced": "Enhanced",
+    "toolExport": "Export",
+    "planEnhNote": "tasks · click a row to open the task form · purple columns are computed automatically.",
+    "planParityNote": "Faithful reproduction of the workbook — same columns, same order."
   }
 }

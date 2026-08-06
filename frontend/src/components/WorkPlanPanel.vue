@@ -1,11 +1,17 @@
 <template>
   <div v-if="project && project.workPlanEnabled" class="wp-panel" style="margin-top:14px;">
     <div class="wp-header">
-      <div class="wp-title">📋 {{ t('workPlan.title') }}</div>
-      <div class="wp-seg">
-        <button :class="['wp-seg-btn', { active: activeTab === 'plan' }]" @click="activeTab = 'plan'">{{ t('workPlan.tabPlan') }}</button>
-        <button v-if="cutoverModules.length" :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
-        <button :class="['wp-seg-btn', { active: activeTab === 'kpis' }]" @click="activeTab = 'kpis'">{{ t('workPlan.tabKpis') }}</button>
+      <div class="wp-title">📋 {{ t('workPlan.title') }}<span class="wp-badge-mode">{{ parity ? 'EXCEL PARITY' : 'ENHANCED' }}</span></div>
+      <div class="wp-tools">
+        <div class="wp-seg">
+          <button :class="['wp-seg-btn', { active: activeTab === 'plan' }]" @click="activeTab = 'plan'">{{ t('workPlan.tabPlan') }}</button>
+          <button v-if="cutoverModules.length" :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
+          <button :class="['wp-seg-btn', { active: activeTab === 'kpis' }]" @click="activeTab = 'kpis'">{{ t('workPlan.tabKpis') }}</button>
+        </div>
+        <button class="wp-mini-btn" @click="parity = !parity">
+          {{ parity ? t('workPlan.toolEnhanced') : t('workPlan.toolParity') }}
+        </button>
+        <button class="wp-mini-btn" @click="exportTsv">{{ t('workPlan.toolExport') }}</button>
       </div>
     </div>
 
@@ -93,8 +99,8 @@
             <th>{{ t('workPlan.teams') }}</th>
             <th class="col-remarks">{{ t('workPlan.remarks') }}</th>
             <th>{{ t('workPlan.status') }}</th>
-            <th>{{ t('workPlan.colHealth') }}</th>
-            <th class="num">{{ t('workPlan.colVariance') }}</th>
+            <th v-if="!parity" class="wp-col-computed">{{ t('workPlan.colHealth') }}</th>
+            <th v-if="!parity" class="num wp-col-computed">{{ t('workPlan.colVariance') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -119,8 +125,8 @@
                   <span class="wp-pc" :style="`color:var(--${m.color || 'dev'});`">{{ m.completion || 0 }}%</span>
                 </div>
               </td>
-              <td></td>
-              <td></td>
+              <td v-if="!parity"></td>
+              <td v-if="!parity"></td>
             </tr>
             <template v-if="open.has(m.id)">
               <tr v-for="task in m.visibleTasks" :key="task.id" :class="['wp-trow', 'wp-clickable', flagClass(task)]" @click="$emit('task-click', task.id)">
@@ -158,19 +164,23 @@
                     <span class="wp-pc" :style="`color:${task.isDone ? 'var(--green)' : 'var(--' + (m.color || 'dev') + ')'};`">{{ task.progress || 0 }}%</span>
                   </div>
                 </td>
-                <td><span :class="['wp-hb', taskHealth(task)]">{{ t('workPlan.' + HEALTH_KEY[taskHealth(task)]) }}</span></td>
-                <td class="num">
+                <td v-if="!parity"><span :class="['wp-hb', taskHealth(task)]">{{ t('workPlan.' + HEALTH_KEY[taskHealth(task)]) }}</span></td>
+                <td v-if="!parity" class="num">
                   <span v-if="taskVariance(task) !== null" class="wp-var">+{{ taskVariance(task) }}d</span>
                   <template v-else>—</template>
                 </td>
               </tr>
               <tr v-if="!m.tasks.length" class="wp-trow">
-                <td colspan="10" class="wp-empty">{{ t('workPlan.noTasks') }}</td>
+                <td :colspan="parity ? 8 : 10" class="wp-empty">{{ t('workPlan.noTasks') }}</td>
               </tr>
             </template>
           </template>
         </tbody>
       </table>
+      <div class="wp-plan-note">
+        {{ parity ? t('workPlan.planParityNote')
+                  : visibleTaskCount + ' ' + t('workPlan.planEnhNote') }}
+      </div>
     </div>
 
     <!-- CUTOVER RUNBOOK (6c) — modules whose non-gate steps all carry a start time, span <= 3 days -->
@@ -501,6 +511,43 @@ const visibleModules = computed(() => {
     .map(m => ({ ...m, visibleTasks: m.tasks.filter(t => taskVisible(t, m)) }))
     .filter(m => m.visibleTasks.length > 0)
 })
+const visibleTaskCount = computed(() => visibleModules.value.reduce((s, m) => s + m.visibleTasks.length, 0))
+
+// ── integration tools: Excel parity toggle + TSV export ─────────────────────
+// View-only — nothing is persisted, no PUT.
+const parity = ref(false)
+
+const stripNl = v => String(v ?? '').replace(/\n/g, ' | ')
+// Exports the FULL plan in sortOrder — never the filtered view. Columns and
+// row shapes mirror the approved mockup; BOM + CRLF so Excel opens Greek text.
+function exportTsv() {
+  const rows = [['from', '', 'to', '', 'Days', 'Task', 'Environment', 'Team(s)', 'Remark(s)', 'Status']]
+  wpModules.value.forEach(m => {
+    rows.push([m.minStart || '', '', m.maxEnd || '', '', '', stripNl(m.name), '', '', '', ''])
+    m.tasks.forEach(tk => {
+      rows.push([
+        tk.startDate || '',
+        tk.startTime ? fmtTime(tk.startTime) : '',
+        tk.endDate || '',
+        tk.endTime ? fmtTime(tk.endTime) : '',
+        tk.workDays ?? '',
+        stripNl(tk.name),
+        stripNl(tk.environment || ''),
+        stripNl(tk.assignee || ''),
+        stripNl(remarkText(tk)),
+        (tk.progress || 0) / 100,
+      ])
+    })
+  })
+  const blob = new Blob(['\uFEFF' + rows.map(r => r.join('\t')).join('\r\n')], { type: 'text/tab-separated-values' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = (props.project.title || 'workplan').replace(/[^\p{L}\p{N}]+/gu, '_')
+    + '_WorkPlan_' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '.tsv'
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 // ── 6c: cutover runbook ─────────────────────────────────────────────────────
 const activeTab = ref('plan')
@@ -857,6 +904,18 @@ function teamColor(name) {
 .wp-seg-btn { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 6px 12px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; border-radius: 5px; transition: all 0.12s; }
 .wp-seg-btn:hover { color: var(--text); }
 .wp-seg-btn.active { background: var(--text); color: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+/* integration tools — mode badge, header tool cluster, parity columns, plan footer note */
+.wp-badge-mode { font-size: 8.5px; font-weight: 800; letter-spacing: 1px;
+  padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: 2px;
+  background: var(--dev-dim); color: var(--dev); }
+.wp-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.wp-mini-btn { border: 1px solid var(--border); background: var(--surface);
+  border-radius: 5px; font-family: "Nunito Sans", sans-serif; font-size: 10px;
+  font-weight: 800; padding: 3px 8px; color: var(--text-dim); cursor: pointer; }
+.wp-mini-btn:hover { color: var(--text); border-color: var(--text-dim); }
+/* must out-rank `.wp-table th` (text-dim) — bare .wp-col-computed would lose */
+.wp-table th.wp-col-computed { color: var(--dev); }
+.wp-plan-note { padding: 8px 20px 12px; font-size: 11px; color: var(--text-dim); }
 /* cutover runbook — vertical timeline mirrors .history-timeline (existing vars only) */
 .wp-rb { padding: 14px 20px; }
 .wp-rb-block { margin-bottom: 18px; }
