@@ -2,8 +2,12 @@
   <div v-if="project && project.workPlanEnabled" class="wp-panel" style="margin-top:14px;">
     <div class="wp-header">
       <div class="wp-title">📋 {{ t('workPlan.title') }}</div>
+      <div v-if="cutoverModules.length" class="wp-seg">
+        <button :class="['wp-seg-btn', { active: activeTab === 'plan' }]" @click="activeTab = 'plan'">{{ t('workPlan.tabPlan') }}</button>
+        <button :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
+      </div>
     </div>
-    <div class="wp-scroll">
+    <div v-if="activeTab === 'plan'" class="wp-scroll">
       <table class="wp-table">
         <thead>
           <tr>
@@ -84,6 +88,43 @@
         </tbody>
       </table>
     </div>
+
+    <!-- CUTOVER RUNBOOK (6c) — modules whose non-gate steps all carry a start time, span <= 3 days -->
+    <div v-else-if="activeTab === 'cutover'" class="wp-rb">
+      <div v-for="m in cutoverModules" :key="m.id" class="wp-rb-block">
+        <div class="wp-rb-head">
+          <span class="wp-mdot" :style="`background:var(--${m.color || 'dev'});`"></span>
+          <span class="wp-mname">{{ m.name || '—' }}</span>
+          <span class="wp-rb-meta">
+            {{ m.minStart ? fmtDate(m.minStart) : '—' }} → {{ m.maxEnd ? fmtDate(m.maxEnd) : '—' }}
+            · {{ m.sumDays }}d
+            · {{ m.doneCount }}/{{ m.tasks.length }} {{ t('workPlan.runbookSteps') }}
+          </span>
+        </div>
+        <div class="wp-rb-timeline">
+          <template v-for="row in stepRows(m)" :key="row.key">
+            <div v-if="row.type === 'divider'" class="wp-rb-day">
+              <span class="wp-rb-day-label">{{ row.label }}</span>
+            </div>
+            <div v-else class="wp-rb-step" @click="$emit('task-click', row.task.id)">
+              <span :class="['wp-rb-dot', { gate: row.task.isGate === true, filled: (row.task.progress || 0) === 100 }]"></span>
+              <span class="wp-rb-time">{{ stepTime(row.task) }}</span>
+              <div class="wp-rb-body">
+                <div :class="['wp-rb-name', { done: row.task.isDone }]">
+                  <span v-if="row.task.isGate === true" class="wp-gate" :title="t('workPlan.gate')">◆</span>{{ row.task.name || '—' }}
+                </div>
+                <div v-if="teamsOf(row.task).length" class="wp-rb-teams">
+                  <span v-for="tm in teamsOf(row.task)" :key="tm" class="wp-team">
+                    <i :style="`background:var(--${teamColor(tm)});`"></i>{{ tm }}
+                  </span>
+                </div>
+                <div v-if="remarkText(row.task)" class="wp-rb-remark" :title="remarkText(row.task)">{{ remarkShort(row.task) }}</div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -141,6 +182,72 @@ const wpModules = computed(() => {
     }
   })
 })
+
+// ── 6c: cutover runbook ─────────────────────────────────────────────────────
+const activeTab = ref('plan')
+
+// A module is a cutover window when BOTH hold:
+//  (a) every non-gate task has a startTime, (b) the whole span fits in <= 3 calendar days.
+// Modules without tasks (or without dates to measure a span) never qualify.
+const cutoverModules = computed(() => wpModules.value.filter(m => {
+  if (!m.tasks.length) return false
+  const nonGate = m.tasks.filter(t => t.isGate !== true)
+  if (!nonGate.every(t => !!t.startTime)) return false
+  if (!m.minStart || !m.maxEnd) return false
+  const spanDays = (new Date(m.maxEnd) - new Date(m.minStart)) / 86400000
+  return spanDays <= 3
+}))
+
+// If the qualifying modules disappear (reload/edit), never strand the hidden tab.
+watch(cutoverModules, (list) => {
+  if (!list.length && activeTab.value === 'cutover') activeTab.value = 'plan'
+})
+
+// Chronological ordering for runbook steps (NOT sortOrder):
+//  key = (startDate | endDate | '9999-12-31') + 'T' + (startTime | endTime | '99:99')
+//  -> gates (endDate/endTime only) slot in at their deadline moment,
+//  -> steps missing a date sink to the end, missing a time sink to the end of their day.
+//  Ties keep DTO order (stable sort; the DTO arrives sorted by sortOrder).
+function stepKey(t) {
+  const d = t.startDate || t.endDate || '9999-12-31'
+  const tm = (t.startTime || t.endTime) ? fmtTime(t.startTime || t.endTime) : '99:99'
+  return d + 'T' + tm
+}
+function sortedSteps(m) {
+  return [...m.tasks].sort((a, b) => {
+    const ka = stepKey(a), kb = stepKey(b)
+    // Equal keys must return 0 so the DTO order (sortOrder) survives as tie-break.
+    return ka < kb ? -1 : ka > kb ? 1 : 0
+  })
+}
+// start time on the left; gates only have an end time — show that instead
+function stepTime(t) {
+  const v = t.startTime || t.endTime
+  return v ? fmtTime(v) : '—'
+}
+// Runbook rows with a day divider whenever the step date changes (incl. before the
+// first step — it marks the window start). Undated steps sort last and group under
+// a "no date" divider. No "+1" convention here: the runbook spans several days.
+function stepDateOf(t) {
+  return t.startDate || t.endDate || null
+}
+function fmtDayMonth(s) {
+  const p = String(s).split('-')
+  return p.length === 3 ? `${p[2]}/${p[1]}` : s
+}
+function stepRows(m) {
+  const rows = []
+  let prev
+  sortedSteps(m).forEach(task => {
+    const d = stepDateOf(task)
+    if (rows.length === 0 || d !== prev) {
+      rows.push({ type: 'divider', key: 'day-' + (d || 'none') + '-' + rows.length, label: d ? fmtDayMonth(d) : t('workPlan.noDate') })
+      prev = d
+    }
+    rows.push({ type: 'step', key: task.id, task })
+  })
+  return rows
+}
 
 // 'YYYY-MM-DD' -> 'DD/MM/YY' (string split — no timezone surprises)
 function fmtDate(s) {
@@ -221,4 +328,30 @@ function teamColor(name) {
 .wp-bar i { display: block; height: 100%; border-radius: 4px; }
 .wp-pc { font-family: "Nunito Sans", sans-serif; font-size: 11.5px; font-weight: 800; width: 34px; text-align: right; }
 .wp-empty { text-align: center; color: var(--text-dim); font-size: 12px; font-family: "Nunito Sans", sans-serif; }
+/* segmented control — mirrors GanttV2 zoom controls (existing vars only) */
+.wp-seg { display: flex; gap: 2px; background: var(--surface3); border: 1px solid var(--border); border-radius: 7px; padding: 3px; }
+.wp-seg-btn { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 6px 12px; border: none; background: transparent; color: var(--text-dim); cursor: pointer; border-radius: 5px; transition: all 0.12s; }
+.wp-seg-btn:hover { color: var(--text); }
+.wp-seg-btn.active { background: var(--text); color: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+/* cutover runbook — vertical timeline mirrors .history-timeline (existing vars only) */
+.wp-rb { padding: 14px 20px; }
+.wp-rb-block { margin-bottom: 18px; }
+.wp-rb-block:last-child { margin-bottom: 4px; }
+.wp-rb-head { display: flex; align-items: center; margin-bottom: 8px; }
+.wp-rb-meta { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); margin-left: 10px; white-space: nowrap; }
+.wp-rb-timeline { display: flex; flex-direction: column; gap: 0; border-left: 2px solid var(--border-bright); margin-left: 8px; padding-left: 18px; }
+.wp-rb-step { position: relative; padding: 7px 6px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; border-radius: 6px; }
+.wp-rb-step:hover { background: var(--accent-dim); }
+.wp-rb-dot { position: absolute; left: -24px; top: 12px; width: 8px; height: 8px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
+.wp-rb-dot.gate { transform: rotate(45deg); border-radius: 2px; border-color: var(--dev); }
+.wp-rb-dot.filled { background: var(--green); border-color: var(--green); }
+.wp-rb-time { font-family: "Nunito Sans", sans-serif; font-size: 11.5px; font-weight: 800; color: var(--text-mid); min-width: 44px; padding-top: 1px; white-space: nowrap; }
+.wp-rb-body { min-width: 0; }
+.wp-rb-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.wp-rb-name.done { color: var(--text-dim); text-decoration: line-through; }
+.wp-rb-teams { margin-top: 2px; }
+.wp-rb-remark { font-family: "Nunito Sans", sans-serif; font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.wp-rb-day { display: flex; align-items: center; gap: 8px; padding: 8px 0 2px; }
+.wp-rb-day-label { font-family: "Nunito Sans", sans-serif; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+.wp-rb-day::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 </style>

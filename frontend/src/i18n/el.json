@@ -502,6 +502,10 @@
     "taskFields": "Πλάνο Εργασιών",
     "startTime": "Ώρα έναρξης",
     "endTime": "Ώρα λήξης",
-    "workDays": "Εργάσιμες ημέρες"
+    "workDays": "Εργάσιμες ημέρες",
+    "tabPlan": "Πλάνο",
+    "tabCutover": "Cutover",
+    "runbookSteps": "βήματα",
+    "noDate": "Χωρίς ημερομηνία"
   }
 }

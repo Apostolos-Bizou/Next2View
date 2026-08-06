@@ -502,6 +502,10 @@
     "taskFields": "Work Plan",
     "startTime": "Start time",
     "endTime": "End time",
-    "workDays": "Working days"
+    "workDays": "Working days",
+    "tabPlan": "Plan",
+    "tabCutover": "Cutover",
+    "runbookSteps": "steps",
+    "noDate": "No date"
   }
 }
