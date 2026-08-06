@@ -7,6 +7,72 @@
         <button :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
       </div>
     </div>
+
+    <!-- KPI strip (phase A) — always unfiltered totals; time anchor = reference date -->
+    <div class="wp-kpis">
+      <div class="wp-kpi">
+        <div class="wp-kpi-lbl">{{ t('workPlan.kOverall') }}</div>
+        <div class="wp-kpi-val accent">{{ kpi.overall }}<small>%</small></div>
+        <div class="wp-kpi-sub">{{ t('workPlan.kPlannedTo') }} {{ kpi.planned }}%</div>
+      </div>
+      <div class="wp-kpi" :class="kpi.variance > 0 ? 'good' : kpi.variance < 0 ? 'bad' : ''">
+        <div class="wp-kpi-lbl">{{ t('workPlan.kVariance') }}</div>
+        <div class="wp-kpi-val" :class="kpi.variance > 0 ? 'good' : kpi.variance < 0 ? 'bad' : ''">{{ kpi.variance > 0 ? '+' : '' }}{{ kpi.variance }}<small>pp</small></div>
+        <div class="wp-kpi-sub">{{ kpi.variance < 0 ? t('workPlan.kBehind') : t('workPlan.kOnPlan') }}</div>
+      </div>
+      <div class="wp-kpi">
+        <div class="wp-kpi-lbl">{{ t('workPlan.kNextGate') }}</div>
+        <template v-if="kpi.nextGate">
+          <div class="wp-kpi-val" :class="{ bad: kpi.nextGateDays < 0 }" :title="kpi.nextGate.g.name">{{ kpi.nextGateDays }}<small>d</small></div>
+          <div class="wp-kpi-sub">{{ fmtDate(kpi.nextGate.d) }}</div>
+        </template>
+        <template v-else>
+          <div class="wp-kpi-val">—</div>
+          <div class="wp-kpi-sub"></div>
+        </template>
+      </div>
+      <div class="wp-kpi">
+        <div class="wp-kpi-lbl">{{ t('workPlan.kGates') }}</div>
+        <div class="wp-kpi-val">{{ kpi.passedCount }}<small>/{{ kpi.gates.length }}</small></div>
+        <div class="wp-kpi-sub wp-kpi-dia">{{ kpi.diamonds }}</div>
+      </div>
+      <div class="wp-kpi" :class="(kpi.overdue + kpi.flagged) ? 'bad' : 'good'">
+        <div class="wp-kpi-lbl">{{ t('workPlan.kAtRisk') }}</div>
+        <div class="wp-kpi-val" :class="(kpi.overdue + kpi.flagged) ? 'bad' : 'good'">{{ kpi.overdue + kpi.flagged }}</div>
+        <div class="wp-kpi-sub">{{ kpi.overdue }} {{ t('workPlan.kOverdue') }} · {{ kpi.flagged }} {{ t('workPlan.kFlagged') }}</div>
+      </div>
+      <div class="wp-kpi">
+        <div class="wp-kpi-lbl">{{ t('workPlan.kEffort') }}</div>
+        <div class="wp-kpi-val">{{ kpi.effort }}<small>d</small></div>
+        <div class="wp-kpi-sub">{{ wpModules.length }} {{ t('workPlan.kModules') }}</div>
+      </div>
+    </div>
+
+    <!-- filter row (phase A) — applies to the PLAN table only; KPIs stay unfiltered -->
+    <div v-if="activeTab === 'plan'" class="wp-ctrl">
+      <div class="wp-fld">
+        <label class="wp-ctrl-lbl">{{ t('workPlan.asOf') }}</label>
+        <input type="date" class="wp-select" v-model="asOf" />
+      </div>
+      <div class="wp-fld">
+        <label class="wp-ctrl-lbl">{{ t('workPlan.environment') }}</label>
+        <select class="wp-select" v-model="fEnv">
+          <option value="">{{ t('workPlan.allEnvs') }}</option>
+          <option v-for="e in envOptions" :key="e" :value="e">{{ e }}</option>
+        </select>
+      </div>
+      <div class="wp-fld">
+        <label class="wp-ctrl-lbl">{{ t('workPlan.teams') }}</label>
+        <select class="wp-select" v-model="fTeam">
+          <option value="">{{ t('workPlan.allTeams') }}</option>
+          <option v-for="tm in teamOptions" :key="tm" :value="tm">{{ tm }}</option>
+        </select>
+      </div>
+      <div class="wp-chips">
+        <button v-for="q in QUICK_VIEWS" :key="q" :class="['wp-chip', { on: quickView === q }]" @click="quickView = q">{{ t('workPlan.' + QUICK_LABEL[q]) }}</button>
+      </div>
+    </div>
+
     <div v-if="activeTab === 'plan'" class="wp-scroll">
       <table class="wp-table">
         <thead>
@@ -22,7 +88,7 @@
           </tr>
         </thead>
         <tbody>
-          <template v-for="m in wpModules" :key="m.id">
+          <template v-for="m in visibleModules" :key="m.id">
             <tr class="wp-mrow" @click="toggle(m.id)">
               <td class="wp-dt">{{ m.minStart ? fmtDate(m.minStart) : '—' }}</td>
               <td class="wp-dt">{{ m.maxEnd ? fmtDate(m.maxEnd) : '—' }}</td>
@@ -44,7 +110,7 @@
               </td>
             </tr>
             <template v-if="open.has(m.id)">
-              <tr v-for="task in m.tasks" :key="task.id" class="wp-trow wp-clickable" @click="$emit('task-click', task.id)">
+              <tr v-for="task in m.visibleTasks" :key="task.id" class="wp-trow wp-clickable" @click="$emit('task-click', task.id)">
                 <td class="wp-dt">
                   {{ task.startDate ? fmtDate(task.startDate) : '—' }}
                   <span v-if="task.startTime" class="wp-tm">{{ fmtTime(task.startTime) }}</span>
@@ -183,6 +249,105 @@ const wpModules = computed(() => {
   })
 })
 
+// ── KPI phase A ─────────────────────────────────────────────────────────────
+// Greek public holidays inside the plan horizon, copied from the approved mockup.
+// Needs updating for 2028 onwards.
+// NOT used in phase A — reserved for phase C (working-day cascade / slip simulation).
+// eslint-disable-next-line no-unused-vars
+const GREEK_HOLIDAYS = new Set([
+  '2026-10-28', '2026-12-25', '2026-12-28', '2026-12-29', '2026-12-30', '2026-12-31',
+  '2027-01-01', '2027-01-06', '2027-03-15', '2027-03-25', '2027-05-03', '2027-06-21',
+])
+
+function todayISO() {
+  const d = new Date()
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+}
+const dd = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000)
+
+// reference date — defaults to today, drives planned%, variance, next-gate, overdue, 7-day view
+const asOf = ref(todayISO())
+const fEnv = ref('')
+const fTeam = ref('')
+const quickView = ref('all')
+const QUICK_VIEWS = ['all', 'week', 'risk', 'gates', 'cut', 'open']
+const QUICK_LABEL = { all: 'qAll', week: 'qWeek', risk: 'qRisk', gates: 'qGates', cut: 'qCut', open: 'qOpen' }
+
+const allTasks = computed(() => wpModules.value.flatMap(m => m.tasks))
+const envOptions = computed(() => [...new Set(allTasks.value.flatMap(envsOf))].sort())
+const teamOptions = computed(() => [...new Set(allTasks.value.flatMap(teamsOf))].sort())
+
+// weight: workDays, or 0.25 when the task has none (mirrors the approved mockup)
+const weightOf = t => (t.workDays !== null && t.workDays !== undefined) ? Number(t.workDays) : 0.25
+const isOverdue = t => !!(t.endDate && t.endDate < asOf.value && (t.progress || 0) < 100)
+
+const kpi = computed(() => {
+  const tasks = allTasks.value
+  const nonGate = tasks.filter(t => t.isGate !== true)
+  // Weighted by work days, not task count. A 45-day task cannot count the
+  // same as a 0.1-day one. This differs from the project header, which uses
+  // calcCompletion; the label says which measure this is.
+  const totW = nonGate.reduce((s, t) => s + weightOf(t), 0)
+  const overall = totW ? Math.round(nonGate.reduce((s, t) => s + (t.progress || 0) * weightOf(t), 0) / totW) : 0
+  // planned-to-reference-date: full weight past endDate, pro-rata inside the window, 0 before it
+  let earned = 0
+  nonGate.forEach(t => {
+    if (!t.endDate) return
+    const start = t.startDate || t.endDate
+    if (asOf.value >= t.endDate) earned += weightOf(t)
+    else if (asOf.value > start) {
+      const span = Math.max(1, dd(start, t.endDate))
+      earned += weightOf(t) * (dd(start, asOf.value) / span)
+    }
+  })
+  const planned = totW ? Math.round((earned / totW) * 100) : 0
+  const gates = tasks.filter(t => t.isGate === true)
+  const passed = gates.filter(g => (g.progress || 0) === 100)
+  // next pending gate CHRONOLOGICALLY (no name matching); undated pending gates can't be "next"
+  const pendingDated = gates
+    .filter(g => (g.progress || 0) < 100)
+    .map(g => ({ g, d: g.endDate || g.startDate || null }))
+    .filter(x => x.d)
+    .sort((a, b) => (a.d < b.d ? -1 : a.d > b.d ? 1 : 0))
+  const nextGate = pendingDated[0] || null
+  return {
+    overall,
+    planned,
+    variance: overall - planned,
+    gates,
+    passedCount: passed.length,
+    diamonds: gates.map(g => ((g.progress || 0) === 100 ? '◆' : '◇')).join(''),
+    nextGate,
+    nextGateDays: nextGate ? dd(asOf.value, nextGate.d) : null,
+    // Gates are approvals, not work. They are counted in the gates KPI;
+    // including them here would report the same thing twice.
+    overdue: nonGate.filter(isOverdue).length,
+    flagged: nonGate.filter(t => t.isBlocked === true).length,
+    effort: parseFloat(tasks.reduce((s, t) => s + (Number(t.workDays) || 0), 0).toFixed(2)),
+  }
+})
+
+// ── filters (PLAN table only — modules with no visible tasks are hidden) ────
+function taskVisible(t, m) {
+  if (fEnv.value && !envsOf(t).includes(fEnv.value)) return false
+  if (fTeam.value && !teamsOf(t).includes(fTeam.value)) return false
+  switch (quickView.value) {
+    case 'week': { const s = t.startDate || t.endDate; if (!s) return false; const d = dd(asOf.value, s); return d >= 0 && d <= 7 }
+    case 'risk': return isOverdue(t) || t.isBlocked === true
+    case 'gates': return t.isGate === true
+    case 'cut': return cutoverIds.value.has(m.id)
+    case 'open': return remarkText(t).includes('?')
+    default: return true
+  }
+}
+const filtersActive = computed(() => !!(fEnv.value || fTeam.value || quickView.value !== 'all'))
+const visibleModules = computed(() => {
+  if (!filtersActive.value) return wpModules.value.map(m => ({ ...m, visibleTasks: m.tasks }))
+  return wpModules.value
+    .map(m => ({ ...m, visibleTasks: m.tasks.filter(t => taskVisible(t, m)) }))
+    .filter(m => m.visibleTasks.length > 0)
+})
+
 // ── 6c: cutover runbook ─────────────────────────────────────────────────────
 const activeTab = ref('plan')
 
@@ -197,6 +362,8 @@ const cutoverModules = computed(() => wpModules.value.filter(m => {
   const spanDays = (new Date(m.maxEnd) - new Date(m.minStart)) / 86400000
   return spanDays <= 3
 }))
+
+const cutoverIds = computed(() => new Set(cutoverModules.value.map(m => m.id)))
 
 // If the qualifying modules disappear (reload/edit), never strand the hidden tab.
 watch(cutoverModules, (list) => {
@@ -354,4 +521,28 @@ function teamColor(name) {
 .wp-rb-day { display: flex; align-items: center; gap: 8px; padding: 8px 0 2px; }
 .wp-rb-day-label { font-family: "Nunito Sans", sans-serif; font-size: 9px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
 .wp-rb-day::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+/* KPI strip — mirrors DashboardView .kpi-strip/.kpi (existing vars only) */
+.wp-kpis { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; padding: 14px 20px 12px; border-bottom: 1px solid var(--border); }
+.wp-kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 11px 10px; position: relative; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.05); text-align: center; }
+.wp-kpi::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: var(--accent); }
+.wp-kpi.good::before { background: var(--green); }
+.wp-kpi.bad::before { background: var(--red); }
+.wp-kpi-lbl { font-family: "Nunito Sans", sans-serif; font-size: 8.5px; letter-spacing: 1.6px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wp-kpi-val { font-size: 22px; font-weight: 900; line-height: 1.1; color: var(--text); }
+.wp-kpi-val small { font-size: 12px; font-weight: 800; color: var(--text-dim); }
+.wp-kpi-val.accent { color: var(--accent); }
+.wp-kpi-val.good { color: var(--green); }
+.wp-kpi-val.bad { color: var(--red); }
+.wp-kpi-sub { font-family: "Nunito Sans", sans-serif; font-size: 9.5px; color: var(--text-dim); font-weight: 700; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 12px; }
+.wp-kpi-dia { color: var(--dev); letter-spacing: 2px; }
+@media (max-width: 1100px) { .wp-kpis { grid-template-columns: repeat(3, 1fr); } }
+/* filter row — selects mirror .ph-select, chips mirror quick-filter buttons */
+.wp-ctrl { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; padding: 10px 20px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.wp-fld { display: flex; align-items: center; gap: 7px; }
+.wp-ctrl-lbl { font-family: "Nunito Sans", sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+.wp-select { background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 6px; padding: 5px 10px; color: var(--text-mid); font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 600; cursor: pointer; background-color: var(--surface); }
+.wp-chips { display: flex; gap: 5px; flex-wrap: wrap; }
+.wp-chip { border: 1px solid var(--border-bright); background: var(--surface); border-radius: 10px; padding: 4px 11px; font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; color: var(--text-dim); cursor: pointer; transition: all 0.15s; }
+.wp-chip:hover { color: var(--text); border-color: var(--text-dim); }
+.wp-chip.on { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
 </style>

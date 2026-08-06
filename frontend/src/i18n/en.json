@@ -506,6 +506,27 @@
     "tabPlan": "Plan",
     "tabCutover": "Cutover",
     "runbookSteps": "steps",
-    "noDate": "No date"
+    "noDate": "No date",
+    "kOverall": "Overall progress",
+    "kPlannedTo": "by work days · planned",
+    "kVariance": "Schedule variance",
+    "kOnPlan": "on plan",
+    "kBehind": "behind plan",
+    "kNextGate": "To next gate",
+    "kGates": "Gates",
+    "kAtRisk": "At risk",
+    "kOverdue": "overdue",
+    "kFlagged": "flagged",
+    "kEffort": "Working days",
+    "kModules": "modules",
+    "asOf": "As of",
+    "allEnvs": "— all —",
+    "allTeams": "— all —",
+    "qAll": "All",
+    "qWeek": "7 days",
+    "qRisk": "At risk",
+    "qGates": "Gates",
+    "qCut": "Cutover",
+    "qOpen": "Open"
   }
 }

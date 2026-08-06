@@ -506,6 +506,27 @@
     "tabPlan": "Πλάνο",
     "tabCutover": "Cutover",
     "runbookSteps": "βήματα",
-    "noDate": "Χωρίς ημερομηνία"
+    "noDate": "Χωρίς ημερομηνία",
+    "kOverall": "Συνολική πρόοδος",
+    "kPlannedTo": "με εργάσιμες · προγρ.",
+    "kVariance": "Απόκλιση πλάνου",
+    "kOnPlan": "εντός πλάνου",
+    "kBehind": "πίσω από το πλάνο",
+    "kNextGate": "Έως επόμενη πύλη",
+    "kGates": "Πύλες",
+    "kAtRisk": "Σε κίνδυνο",
+    "kOverdue": "εκπρόθεσμα",
+    "kFlagged": "μπλοκαρισμένα",
+    "kEffort": "Εργάσιμες",
+    "kModules": "φάσεις",
+    "asOf": "Ημ. αναφοράς",
+    "allEnvs": "— όλα —",
+    "allTeams": "— όλες —",
+    "qAll": "Όλα",
+    "qWeek": "7 ημέρες",
+    "qRisk": "Σε κίνδυνο",
+    "qGates": "Πύλες",
+    "qCut": "Cutover",
+    "qOpen": "Ανοιχτά"
   }
 }
