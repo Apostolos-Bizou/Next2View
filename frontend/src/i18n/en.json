@@ -583,6 +583,10 @@
     "intSqlSub": "No column altered, none NOT NULL without default. The other projects see nothing.",
     "intNext": "next =",
     "intSqlNote": "Rollback: V29 is additive → code rollback; the columns stay harmless, exactly as with V28.",
-    "intPlanTitle": "Integration plan — completed"
+    "intPlanTitle": "Integration plan — completed",
+    "rbShift": "Shift start",
+    "rbRecomputed": "recomputed",
+    "rbOnPlan": "on plan",
+    "rbNote": "Change the start time and the whole runbook recomputes."
   }
 }
