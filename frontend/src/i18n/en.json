@@ -535,6 +535,16 @@
     "hLate": "Overdue",
     "hProg": "In progress",
     "hSoon": "Starts soon",
-    "hTodo": "Not started"
+    "hTodo": "Not started",
+    "tabKpis": "KPIs",
+    "pGates": "Sign-off gates",
+    "pPending": "pending",
+    "badgePassed": "PASSED",
+    "badgePending": "PENDING",
+    "pLoad": "Effort by team",
+    "pLoadHint": "Working days per phase",
+    "pNoTeam": "tasks without a team",
+    "pNoTeamOne": "task without a team",
+    "pEnv": "Environment coverage"
   }
 }

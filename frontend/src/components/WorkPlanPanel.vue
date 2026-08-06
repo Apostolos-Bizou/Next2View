@@ -2,9 +2,10 @@
   <div v-if="project && project.workPlanEnabled" class="wp-panel" style="margin-top:14px;">
     <div class="wp-header">
       <div class="wp-title">📋 {{ t('workPlan.title') }}</div>
-      <div v-if="cutoverModules.length" class="wp-seg">
+      <div class="wp-seg">
         <button :class="['wp-seg-btn', { active: activeTab === 'plan' }]" @click="activeTab = 'plan'">{{ t('workPlan.tabPlan') }}</button>
-        <button :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
+        <button v-if="cutoverModules.length" :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
+        <button :class="['wp-seg-btn', { active: activeTab === 'kpis' }]" @click="activeTab = 'kpis'">{{ t('workPlan.tabKpis') }}</button>
       </div>
     </div>
 
@@ -70,6 +71,13 @@
       </div>
       <div class="wp-chips">
         <button v-for="q in QUICK_VIEWS" :key="q" :class="['wp-chip', { on: quickView === q }]" @click="quickView = q">{{ t('workPlan.' + QUICK_LABEL[q]) }}</button>
+      </div>
+    </div>
+    <!-- KPIs tab shows only the reference date — filters never apply there -->
+    <div v-else-if="activeTab === 'kpis'" class="wp-ctrl">
+      <div class="wp-fld">
+        <label class="wp-ctrl-lbl">{{ t('workPlan.asOf') }}</label>
+        <input type="date" class="wp-select" v-model="asOf" />
       </div>
     </div>
 
@@ -198,6 +206,61 @@
               </div>
             </div>
           </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIS TAB (phase C.1) — gates / team load / environment coverage -->
+    <div v-else-if="activeTab === 'kpis'" class="wp-kpitab">
+      <div class="wp-pane">
+        <div class="wp-pane-head">
+          <div class="wp-pane-title">◆ {{ t('workPlan.pGates') }}</div>
+          <div class="wp-pane-sub">{{ kpi.passedCount }}/{{ kpi.gates.length }}</div>
+        </div>
+        <div v-for="g in gateRows" :key="g.id" class="wp-gate-row" @click="$emit('task-click', g.id)">
+          <span :class="['wp-gr-dia', { filled: g.passed }]"></span>
+          <div class="wp-gr-body">
+            <div class="wp-gr-name">{{ g.name }}</div>
+            <div class="wp-gr-sub">{{ g.pending }} {{ t('workPlan.pPending') }} · {{ g.completion }}%</div>
+          </div>
+          <div class="wp-gr-right">
+            <span class="wp-gr-date">{{ g.date ? fmtDate(g.date) : '—' }}</span>
+            <span :class="['wp-gr-badge', { ok: g.passed }]">{{ g.passed ? t('workPlan.badgePassed') : t('workPlan.badgePending') }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- right column: load + environments stacked, so the grid leaves no dead space -->
+      <div class="wp-kpicol">
+        <div class="wp-pane">
+          <div class="wp-pane-head">
+            <div class="wp-pane-title">{{ t('workPlan.pLoad') }}</div>
+            <div class="wp-pane-sub">{{ t('workPlan.pLoadHint') }}</div>
+          </div>
+          <div v-for="l in teamLoad.rows" :key="l.name" class="wp-load-row">
+            <div class="wp-load-name"><i :style="`background:var(--${teamColor(l.name)});`"></i>{{ l.name }}</div>
+            <div class="wp-load-track">
+              <i v-for="s in l.segments" :key="s.id" :style="`width:${teamLoad.max ? (s.days / teamLoad.max) * 100 : 0}%;background:${s.color};`" :title="s.title"></i>
+            </div>
+            <div class="wp-load-total">{{ l.total }}d</div>
+          </div>
+          <div class="wp-legend">
+            <span v-for="(m, mi) in wpModules" :key="m.id" class="wp-legend-item">
+              <i :style="`background:${moduleColor(mi)};`"></i>{{ m.name }}
+            </span>
+          </div>
+          <div v-if="noTeamCount" class="wp-pane-note">{{ noTeamCount }} {{ t(noTeamCount === 1 ? 'workPlan.pNoTeamOne' : 'workPlan.pNoTeam') }}</div>
+        </div>
+
+        <div class="wp-pane">
+          <div class="wp-pane-head">
+            <div class="wp-pane-title">{{ t('workPlan.pEnv') }}</div>
+          </div>
+          <div v-for="e in envCoverage.rows" :key="e.name" class="wp-load-row">
+            <div class="wp-load-name"><span class="wp-env">{{ e.name }}</span></div>
+            <div class="wp-load-track"><i :style="`width:${envCoverage.max ? (e.days / envCoverage.max) * 100 : 0}%;background:var(--accent);`"></i></div>
+            <div class="wp-load-total">{{ e.count }} · {{ e.days }}d</div>
+          </div>
         </div>
       </div>
     </div>
@@ -426,6 +489,89 @@ function stepRows(m) {
   return rows
 }
 
+// ── phase C.1: KPIs tab panels ──────────────────────────────────────────────
+// Gates listed chronologically with their module's pending work and completion.
+const gateRows = computed(() => {
+  const rows = []
+  wpModules.value.forEach(m => {
+    m.tasks.filter(tk => tk.isGate === true).forEach(g => {
+      rows.push({
+        id: g.id,
+        name: g.name || '—',
+        passed: (g.progress || 0) === 100,
+        pending: m.tasks.filter(x => x.isGate !== true && (x.progress || 0) < 100).length,
+        completion: m.completion || 0,
+        date: g.endDate || g.startDate || null,
+      })
+    })
+  })
+  rows.sort((a, b) => {
+    const ka = a.date || '9999-12-31', kb = b.date || '9999-12-31'
+    return ka < kb ? -1 : ka > kb ? 1 : 0
+  })
+  return rows
+})
+
+// Segment colors cycle by module index — module.color is often the same for
+// every phase of one project, which would make a stacked bar unreadable.
+const MODULE_PALETTE = ['dev', 'accent', 'finance', 'legal', 'marketing']
+// Eight phases against five palette vars: shades keep every segment
+// distinct, so the legend actually explains the bar.
+// Implemented with color-mix (baseline 2023; the app already relies on :has(),
+// same support era): round 2 lightens with white, round 3 darkens with black.
+function moduleColor(mi) {
+  const base = `var(--${MODULE_PALETTE[mi % MODULE_PALETTE.length]})`
+  const round = Math.floor(mi / MODULE_PALETTE.length)
+  if (round === 0) return base
+  if (round === 1) return `color-mix(in srgb, ${base} 55%, white)`
+  return `color-mix(in srgb, ${base} 70%, black)`
+}
+const teamLoad = computed(() => {
+  const map = {}
+  wpModules.value.forEach((m, mi) => {
+    m.tasks.forEach(tk => {
+      const teams = teamsOf(tk)
+      const d = Number(tk.workDays) || 0
+      if (!teams.length || !d) return
+      // A task shared by k teams contributes workDays/k to each — effort is
+      // split evenly, so the totals still add up to the plan's working days.
+      const share = d / teams.length
+      teams.forEach(name => {
+        if (!map[name]) map[name] = { name, total: 0, seg: new Map() }
+        map[name].total += share
+        map[name].seg.set(mi, (map[name].seg.get(mi) || 0) + share)
+      })
+    })
+  })
+  const rows = Object.values(map).map(l => ({
+    name: l.name,
+    total: Math.round(l.total * 10) / 10,
+    segments: [...l.seg.entries()].sort((a, b) => a[0] - b[0]).map(([mi, days]) => ({
+      id: mi,
+      days,
+      color: moduleColor(mi),
+      title: `${(wpModules.value[mi] && wpModules.value[mi].name) || ''}: ${Math.round(days * 10) / 10}d`,
+    })),
+  })).sort((a, b) => b.total - a.total)
+  const max = rows.length ? Math.max(...rows.map(r => r.total)) : 0
+  return { rows, max }
+})
+const noTeamCount = computed(() => allTasks.value.filter(tk => tk.isGate !== true && !teamsOf(tk).length).length)
+
+const envCoverage = computed(() => {
+  const map = {}
+  allTasks.value.forEach(tk => {
+    envsOf(tk).forEach(e => {
+      if (!map[e]) map[e] = { name: e, count: 0, days: 0 }
+      map[e].count++
+      map[e].days += Number(tk.workDays) || 0
+    })
+  })
+  const rows = Object.values(map).map(r => ({ ...r, days: Math.round(r.days * 10) / 10 })).sort((a, b) => b.days - a.days)
+  const max = rows.length ? Math.max(...rows.map(r => r.days)) : 0
+  return { rows, max }
+})
+
 // ── phase B: health / variance / row flags ──────────────────────────────────
 const HEALTH_KEY = { done: 'hDone', late: 'hLate', prog: 'hProg', soon: 'hSoon', todo: 'hTodo' }
 
@@ -611,4 +757,38 @@ function teamColor(name) {
 .wp-trow.flag-red td:first-child { box-shadow: inset 3px 0 0 var(--red); }
 .wp-trow.flag-yellow td { background: var(--yellow-dim); }
 .wp-trow.flag-yellow td:first-child { box-shadow: inset 3px 0 0 var(--yellow); }
+/* phase C.1 — KPIs tab: 2-column grid of panels (1 column under 1000px) */
+.wp-kpitab { padding: 14px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+@media (max-width: 1000px) { .wp-kpitab { grid-template-columns: 1fr; } }
+.wp-kpicol { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+/* module legend under the stacked bars */
+.wp-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 8px 16px 10px; border-top: 1px solid var(--border); }
+.wp-legend-item { display: inline-flex; align-items: center; gap: 5px; font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 700; color: var(--text-dim); }
+.wp-legend-item i { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+.wp-pane { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.wp-pane-head { padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.wp-pane-title { font-size: 13px; font-weight: 800; color: var(--text); }
+.wp-pane-sub { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); white-space: nowrap; }
+.wp-pane-note { padding: 10px 16px; font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 600; color: var(--text-dim); background: var(--surface2); border-top: 1px solid var(--border); }
+/* gates panel rows */
+.wp-gate-row { display: flex; align-items: flex-start; gap: 11px; padding: 10px 16px; border-bottom: 1px solid var(--border); cursor: pointer; }
+.wp-gate-row:last-child { border-bottom: none; }
+.wp-gate-row:hover { background: var(--accent-dim); }
+.wp-gr-dia { width: 10px; height: 10px; transform: rotate(45deg); border: 2px solid var(--dev); border-radius: 2px; background: var(--surface); flex-shrink: 0; margin-top: 4px; }
+.wp-gr-dia.filled { background: var(--green); border-color: var(--green); }
+.wp-gr-body { flex: 1; min-width: 0; }
+.wp-gr-name { font-size: 12.5px; font-weight: 700; color: var(--text); }
+.wp-gr-sub { font-family: "Nunito Sans", sans-serif; font-size: 10.5px; font-weight: 600; color: var(--text-dim); margin-top: 2px; }
+.wp-gr-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.wp-gr-date { font-family: "Nunito Sans", sans-serif; font-size: 10.5px; font-weight: 600; color: var(--text-dim); white-space: nowrap; }
+.wp-gr-badge { font-family: "Nunito Sans", sans-serif; font-size: 9px; font-weight: 800; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 8px; background: var(--surface3); color: var(--text-dim); white-space: nowrap; }
+.wp-gr-badge.ok { background: var(--green-dim); color: var(--green); }
+/* team load & env coverage rows — bar mirrors the fin-bar-track pattern */
+.wp-load-row { display: grid; grid-template-columns: 150px 1fr 64px; gap: 10px; align-items: center; padding: 9px 16px; border-bottom: 1px solid var(--border); }
+.wp-load-row:last-of-type { border-bottom: none; }
+.wp-load-name { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--text-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wp-load-name i { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+.wp-load-track { height: 14px; background: var(--surface3); border-radius: 4px; overflow: hidden; display: flex; }
+.wp-load-track i { display: block; height: 100%; }
+.wp-load-total { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; text-align: right; color: var(--text-mid); white-space: nowrap; }
 </style>
