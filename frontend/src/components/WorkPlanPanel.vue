@@ -210,9 +210,44 @@
       </div>
     </div>
 
-    <!-- KPIS TAB (phase C.1) — gates / team load / environment coverage -->
+    <!-- KPIS TAB (phase C.1 + C.2) — simulator / gates / team load / env / alerts -->
     <div v-else-if="activeTab === 'kpis'" class="wp-kpitab">
-      <div class="wp-pane">
+      <!-- left column: slip scenario above the gates -->
+      <div class="wp-kpicol">
+        <div class="wp-pane">
+          <div class="wp-pane-head">
+            <div class="wp-pane-title">{{ t('workPlan.pSim') }}</div>
+            <div class="wp-pane-sub">{{ t('workPlan.pSimHint') }}</div>
+          </div>
+          <div class="wp-sim-ctrl">
+            <select class="wp-select wp-sim-select" v-model="simTaskId">
+              <option value="">—</option>
+              <optgroup v-for="m in wpModules" :key="m.id" :label="m.name">
+                <option v-for="tk in m.tasks.filter(x => x.isGate !== true && x.endDate)" :key="tk.id" :value="tk.id">{{ tk.name }}</option>
+              </optgroup>
+            </select>
+            <input type="number" class="wp-select wp-sim-days" v-model.number="simDays" min="1" />
+            <span class="wp-ctrl-lbl">{{ t('workPlan.simWd') }}</span>
+            <button class="wp-btn" :disabled="!simTaskId" @click="runSim">{{ t('workPlan.simRun') }}</button>
+            <button class="wp-btn-ghost" @click="resetSim">{{ t('workPlan.simReset') }}</button>
+          </div>
+          <div v-if="!simResult" class="wp-sim-empty">{{ t('workPlan.simEmpty') }}</div>
+          <div v-else class="wp-sim-out">
+            <div class="wp-sim-target"><b>{{ simResult.targetName }}</b> +{{ simResult.n }} {{ t('workPlan.simWd') }} · {{ fmtDate(simResult.oldEnd) }} → <b>{{ fmtDate(simResult.newEnd) }}</b></div>
+            <div v-if="simResult.gate" class="wp-sim-gate">
+              ◆ {{ t('workPlan.simImpact') }}: <b>{{ simResult.gate.name }}</b> — {{ fmtDate(simResult.gate.oldEnd) }} → <b class="bad">{{ fmtDate(simResult.gate.newEnd) }}</b>
+            </div>
+            <div v-else class="wp-sim-gate none">{{ t('workPlan.simNoGate') }}</div>
+            <div class="wp-sim-list">
+              <div v-for="mv in simResult.moved.slice(0, 8)" :key="mv.id" class="wp-sim-row">
+                {{ mv.name }} · {{ mv.oldStart ? fmtDate(mv.oldStart) : fmtDate(mv.oldEnd) }} → {{ mv.newStart ? fmtDate(mv.newStart) : fmtDate(mv.newEnd) }}
+              </div>
+              <div v-if="simResult.moved.length > 8" class="wp-sim-row more">{{ t('workPlan.simMore', { n: simResult.moved.length - 8 }) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wp-pane">
         <div class="wp-pane-head">
           <div class="wp-pane-title">◆ {{ t('workPlan.pGates') }}</div>
           <div class="wp-pane-sub">{{ kpi.passedCount }}/{{ kpi.gates.length }}</div>
@@ -227,6 +262,7 @@
             <span class="wp-gr-date">{{ g.date ? fmtDate(g.date) : '—' }}</span>
             <span :class="['wp-gr-badge', { ok: g.passed }]">{{ g.passed ? t('workPlan.badgePassed') : t('workPlan.badgePending') }}</span>
           </div>
+        </div>
         </div>
       </div>
 
@@ -260,6 +296,25 @@
             <div class="wp-load-name"><span class="wp-env">{{ e.name }}</span></div>
             <div class="wp-load-track"><i :style="`width:${envCoverage.max ? (e.days / envCoverage.max) * 100 : 0}%;background:var(--accent);`"></i></div>
             <div class="wp-load-total">{{ e.count }} · {{ e.days }}d</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- automatic alerts — full width, regenerated on every change (phase C.2) -->
+      <div class="wp-pane wp-alerts">
+        <div class="wp-pane-head">
+          <div class="wp-pane-title">{{ t('workPlan.pAlerts') }}</div>
+          <div class="wp-pane-sub">{{ t('workPlan.pAlertsHint') }}</div>
+        </div>
+        <div v-if="!alerts.length" class="wp-al-none">✅ {{ t('workPlan.alNone') }}</div>
+        <div v-else class="wp-al-list">
+          <div v-for="(a, ai) in alerts" :key="ai + '-' + a.id" :class="['wp-al-card', a.sev]">
+            <span class="wp-al-ico">{{ a.icon }}</span>
+            <div class="wp-al-body">
+              <div class="wp-al-title">{{ a.title }}</div>
+              <div class="wp-al-desc">{{ a.desc }}</div>
+            </div>
+            <button class="wp-al-open" @click="$emit('task-click', a.id)">{{ t('workPlan.alOpen') }}</button>
           </div>
         </div>
       </div>
@@ -325,12 +380,38 @@ const wpModules = computed(() => {
 // ── KPI phase A ─────────────────────────────────────────────────────────────
 // Greek public holidays inside the plan horizon, copied from the approved mockup.
 // Needs updating for 2028 onwards.
-// NOT used in phase A — reserved for phase C (working-day cascade / slip simulation).
-// eslint-disable-next-line no-unused-vars
+// Used by the workday helpers below (phase C.2 slip scenario and alerts).
 const GREEK_HOLIDAYS = new Set([
   '2026-10-28', '2026-12-25', '2026-12-28', '2026-12-29', '2026-12-30', '2026-12-31',
   '2027-01-01', '2027-01-06', '2027-03-15', '2027-03-25', '2027-05-03', '2027-06-21',
 ])
+
+// ── workday helpers (phase C.2) ─────────────────────────────────────────────
+// All date math runs on Date.UTC built from the string PARTS. new Date(iso)
+// also parses as UTC, but any local-time getter afterwards could shift the
+// day near midnight in negative-offset zones — UTC getters never can.
+function isoToUTC(iso) {
+  const p = String(iso).split('-')
+  return Date.UTC(+p[0], +p[1] - 1, +p[2])
+}
+function utcToISO(ms) {
+  return new Date(ms).toISOString().slice(0, 10)
+}
+function isWorkday(iso) {
+  const day = new Date(isoToUTC(iso)).getUTCDay()
+  return day !== 0 && day !== 6 && !GREEK_HOLIDAYS.has(String(iso))
+}
+function addWorkdays(iso, n) {
+  if (!iso) return iso
+  let ms = isoToUTC(iso)
+  let left = Math.abs(n)
+  const step = n >= 0 ? 86400000 : -86400000
+  while (left > 0) {
+    ms += step
+    if (isWorkday(utcToISO(ms))) left--
+  }
+  return utcToISO(ms)
+}
 
 function todayISO() {
   const d = new Date()
@@ -572,6 +653,86 @@ const envCoverage = computed(() => {
   return { rows, max }
 })
 
+// ── phase C.2: slip scenario (in-memory only — nothing is saved, no PUT) ────
+const simTaskId = ref('')
+const simDays = ref(3)
+const simResult = ref(null)
+
+function runSim() {
+  const target = allTasks.value.find(x => x.id === simTaskId.value)
+  if (!target || !target.endDate) return
+  const n = Math.max(1, Math.round(Number(simDays.value) || 1))
+  const origEnd = target.endDate
+  const moved = []
+  allTasks.value.forEach(x => {
+    if (x.id === target.id) return
+    // Cascade anchor is startDate, falling back to endDate for gate-style
+    // tasks that carry no start — otherwise no gate could ever move and the
+    // "next gate impact" below would always be empty (same as the mockup).
+    const s = x.startDate || x.endDate
+    if (s && s >= origEnd) {
+      moved.push({
+        id: x.id, name: x.name, isGate: x.isGate === true,
+        oldStart: x.startDate, newStart: x.startDate ? addWorkdays(x.startDate, n) : null,
+        oldEnd: x.endDate, newEnd: x.endDate ? addWorkdays(x.endDate, n) : null,
+      })
+    }
+  })
+  const movedGates = moved.filter(x => x.isGate)
+    .sort((a, b) => ((a.oldEnd || '') < (b.oldEnd || '') ? -1 : 1))
+  simResult.value = {
+    targetId: target.id,
+    targetName: target.name,
+    n,
+    oldEnd: origEnd,
+    newEnd: addWorkdays(origEnd, n),
+    moved,
+    gate: movedGates[0] || null,
+  }
+}
+function resetSim() { simResult.value = null }
+
+// ── phase C.2: automatic alerts (recomputed on every change) ────────────────
+const alerts = computed(() => {
+  const list = []
+  const ref = asOf.value
+  // (a) pending gate within 21 days with outstanding work in its phase
+  gateRows.value.forEach(g => {
+    if (!g.passed && g.date && g.pending > 0 && dd(ref, g.date) <= 21)
+      list.push({ sev: 'crit', icon: '🔴', id: g.id, title: g.name, desc: t('workPlan.alGate', { n: g.pending, date: fmtDate(g.date) }) })
+  })
+  // (b) overdue non-gate tasks
+  allTasks.value.forEach(x => {
+    if (x.isGate !== true && isOverdue(x))
+      list.push({ sev: 'crit', icon: '🔴', id: x.id, title: x.name, desc: t('workPlan.alOverdue', { date: fmtDate(x.endDate), p: x.progress || 0 }) })
+  })
+  // (c) blocked tasks — surface the block note when there is one
+  allTasks.value.forEach(x => {
+    if (x.isBlocked === true)
+      list.push({ sev: 'crit', icon: '🔴', id: x.id, title: x.name, desc: x.blockNote || t('workPlan.alBlocked') })
+  })
+  // (d) open questions
+  allTasks.value.forEach(x => {
+    if (remarkText(x).includes('?'))
+      list.push({ sev: 'warn', icon: '🟡', id: x.id, title: x.name, desc: t('workPlan.alOpenQ') + ' — ' + remarkShort(x) })
+  })
+  // (e) non-gate tasks without a team
+  allTasks.value.forEach(x => {
+    if (x.isGate !== true && !teamsOf(x).length)
+      list.push({ sev: 'warn', icon: '🟡', id: x.id, title: x.name, desc: t('workPlan.alNoTeam') })
+  })
+  // (f) tasks starting or ending on a non-working day
+  allTasks.value.forEach(x => {
+    const bad = (x.startDate && !isWorkday(x.startDate)) ? x.startDate
+      : (x.endDate && !isWorkday(x.endDate)) ? x.endDate : null
+    if (bad) list.push({ sev: 'warn', icon: '🟡', id: x.id, title: x.name, desc: t('workPlan.alNonWork', { date: fmtDate(bad) }) })
+  })
+  // (g) active slip scenario
+  if (simResult.value)
+    list.push({ sev: 'info', icon: '🔵', id: simResult.value.targetId, title: simResult.value.targetName, desc: t('workPlan.alSim', { n: simResult.value.n, m: simResult.value.moved.length }) })
+  return list
+})
+
 // ── phase B: health / variance / row flags ──────────────────────────────────
 const HEALTH_KEY = { done: 'hDone', late: 'hLate', prog: 'hProg', soon: 'hSoon', todo: 'hTodo' }
 
@@ -791,4 +952,38 @@ function teamColor(name) {
 .wp-load-track { height: 14px; background: var(--surface3); border-radius: 4px; overflow: hidden; display: flex; }
 .wp-load-track i { display: block; height: 100%; }
 .wp-load-total { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; text-align: right; color: var(--text-mid); white-space: nowrap; }
+/* phase C.2 — slip scenario */
+.wp-sim-ctrl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2); }
+.wp-sim-select { max-width: 240px; }
+.wp-sim-days { width: 64px; }
+.wp-btn { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 6px 14px; font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; }
+.wp-btn:hover { background: var(--accent); filter: brightness(0.92); }
+.wp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.wp-btn-ghost { background: transparent; border: 1px solid var(--border-bright); border-radius: 6px; padding: 6px 14px; font-family: "Nunito", sans-serif; font-size: 12px; font-weight: 600; color: var(--text-mid); cursor: pointer; }
+.wp-btn-ghost:hover { background: var(--surface2); }
+.wp-sim-empty { padding: 14px 16px; font-family: "Nunito Sans", sans-serif; font-size: 12px; font-weight: 600; color: var(--text-dim); }
+.wp-sim-out { padding: 12px 16px; font-size: 12.5px; color: var(--text-mid); }
+.wp-sim-target { margin-bottom: 8px; }
+.wp-sim-target b, .wp-sim-gate b { color: var(--text); }
+.wp-sim-gate { padding: 8px 10px; background: var(--yellow-dim); border-radius: 6px; margin-bottom: 8px; }
+.wp-sim-gate .bad { color: var(--red); }
+.wp-sim-gate.none { background: var(--surface2); color: var(--text-dim); font-size: 11.5px; }
+.wp-sim-list { display: flex; flex-direction: column; gap: 2px; }
+.wp-sim-row { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 600; color: var(--text-dim); }
+.wp-sim-row.more { font-weight: 800; }
+/* phase C.2 — alerts (mirrors NotificationsView .notif-card: left severity stripe) */
+.wp-alerts { grid-column: 1 / -1; }
+.wp-al-none { padding: 18px 16px; text-align: center; font-family: "Nunito Sans", sans-serif; font-size: 12px; font-weight: 700; color: var(--text-dim); }
+.wp-al-list { display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; }
+.wp-al-card { position: relative; overflow: hidden; display: flex; gap: 12px; align-items: flex-start; padding: 11px 14px 11px 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+.wp-al-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.wp-al-card.crit::before { background: var(--red); }
+.wp-al-card.warn::before { background: var(--yellow); }
+.wp-al-card.info::before { background: var(--accent); }
+.wp-al-ico { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.wp-al-body { flex: 1; min-width: 0; }
+.wp-al-title { font-size: 12.5px; font-weight: 800; color: var(--text); }
+.wp-al-desc { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 600; color: var(--text-dim); margin-top: 2px; }
+.wp-al-open { border: 1px solid var(--border-bright); background: var(--surface); border-radius: 5px; font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; padding: 3px 10px; color: var(--text-dim); cursor: pointer; flex-shrink: 0; }
+.wp-al-open:hover { color: var(--text); border-color: var(--text-dim); }
 </style>

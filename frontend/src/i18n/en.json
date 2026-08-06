@@ -545,6 +545,26 @@
     "pLoadHint": "Working days per phase",
     "pNoTeam": "tasks without a team",
     "pNoTeamOne": "task without a team",
-    "pEnv": "Environment coverage"
+    "pEnv": "Environment coverage",
+    "pSim": "Slip scenario",
+    "pSimHint": "Cascades in working days, skipping GR holidays",
+    "simRun": "Run",
+    "simReset": "Reset",
+    "simWd": "working days",
+    "simEmpty": "Pick a task and press Run.",
+    "simImpact": "Impact on the next gate",
+    "simNoGate": "No gate affected",
+    "simMore": "+{n} more",
+    "pAlerts": "Automatic alerts",
+    "pAlertsHint": "Regenerated on every change",
+    "alOpen": "Open",
+    "alNone": "No alerts",
+    "alGate": "blocked by {n} pending tasks · {date}",
+    "alOverdue": "overdue — ended {date} · {p}%",
+    "alBlocked": "blocked",
+    "alOpenQ": "open question",
+    "alNoTeam": "no owning team",
+    "alNonWork": "{date} is a non-working day",
+    "alSim": "{n} working days slip · {m} tasks affected"
   }
 }
