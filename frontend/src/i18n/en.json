@@ -565,6 +565,24 @@
     "alOpenQ": "open question",
     "alNoTeam": "no owning team",
     "alNonWork": "{date} is a non-working day",
-    "alSim": "{n} working days slip · {m} tasks affected"
+    "alSim": "{n} working days slip · {m} tasks affected",
+    "toolParity": "Excel parity",
+    "toolEnhanced": "Enhanced",
+    "toolExport": "Export",
+    "planEnhNote": "tasks · click a row to open the task form · purple columns are computed automatically.",
+    "planParityNote": "Faithful reproduction of the workbook — same columns, same order.",
+    "tabIntegration": "Integration",
+    "intMapTitle": "Mapping onto the existing schema",
+    "intMapSub": "9 of 14 fields pre-existed · 5 added by V29, all additive & nullable",
+    "intExisting": "existing",
+    "intColExcel": "Excel column",
+    "intColStatus": "Status",
+    "intColNote": "Note",
+    "intApplied": "✓ APPLIED",
+    "intSqlTitle": "V29 — additive only",
+    "intSqlSub": "No column altered, none NOT NULL without default. The other projects see nothing.",
+    "intNext": "next =",
+    "intSqlNote": "Rollback: V29 is additive → code rollback; the columns stay harmless, exactly as with V28.",
+    "intPlanTitle": "Integration plan — completed"
   }
 }
