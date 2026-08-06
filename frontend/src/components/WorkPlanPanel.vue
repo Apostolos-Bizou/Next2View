@@ -5,6 +5,7 @@
       <div class="wp-tools">
         <div class="wp-seg">
           <button :class="['wp-seg-btn', { active: activeTab === 'plan' }]" @click="activeTab = 'plan'">{{ t('workPlan.tabPlan') }}</button>
+          <button :class="['wp-seg-btn', { active: activeTab === 'timeline' }]" @click="activeTab = 'timeline'">{{ t('workPlan.tabTimeline') }}</button>
           <button v-if="cutoverModules.length" :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
           <button :class="['wp-seg-btn', { active: activeTab === 'kpis' }]" @click="activeTab = 'kpis'">{{ t('workPlan.tabKpis') }}</button>
           <button :class="['wp-seg-btn', { active: activeTab === 'integration' }]" @click="activeTab = 'integration'">{{ t('workPlan.tabIntegration') }}</button>
@@ -56,8 +57,8 @@
       </div>
     </div>
 
-    <!-- filter row (phase A) — applies to the PLAN table only; KPIs stay unfiltered -->
-    <div v-if="activeTab === 'plan'" class="wp-ctrl">
+    <!-- filter row (phase A) — applies to the PLAN table and the TIMELINE; KPIs stay unfiltered -->
+    <div v-if="activeTab === 'plan' || activeTab === 'timeline'" class="wp-ctrl">
       <div class="wp-fld">
         <label class="wp-ctrl-lbl">{{ t('workPlan.asOf') }}</label>
         <input type="date" class="wp-select" v-model="asOf" />
@@ -181,6 +182,90 @@
       <div class="wp-plan-note">
         {{ parity ? t('workPlan.planParityNote')
                   : visibleTaskCount + ' ' + t('workPlan.planEnhNote') }}
+      </div>
+    </div>
+
+    <!-- TIMELINE TAB (6β) — gantt over the FILTERED plan; the axis stays fixed to the full plan -->
+    <div v-else-if="activeTab === 'timeline'" class="wp-tl">
+      <div class="wp-tl-ctrl">
+        <div class="wp-seg">
+          <button :class="['wp-seg-btn', { active: tlGroup === 'phase' }]" @click="tlGroup = 'phase'">{{ t('workPlan.byPhase') }}</button>
+          <button :class="['wp-seg-btn', { active: tlGroup === 'team' }]" @click="tlGroup = 'team'">{{ t('workPlan.byTeam') }}</button>
+          <button :class="['wp-seg-btn', { active: tlGroup === 'env' }]" @click="tlGroup = 'env'">{{ t('workPlan.byEnv') }}</button>
+        </div>
+        <div style="flex:1"></div>
+        <div class="wp-seg">
+          <button :class="['wp-seg-btn', { active: tlZoom === 26 }]" @click="tlZoom = 26">{{ t('workPlan.zDay') }}</button>
+          <button :class="['wp-seg-btn', { active: tlZoom === 14 }]" @click="tlZoom = 14">{{ t('workPlan.zWeek') }}</button>
+          <button :class="['wp-seg-btn', { active: tlZoom === 7 }]" @click="tlZoom = 7">{{ t('workPlan.zMonth') }}</button>
+        </div>
+        <button class="wp-mini-btn" @click="tlJumpToday">{{ t('workPlan.jumpToday') }}</button>
+      </div>
+      <div v-if="!tlRange.days" class="wp-sim-empty">{{ t('workPlan.noTasks') }}</div>
+      <div v-else class="wp-tl-scroll" ref="tlScroll"
+           @wheel="tlWheel" @touchstart="tlTouchStart" @touchmove="tlTouchMove" @touchend="tlTouchEnd">
+        <div class="wp-tl-table" :style="{ '--cw': tlZoom + 'px', '--tw': tlRange.days * tlZoom + 'px' }">
+          <div class="wp-tl-head">
+            <div class="wp-tl-head-l">{{ t('workPlan.task') }}</div>
+            <div class="wp-tl-head-c">
+              <div v-for="mo in tlMonths" :key="'m' + mo.startI" class="wp-tl-mon"
+                   :style="{ left: mo.startI * tlZoom + 'px', width: mo.span * tlZoom + 'px' }">{{ mo.label }}</div>
+              <div v-for="d in tlDays" :key="d.i" :class="['wp-tl-dy', { we: d.isWe, ho: d.isHo }]"
+                   :style="{ left: d.i * tlZoom + 'px', width: tlZoom + 'px' }">{{ tlZoom >= 13 ? d.dayNum : '' }}</div>
+              <div v-for="(cb, ci) in tlCutBands" :key="'cl' + ci" class="wp-tl-cutlab"
+                   :style="{ left: cb.left + 'px' }">{{ cb.label }}</div>
+              <div v-if="tlTodayIx !== null" class="wp-tl-today" :style="{ left: tlTodayIx * tlZoom + 'px' }"></div>
+            </div>
+          </div>
+          <!-- single shaded layer behind every row — see tlBgSegments -->
+          <div class="wp-tl-bg">
+            <div v-for="(seg, si) in tlBgSegments" :key="si" :class="['wp-tl-bgseg', seg.cls]"
+                 :style="{ left: seg.i * tlZoom + 'px', width: seg.cls === 'gl' ? '1px' : tlZoom + 'px' }"></div>
+            <div v-for="(cb, ci) in tlCutBands" :key="'cb' + ci" class="wp-tl-cutband"
+                 :style="{ left: cb.left + 'px', width: cb.width + 'px' }"></div>
+            <div v-if="tlTodayIx !== null" class="wp-tl-today fade" :style="{ left: tlTodayIx * tlZoom + 'px' }"></div>
+          </div>
+          <template v-for="g in tlGroups" :key="g.key">
+            <div class="wp-tl-row mod">
+              <div class="wp-tl-lab">
+                <span class="wp-mdot" :style="`background:var(--${g.color});`"></span>
+                <span class="lt">{{ g.label }}</span>
+                <span class="wp-tl-pill">{{ g.progress || 0 }}%</span>
+              </div>
+              <div class="wp-tl-track">
+                <div v-if="tlModSpan(g)" class="wp-tl-mod"
+                     :style="{ left: (tlModSpan(g).a * tlZoom + 4) + 'px', width: Math.max(10, (tlModSpan(g).b - tlModSpan(g).a) * tlZoom - 8) + 'px' }"></div>
+              </div>
+            </div>
+            <div v-for="task in g.tasks" :key="task.id" class="wp-tl-row">
+              <div class="wp-tl-lab task">
+                <span v-if="task.isGate === true" class="wp-gate" :title="t('workPlan.gate')">◆</span>
+                <span v-else :class="['wp-tl-chk', { done: task.isDone }]">✓</span>
+                <span :class="['lt', { done: task.isDone }]">{{ task.name || '—' }}</span>
+              </div>
+              <div class="wp-tl-track">
+                <div v-if="task.isGate === true && task.endDate" class="wp-tl-dia"
+                     :class="{ ok: gatePassed(task), bad: !gatePassed(task) && task.endDate < asOf }"
+                     :style="{ left: (tlIx(task.endDate) * tlZoom + tlZoom / 2) + 'px' }"
+                     :title="task.name" @click="$emit('task-click', task.id)"></div>
+                <div v-else-if="tlBarInfo(task)" :class="['wp-tl-bar', { open: tlBarInfo(task).open, late: taskHealth(task) === 'late' }]"
+                     :style="{ left: tlBarInfo(task).left + 'px', width: tlBarInfo(task).w + 'px', background: `var(--${teamColor(teamsOf(task)[0] || '')})` }"
+                     :title="task.name" @click="$emit('task-click', task.id)">
+                  <div v-if="(task.progress || 0) < 100" class="fill" :style="{ left: (task.progress || 0) + '%' }"></div>
+                  <span v-if="tlBarInfo(task).w > 70" class="bl">{{ (task.name || '').slice(0, Math.floor(tlBarInfo(task).w / 6)) }}</span>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+      <!-- legend — dynamic from the data, never a hardcoded team list -->
+      <div v-if="tlRange.days" class="wp-tl-strip">
+        <span v-for="tm in teamOptions" :key="tm" class="wp-tl-strip-item"><i :style="`background:var(--${teamColor(tm)});`"></i>{{ tm }}</span>
+        <span class="wp-tl-strip-item"><i class="dia"></i>{{ t('workPlan.legendGate') }}</span>
+        <span v-if="tlCutBands.length" class="wp-tl-strip-item"><i class="cut"></i>{{ t('workPlan.legendCut') }}</span>
+        <span v-if="tlTodayIx !== null" class="wp-tl-strip-item"><i class="today"></i>{{ t('workPlan.legendToday') }}</span>
+        <span class="wp-tl-strip-item hint">{{ t('workPlan.legendZoom') }}</span>
       </div>
     </div>
 
@@ -415,7 +500,7 @@ ALTER TABLE projects ADD COLUMN IF NOT EXISTS work_plan_enabled BOOLEAN NOT NULL
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DOMPurify from 'dompurify'
 
@@ -595,6 +680,159 @@ const visibleModules = computed(() => {
 })
 const visibleTaskCount = computed(() => visibleModules.value.reduce((s, m) => s + m.visibleTasks.length, 0))
 
+// ── 6β: timeline tab ────────────────────────────────────────────────────────
+const tlGroup = ref('phase')        // 'phase' | 'team' | 'env' (team/env land in commit 2)
+const tlZoom = ref(14)              // px per day: 26 day · 14 week · 7 month
+const tlScroll = ref(null)
+
+// Axis over ALL tasks (never the filtered set) so filtering can't shift the grid.
+const tlRange = computed(() => {
+  const ds = wpModules.value.flatMap(m => m.tasks.flatMap(t => [t.startDate, t.endDate])).filter(Boolean).sort()
+  if (!ds.length) return { start: null, days: 0 }
+  const s = isoToUTC(ds[0])
+  const days = Math.round((isoToUTC(ds[ds.length - 1]) - s) / 86400000) + 2
+  return { start: s, days }
+})
+function tlIx(iso) { return Math.round((isoToUTC(iso) - tlRange.value.start) / 86400000) }
+
+const tlDays = computed(() => {
+  const out = []
+  const { start, days } = tlRange.value
+  if (!start) return out
+  for (let i = 0; i < days; i++) {
+    const ms = start + i * 86400000
+    const d = new Date(ms)
+    const dow = d.getUTCDay()
+    out.push({
+      i, iso: utcToISO(ms), dayNum: d.getUTCDate(),
+      isWe: dow === 0 || dow === 6, isHo: GREEK_HOLIDAYS.has(utcToISO(ms)),
+      isMonday: dow === 1, monthIdx: d.getUTCMonth(),
+    })
+  }
+  return out
+})
+
+// Contiguous same-month segments; the last one also carries the year.
+// Labels come from the existing top-level `months` i18n block (ganttv2 has
+// no short-month set — checked).
+const tlMonths = computed(() => {
+  const segs = []
+  tlDays.value.forEach(d => {
+    const last = segs[segs.length - 1]
+    if (!last || last.m !== d.monthIdx) segs.push({ m: d.monthIdx, startI: d.i, span: 1 })
+    else last.span++
+  })
+  const { start, days } = tlRange.value
+  const year = start ? new Date(start + (days - 1) * 86400000).getUTCFullYear() : ''
+  return segs.map((seg, i) => ({ ...seg, label: t('months.' + seg.m) + (i === segs.length - 1 ? ' ' + year : '') }))
+})
+
+// One shaded layer behind all rows. The mockup repaints we/ho columns inside
+// every row (cheap as an innerHTML string, ~30k nodes as Vue vnodes) — same
+// look here with ~2 orders of magnitude fewer nodes. Holidays are aperiodic,
+// so a repeating CSS gradient cannot replace this.
+const tlBgSegments = computed(() => tlDays.value
+  .filter(d => d.isWe || d.isHo || d.isMonday)
+  .map(d => ({ i: d.i, cls: d.isHo ? 'ho' : d.isWe ? 'we' : 'gl' })))
+
+// Groups honour the SAME filtered pipeline as the plan table (visibleModules).
+// In team/env mode a task with two teams (or envs) appears in two groups —
+// same as the mockup, no dedup. Keys come from the data, never a fixed list;
+// the trailing '—' bucket collects tasks with none. Empty groups are dropped.
+const tlGroups = computed(() => {
+  if (tlGroup.value === 'phase')
+    return visibleModules.value.map(m => ({ key: m.id, label: m.name,
+      color: m.color || 'dev', tasks: m.visibleTasks, progress: m.completion }))
+  const tasks = visibleModules.value.flatMap(m => m.visibleTasks)
+  const of = tlGroup.value === 'team' ? teamsOf : envsOf
+  const keys = [...new Set(tasks.flatMap(of))]
+  return keys.map(k => ({ key: k, label: k, color: teamColor(k), tasks: tasks.filter(t => of(t).includes(k)) }))
+    .concat([{ key: '—', label: '—', color: 'dev', tasks: tasks.filter(t => !of(t).length) }])
+    .filter(g => g.tasks.length)
+    .map(g => ({ ...g, progress: Math.round(g.tasks.reduce((s, t) => s + (t.progress || 0), 0) / g.tasks.length) }))
+})
+
+// Cutover windows as shaded bands on the shared layer + a label pill in the header.
+const tlCutBands = computed(() => cutoverModules.value
+  .filter(m => m.minStart && m.maxEnd)
+  .map(m => ({
+    left: tlIx(m.minStart) * tlZoom.value,
+    width: (tlIx(m.maxEnd) + 1 - tlIx(m.minStart)) * tlZoom.value,
+    label: m.name,
+  })))
+
+// Anchored to the asOf ref like every other computation in the panel — never a raw today.
+const tlTodayIx = computed(() => {
+  if (!tlRange.value.start) return null
+  const i = tlIx(asOf.value)
+  return (i >= 0 && i <= tlRange.value.days) ? i : null
+})
+
+function tlJumpToday() {
+  const el = tlScroll.value
+  if (!el || !tlRange.value.start) return
+  el.scrollLeft = Math.max(0, tlIx(asOf.value) * tlZoom.value - 240)
+}
+
+// Ctrl/⌘ + wheel and two-finger pinch step through the zoom levels —
+// same technique as GanttV2, adapted to our px-per-day levels.
+const TL_LEVELS = [26, 14, 7]  // day → week → month
+function tlWheel(ev) {
+  if (!(ev.ctrlKey || ev.metaKey)) return
+  ev.preventDefault()
+  let idx = TL_LEVELS.indexOf(tlZoom.value)
+  if (idx === -1) idx = 1
+  if (ev.deltaY > 0 && idx < 2) idx++
+  else if (ev.deltaY < 0 && idx > 0) idx--
+  else return
+  tlZoom.value = TL_LEVELS[idx]
+}
+let tlTouchDist = 0
+let tlTouchZoom = null
+function tlTouchStart(ev) {
+  if (ev.touches.length === 2) {
+    const dx = ev.touches[0].clientX - ev.touches[1].clientX
+    const dy = ev.touches[0].clientY - ev.touches[1].clientY
+    tlTouchDist = Math.sqrt(dx * dx + dy * dy)
+    tlTouchZoom = tlZoom.value
+  }
+}
+function tlTouchMove(ev) {
+  if (ev.touches.length === 2 && tlTouchDist > 0) {
+    const dx = ev.touches[0].clientX - ev.touches[1].clientX
+    const dy = ev.touches[0].clientY - ev.touches[1].clientY
+    const ratio = Math.sqrt(dx * dx + dy * dy) / tlTouchDist
+    // spread = zoom in = MORE px per day = lower index
+    const idx = TL_LEVELS.indexOf(tlTouchZoom)
+    let ni = idx
+    if (ratio > 1.3) ni = Math.max(idx - 1, 0)
+    else if (ratio < 0.77) ni = Math.min(idx + 1, 2)
+    if (ni !== idx && tlZoom.value !== TL_LEVELS[ni]) tlZoom.value = TL_LEVELS[ni]
+  }
+}
+function tlTouchEnd() { tlTouchDist = 0; tlTouchZoom = null }
+
+// Same "passed" rule the gates panel and KPIs use: progress at exactly 100.
+const gatePassed = g => (g.progress || 0) === 100
+
+function tlModSpan(g) {
+  const st = g.tasks.map(t => t.startDate || t.endDate).filter(Boolean).sort()
+  const en = g.tasks.map(t => t.endDate).filter(Boolean).sort()
+  if (!st.length || !en.length) return null
+  return { a: tlIx(st[0]), b: tlIx(en[en.length - 1]) + 1 }
+}
+
+// Bars run startDate..endDate inclusive (+1 day). Tasks without a start render
+// open-ended: anchored at the end, pulled back ~2px-cells per work day (mockup rule).
+function tlBarInfo(t) {
+  const end = t.endDate || t.startDate
+  if (!end) return null
+  const open = !t.startDate
+  const a = t.startDate ? tlIx(t.startDate) : Math.max(0, tlIx(end) - Math.ceil(Number(t.workDays) || 1) * 2)
+  const b = tlIx(end) + 1
+  return { left: a * tlZoom.value + 1, w: Math.max(10, (b - a) * tlZoom.value - 2), open }
+}
+
 // ── integration tools: Excel parity toggle + TSV export ─────────────────────
 // View-only — nothing is persisted, no PUT.
 const parity = ref(false)
@@ -689,6 +927,11 @@ const INT_STEPS = [
 
 // ── 6c: cutover runbook ─────────────────────────────────────────────────────
 const activeTab = ref('plan')
+
+// timeline: auto-jump to today when the tab opens (the pane mounts via
+// v-else-if, so tlScroll only exists after nextTick). Lives here, not in the
+// 6β section — activeTab is declared at this point (const, no hoisting).
+watch(activeTab, (v) => { if (v === 'timeline') nextTick(tlJumpToday) })
 
 // A module is a cutover window when BOTH hold:
 //  (a) every non-gate task has a startTime, (b) the whole span fits in <= 3 calendar days.
@@ -1263,4 +1506,56 @@ function teamColor(name) {
   justify-content: center; flex-shrink: 0; margin-top: 1px; }
 .wp-int-step-t { font-size: 12px; font-weight: 700; color: var(--text); }
 .wp-int-step-s { font-size: 11px; color: var(--text-dim); margin-top: 1px; line-height: 1.5; }
+/* ── timeline (6β) — mockup g* rules on a wp-tl- prefix; sticky pattern from GanttV2
+   (header z6 · corner z7 · row labels z5, opaque backgrounds, one shared scroll box).
+   Only var() colors; the raw rgba values are the mockup's alpha overlays. */
+.wp-tl-ctrl { display: flex; align-items: center; gap: 10px; padding: 10px 20px; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.wp-tl-scroll { overflow: auto; max-height: 58vh; }
+.wp-tl-table { display: flex; flex-direction: column; min-width: min-content; position: relative; }
+.wp-tl-head { position: sticky; top: 0; z-index: 6; background: var(--surface2); border-bottom: 2px solid var(--border); display: flex; min-height: 56px; }
+.wp-tl-head-l { position: sticky; left: 0; z-index: 7; width: 290px; min-width: 290px; padding: 10px 14px; background: var(--surface2); border-right: 2px solid var(--border); display: flex; align-items: flex-end; font-family: "Nunito Sans", sans-serif; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); font-weight: 800; text-transform: uppercase; box-shadow: 3px 0 6px -3px rgba(0,0,0,.06); flex-shrink: 0; }
+.wp-tl-head-c { position: relative; flex-shrink: 0; width: var(--tw); }
+.wp-tl-mon { position: absolute; top: 0; height: 28px; border-right: 1px solid var(--border); background: var(--surface3); font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--text); display: flex; align-items: center; padding-left: 8px; overflow: hidden; white-space: nowrap; }
+.wp-tl-dy { position: absolute; top: 28px; height: 28px; border-right: 1px solid var(--border); font-family: "Nunito Sans", sans-serif; font-size: 9px; font-weight: 700; color: var(--text-mid); display: flex; align-items: center; justify-content: center; background: var(--surface2); overflow: hidden; }
+.wp-tl-dy.we { background: rgba(220,38,38,.03); color: var(--text-dim); }
+.wp-tl-dy.ho { background: rgba(220,38,38,.09); color: var(--red); font-weight: 800; }
+.wp-tl-bg { position: absolute; top: 56px; bottom: 0; left: 290px; z-index: 0; pointer-events: none; }
+.wp-tl-bgseg { position: absolute; top: 0; bottom: 0; }
+.wp-tl-bgseg.we { background: rgba(0,0,0,.035); }
+.wp-tl-bgseg.ho { background: rgba(220,38,38,.07); }
+.wp-tl-bgseg.gl { background: rgba(0,0,0,.05); }
+.wp-tl-row { display: flex; border-bottom: 1px solid var(--border); min-height: 34px; position: relative; }
+.wp-tl-row.mod { background: var(--surface3); min-height: 38px; }
+.wp-tl-row:hover { background: var(--accent-dim); }
+.wp-tl-lab { position: sticky; left: 0; z-index: 5; width: 290px; min-width: 290px; padding: 6px 14px; background: var(--surface); border-right: 2px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; font-size: 13px; box-shadow: 3px 0 6px -3px rgba(0,0,0,.06); }
+.wp-tl-row.mod .wp-tl-lab { background: var(--surface3); }
+.wp-tl-lab.task { padding-left: 30px; }
+.wp-tl-lab .lt { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-mid); font-weight: 600; font-size: 12.5px; }
+.wp-tl-row.mod .wp-tl-lab .lt { color: var(--text); font-weight: 800; font-size: 13px; }
+.wp-tl-lab .lt.done { color: var(--text-dim); text-decoration: line-through; }
+.wp-tl-pill { font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 9px; background: var(--surface); color: var(--text-mid); border: 1px solid var(--border); }
+.wp-tl-chk { font-size: 10px; font-weight: 800; color: var(--border-bright); }
+.wp-tl-chk.done { color: var(--green); }
+.wp-tl-track { position: relative; flex-shrink: 0; width: var(--tw); }
+.wp-tl-mod { position: absolute; top: 13px; height: 8px; background: var(--text-mid); opacity: .55; border-radius: 2px; z-index: 3; }
+.wp-tl-bar { position: absolute; top: 8px; height: 17px; border-radius: 5px; z-index: 3; cursor: pointer; display: flex; align-items: center; overflow: hidden; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+.wp-tl-bar .fill { position: absolute; top: 0; bottom: 0; right: 0; background: rgba(255,255,255,.42); }
+.wp-tl-bar .bl { position: relative; font-family: "Nunito Sans", sans-serif; font-size: 9.5px; font-weight: 800; color: #fff; padding: 0 6px; white-space: nowrap; overflow: hidden; text-shadow: 0 1px 1px rgba(0,0,0,.25); }
+.wp-tl-bar.open { border-left: 2px dashed rgba(255,255,255,.85); }
+.wp-tl-bar.late { outline: 2px solid var(--red); outline-offset: 1px; box-shadow: 0 0 0 1px rgba(255,255,255,.35), 0 0 8px rgba(220,38,38,.45); }
+.wp-tl-dia { position: absolute; top: 9px; width: 14px; height: 14px; margin-left: -7px; background: var(--surface); border: 2.5px solid var(--dev); transform: rotate(45deg); z-index: 4; cursor: pointer; }
+.wp-tl-dia.ok { background: var(--green); border-color: var(--green); }
+.wp-tl-dia.bad { border-color: var(--red); background: var(--red-dim); }
+/* timeline commit 2 — cutover bands, today line, legend strip (mockup 208–211, 570–577) */
+.wp-tl-cutband { position: absolute; top: 0; bottom: 0; z-index: 1; background: rgba(217,119,6,.07); border-left: 2px dashed var(--legal); border-right: 2px dashed var(--legal); }
+.wp-tl-cutlab { position: absolute; top: 2px; font-family: "Nunito Sans", sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #fff; background: var(--legal); padding: 2px 7px; border-radius: 8px; white-space: nowrap; z-index: 5; }
+.wp-tl-today { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--red); z-index: 4; pointer-events: none; box-shadow: 0 0 8px rgba(220,38,38,.4); }
+.wp-tl-today.fade { opacity: .3; }
+.wp-tl-strip { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; padding: 10px 20px; border-top: 1px solid var(--border); background: var(--surface2); font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 700; color: var(--text-dim); }
+.wp-tl-strip-item { display: inline-flex; align-items: center; gap: 6px; }
+.wp-tl-strip-item i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+.wp-tl-strip-item i.dia { width: 9px; height: 9px; background: var(--surface); border: 2.5px solid var(--dev); transform: rotate(45deg); border-radius: 2px; }
+.wp-tl-strip-item i.cut { background: rgba(217,119,6,.15); border: 1px dashed var(--legal); }
+.wp-tl-strip-item i.today { width: 3px; height: 12px; background: var(--red); border-radius: 1px; }
+.wp-tl-strip-item.hint { margin-left: auto; font-weight: 600; }
 </style>

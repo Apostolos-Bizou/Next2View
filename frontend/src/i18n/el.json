@@ -587,6 +587,18 @@
     "rbShift": "Μετατόπιση",
     "rbRecomputed": "ξαναϋπολογίστηκε",
     "rbOnPlan": "στο πλάνο",
-    "rbNote": "Άλλαξε την ώρα εκκίνησης και όλο το runbook ξαναϋπολογίζεται."
+    "rbNote": "Άλλαξε την ώρα εκκίνησης και όλο το runbook ξαναϋπολογίζεται.",
+    "tabTimeline": "Χρονοδιάγραμμα",
+    "byPhase": "Ανά φάση",
+    "zDay": "Ημέρα",
+    "zWeek": "Εβδομάδα",
+    "zMonth": "Μήνας",
+    "byTeam": "Ανά ομάδα",
+    "byEnv": "Ανά περιβάλλον",
+    "jumpToday": "Μετάβαση στο σήμερα",
+    "legendGate": "Πύλη έγκρισης",
+    "legendCut": "Παράθυρο cutover",
+    "legendToday": "Σήμερα",
+    "legendZoom": "Ctrl + scroll: zoom · Pinch σε αφή"
   }
 }
