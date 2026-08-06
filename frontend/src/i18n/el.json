@@ -570,6 +570,19 @@
     "toolEnhanced": "Εμπλουτισμένο",
     "toolExport": "Εξαγωγή",
     "planEnhNote": "εργασίες · κλικ σε γραμμή ανοίγει τη φόρμα task · οι μωβ στήλες υπολογίζονται αυτόματα.",
-    "planParityNote": "Πιστή αναπαραγωγή του Excel — ίδιες στήλες, ίδια σειρά."
+    "planParityNote": "Πιστή αναπαραγωγή του Excel — ίδιες στήλες, ίδια σειρά.",
+    "tabIntegration": "Ενσωμάτωση",
+    "intMapTitle": "Αντιστοίχιση με το υπάρχον schema",
+    "intMapSub": "9 από τα 14 πεδία προϋπήρχαν · 5 προστέθηκαν με το V29, όλα additive & nullable",
+    "intExisting": "υπήρχαν",
+    "intColExcel": "Στήλη Excel",
+    "intColStatus": "Κατάσταση",
+    "intColNote": "Σημείωση",
+    "intApplied": "✓ ΕΦΑΡΜΟΣΤΗΚΕ",
+    "intSqlTitle": "V29 — μόνο προσθήκες",
+    "intSqlSub": "Καμία στήλη δεν τροποποιήθηκε, καμία NOT NULL χωρίς default. Τα υπόλοιπα projects δεν αντιλαμβάνονται τίποτα.",
+    "intNext": "επόμενο =",
+    "intSqlNote": "Rollback: το V29 είναι additive → code rollback· οι στήλες μένουν αβλαβείς, όπως με το V28.",
+    "intPlanTitle": "Σχέδιο ενσωμάτωσης — ολοκληρώθηκε"
   }
 }

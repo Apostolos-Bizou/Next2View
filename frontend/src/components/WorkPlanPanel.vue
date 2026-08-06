@@ -7,6 +7,7 @@
           <button :class="['wp-seg-btn', { active: activeTab === 'plan' }]" @click="activeTab = 'plan'">{{ t('workPlan.tabPlan') }}</button>
           <button v-if="cutoverModules.length" :class="['wp-seg-btn', { active: activeTab === 'cutover' }]" @click="activeTab = 'cutover'">{{ t('workPlan.tabCutover') }}</button>
           <button :class="['wp-seg-btn', { active: activeTab === 'kpis' }]" @click="activeTab = 'kpis'">{{ t('workPlan.tabKpis') }}</button>
+          <button :class="['wp-seg-btn', { active: activeTab === 'integration' }]" @click="activeTab = 'integration'">{{ t('workPlan.tabIntegration') }}</button>
         </div>
         <button class="wp-mini-btn" @click="parity = !parity">
           {{ parity ? t('workPlan.toolEnhanced') : t('workPlan.toolParity') }}
@@ -329,6 +330,78 @@
         </div>
       </div>
     </div>
+
+    <!-- INTEGRATION TAB — static reference: schema mapping / V29 SQL / integration plan -->
+    <div v-else-if="activeTab === 'integration'" class="wp-int">
+      <div class="wp-int-panel">
+        <div class="wp-int-head">
+          <div>
+            <div class="wp-int-title">🔌 {{ t('workPlan.intMapTitle') }}</div>
+            <div class="wp-int-sub">{{ t('workPlan.intMapSub') }}</div>
+          </div>
+          <div class="wp-int-badges">
+            <span class="badge green">9 {{ t('workPlan.intExisting') }}</span>
+            <span class="badge dev">5 × V29</span>
+          </div>
+        </div>
+        <div class="wp-scroll">
+          <table class="wp-mapt">
+            <thead>
+              <tr>
+                <th>{{ t('workPlan.intColExcel') }}</th>
+                <th>Next2View</th>
+                <th>{{ t('workPlan.intColStatus') }}</th>
+                <th>{{ t('workPlan.intColNote') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in INT_MAP" :key="row.col">
+                <td>{{ row.excel }}</td>
+                <td><code>{{ row.col }}</code></td>
+                <td><span v-if="row.applied" class="badge green">{{ t('workPlan.intApplied') }}</span></td>
+                <td>{{ row.note[locale] || row.note.en }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="wp-int-panel">
+        <div class="wp-int-head">
+          <div>
+            <div class="wp-int-title">🗄️ {{ t('workPlan.intSqlTitle') }}</div>
+            <div class="wp-int-sub">{{ t('workPlan.intSqlSub') }}</div>
+          </div>
+          <div class="wp-int-badges">
+            <span class="badge green">V29 · 05/08/2026 · {{ t('workPlan.intNext') }} V30</span>
+          </div>
+        </div>
+        <pre class="wp-sql">ALTER TABLE tasks ADD COLUMN IF NOT EXISTS start_time   TIME         NULL;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS end_time     TIME         NULL;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS environment  VARCHAR(40)  NULL;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_days    NUMERIC(6,2) NULL;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS is_gate      BOOLEAN      NOT NULL DEFAULT FALSE;
+
+-- opt-in switch: the panel renders only where it is turned on
+ALTER TABLE projects ADD COLUMN IF NOT EXISTS work_plan_enabled BOOLEAN NOT NULL DEFAULT FALSE;</pre>
+        <div class="wp-int-note">{{ t('workPlan.intSqlNote') }}</div>
+      </div>
+
+      <div class="wp-int-panel">
+        <div class="wp-int-head">
+          <div>
+            <div class="wp-int-title">🧩 {{ t('workPlan.intPlanTitle') }}</div>
+          </div>
+        </div>
+        <div v-for="s in INT_STEPS" :key="s.title.en" class="wp-int-step">
+          <span class="wp-int-step-ic">{{ s.done ? '✓' : '' }}</span>
+          <div>
+            <div class="wp-int-step-t">{{ s.title[locale] || s.title.en }}</div>
+            <div class="wp-int-step-s">{{ s.sub[locale] || s.sub.en }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -343,7 +416,7 @@ const props = defineProps({
 
 defineEmits(['task-click'])
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // collapse state — local only, default: all modules open
 const open = ref(new Set())
@@ -548,6 +621,62 @@ function exportTsv() {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+// ── integration tab: static reference content (NOT i18n — structural data) ──
+// `applied` is true everywhere today; the field stays so a future V30 baseline
+// row can land as applied:false without a structural change.
+const INT_MAP = [
+  { excel: 'Φάση (navy row)', col: 'modules.name + sortOrder', applied: true,
+    note: { el: 'Phase = Module. Το from/to της φάσης υπολογίζεται (MIN/MAX).',
+            en: 'Phase = Module; span computed from children.' } },
+  { excel: 'Task', col: 'tasks.name', applied: true,
+    note: { el: '255 chars — το μεγαλύτερο task είναι 68.', en: '255 chars; longest task is 68.' } },
+  { excel: 'from (date)', col: 'tasks.start_date', applied: true, note: { el: 'LocalDate', en: 'LocalDate' } },
+  { excel: 'to (date)', col: 'tasks.end_date', applied: true, note: { el: 'LocalDate', en: 'LocalDate' } },
+  { excel: 'Status %', col: 'tasks.progress + manual_progress', applied: true,
+    note: { el: 'Integer 0–100 με slider.', en: 'Integer 0–100 with slider.' } },
+  { excel: 'Remark(s)', col: 'tasks.comment', applied: true,
+    note: { el: 'TEXT, rich-text + Jsoup sanitized.', en: 'TEXT, rich-text + Jsoup sanitized.' } },
+  { excel: 'Team(s)', col: 'tasks.assignee', applied: true,
+    note: { el: 'VARCHAR(150) — comma-join ομάδων.', en: 'VARCHAR(150) — comma-joined teams.' } },
+  { excel: '— (λεπτομέρεια)', col: 'tasks.description', applied: true,
+    note: { el: 'Rich text.', en: 'Rich text.' } },
+  { excel: 'from (time)', col: 'tasks.start_time', applied: true,
+    note: { el: 'Απαραίτητο για το cutover runbook (12:00 → 15:30 → 18:00).',
+            en: 'Required for the cutover runbook.' } },
+  { excel: 'to (time)', col: 'tasks.end_time', applied: true, note: { el: 'Ίδιο.', en: 'Same.' } },
+  { excel: 'Environment', col: 'tasks.environment', applied: true,
+    note: { el: 'VARCHAR(40), comma-join, split στο render.', en: 'VARCHAR(40), comma-joined.' } },
+  { excel: 'Days', col: 'tasks.work_days', applied: true,
+    note: { el: 'NUMERIC(6,2) — χωράει 0.1 / 0.25 / 0.75.', en: 'NUMERIC(6,2) — holds 0.25.' } },
+  { excel: 'Sign-off', col: 'tasks.is_gate', applied: true,
+    note: { el: 'Ανεξάρτητο από work_days — 9 πύλες, όχι 8.',
+            en: 'Independent of work_days — 9 gates, not 8.' } },
+  { excel: 'Κίτρινο / κόκκινο highlight', col: 'tasks.is_blocked + comment', applied: true,
+    note: { el: 'Κόκκινο = is_blocked· το κίτρινο μένει στο comment.',
+            en: 'Red maps to is_blocked; yellow stays in comment.' } },
+]
+
+const INT_STEPS = [
+  { done: true, title: { el: '1 · buildProjectPayload() refactor', en: '1 · buildProjectPayload() refactor' },
+    sub: { el: 'Ενοποίηση των 9 σημείων PUT — έκλεισε το silent data-loss. — v5.6.0',
+           en: 'Unified the 9 hand-built PUT payloads — closed the silent data loss. — v5.6.0' } },
+  { done: true, title: { el: '2 · V29 + entity/DTO', en: '2 · V29 + entity/DTO' },
+    sub: { el: '5 πεδία + mapping· calcCompletion αμετάβλητο. — v5.7.0',
+           en: '5 fields + mapping; calcCompletion untouched. — v5.7.0' } },
+  { done: true, title: { el: '3 · WorkPlanPanel.vue', en: '3 · WorkPlanPanel.vue' },
+    sub: { el: 'Πίσω από το workPlanEnabled — μηδέν αλλαγή στα υπόλοιπα projects. — v5.8.0',
+           en: 'Behind workPlanEnabled — zero change elsewhere. — v5.8.0' } },
+  { done: true, title: { el: '4 · Επέκταση φόρμας task', en: '4 · Task form extension' },
+    sub: { el: 'Τα 5 πεδία στο υπάρχον modal. — v5.9.0',
+           en: 'The 5 fields in the existing modal. — v5.9.0' } },
+  { done: true, title: { el: '5 · Import του Excel', en: '5 · One-off Excel import' },
+    sub: { el: '8 modules · 52 tasks · 9 πύλες στην παραγωγή. — 06/08/2026',
+           en: '8 modules · 52 tasks · 9 gates in production. — 06/08/2026' } },
+  { done: true, title: { el: 'Τι ΔΕΝ αγγίζουμε', en: 'What we do NOT touch' },
+    sub: { el: 'calcCompletion(Project) · requireMfaForFiles() · JwtAuthFilter.PUBLIC_PATHS · vite.config.js secure:true · application-dev.yml · V28 ή παλαιότερα',
+           en: 'calcCompletion(Project) · requireMfaForFiles() · JwtAuthFilter.PUBLIC_PATHS · vite.config.js secure:true · application-dev.yml · V28 ή παλαιότερα' } },
+]
 
 // ── 6c: cutover runbook ─────────────────────────────────────────────────────
 const activeTab = ref('plan')
@@ -1045,4 +1174,33 @@ function teamColor(name) {
 .wp-al-desc { font-family: "Nunito Sans", sans-serif; font-size: 11px; font-weight: 600; color: var(--text-dim); margin-top: 2px; }
 .wp-al-open { border: 1px solid var(--border-bright); background: var(--surface); border-radius: 5px; font-family: "Nunito Sans", sans-serif; font-size: 10px; font-weight: 800; padding: 3px 10px; color: var(--text-dim); cursor: pointer; flex-shrink: 0; }
 .wp-al-open:hover { color: var(--text); border-color: var(--text-dim); }
+/* integration tab — mapping table / V29 SQL / plan steps */
+.wp-int { padding: 14px 20px; display: flex; flex-direction: column; gap: 14px; }
+.wp-int-panel { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.wp-int-head { padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--surface2);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.wp-int-title { font-size: 12.5px; font-weight: 800; color: var(--text); }
+.wp-int-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+.wp-int-badges { display: flex; gap: 6px; }
+/* purple variant of the global .badge — main.css only ships blue/red/green */
+.badge.dev { background: var(--dev-dim); color: var(--dev); }
+.wp-mapt { width: 100%; border-collapse: collapse; }
+.wp-mapt th { background: var(--surface2); border-bottom: 2px solid var(--border);
+  font-family: "Nunito Sans", sans-serif; font-size: 9px; font-weight: 800; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text-dim); text-align: left; padding: 9px 12px; }
+.wp-mapt td { border-bottom: 1px solid var(--border); padding: 8px 12px; font-size: 12px; color: var(--text-mid); }
+.wp-mapt code { font-family: ui-monospace, Menlo, monospace; font-size: 11px; font-weight: 700;
+  background: var(--surface3); border-radius: 4px; padding: 2px 6px; color: var(--text); }
+/* Hardcoded hex: σκόπιμη εξαίρεση — code block, σκούρο σε κάθε θέμα (όπως mockup 384–386) */
+.wp-sql { margin: 0; padding: 14px 20px; background: #1c2333; color: #cfe3fb;
+  font-family: ui-monospace, Menlo, monospace; font-size: 11px; line-height: 1.65; overflow-x: auto; }
+.wp-int-note { padding: 10px 16px; font-size: 11px; color: var(--text-dim); border-top: 1px solid var(--border); }
+.wp-int-step { display: flex; gap: 10px; align-items: flex-start; padding: 10px 16px;
+  border-bottom: 1px solid var(--border); }
+.wp-int-step:last-child { border-bottom: none; }
+.wp-int-step-ic { width: 18px; height: 18px; border-radius: 50%; background: var(--green-dim, var(--surface3));
+  color: var(--green); font-size: 11px; font-weight: 800; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.wp-int-step-t { font-size: 12px; font-weight: 700; color: var(--text); }
+.wp-int-step-s { font-size: 11px; color: var(--text-dim); margin-top: 1px; line-height: 1.5; }
 </style>
