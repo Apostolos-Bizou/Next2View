@@ -587,6 +587,18 @@
     "rbShift": "Shift start",
     "rbRecomputed": "recomputed",
     "rbOnPlan": "on plan",
-    "rbNote": "Change the start time and the whole runbook recomputes."
+    "rbNote": "Change the start time and the whole runbook recomputes.",
+    "tabTimeline": "Timeline",
+    "byPhase": "By phase",
+    "zDay": "Day",
+    "zWeek": "Week",
+    "zMonth": "Month",
+    "byTeam": "By team",
+    "byEnv": "By environment",
+    "jumpToday": "Jump to today",
+    "legendGate": "Sign-off gate",
+    "legendCut": "Cutover window",
+    "legendToday": "Today",
+    "legendZoom": "Ctrl + scroll: zoom · Pinch on touch"
   }
 }
