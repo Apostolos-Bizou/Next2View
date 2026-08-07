@@ -447,6 +447,100 @@
       <div class="g-tip">💡 A task with 100% is automatically considered ✓ Done. No further action needed.</div>
     </div>
 
+    <!-- ── WORK PLAN ── -->
+    <div v-if="activeTab === 'workplan' && locale === 'el'" class="guide-panel">
+      <div class="g-section-title">📋 Πλάνο Εργασιών (Work Plan)</div>
+      <div class="g-desc">Εξειδικευμένη προβολή παρακολούθησης πλάνου με ώρες, εργάσιμες ημέρες, πύλες έγκρισης και παράθυρα cutover. Εμφανίζεται ΜΟΝΟ σε projects όπου έχει ενεργοποιηθεί από τον διαχειριστή — αν δεν τη βλέπεις σε ένα project, το project δεν τη χρησιμοποιεί.</div>
+
+      <div class="g-subsection">📊 Δείκτες &amp; φίλτρα</div>
+      <div class="g-desc">Έξι δείκτες πάνω από όλες τις καρτέλες:<br>
+        · <strong>Συνολική πρόοδος</strong> — σταθμισμένη με τις εργάσιμες ημέρες κάθε εργασίας.<br>
+        · <strong>Απόκλιση πλάνου</strong> — σε ποσοστιαίες μονάδες (pp) σε σχέση με το προγραμματισμένο.<br>
+        · <strong>Έως επόμενη πύλη</strong> — ημέρες μέχρι την επόμενη εκκρεμή πύλη έγκρισης.<br>
+        · <strong>Πύλες</strong> — πόσες έχουν περάσει από το σύνολο (x/y).<br>
+        · <strong>Σε κίνδυνο</strong> — εκπρόθεσμες και μπλοκαρισμένες εργασίες.<br>
+        · <strong>Εργάσιμες</strong> — συνολικές εργάσιμες ημέρες του πλάνου.<br>
+        Φίλτρα: <strong>Ημ. αναφοράς</strong>, <strong>Περιβάλλον</strong>, <strong>Ομάδα</strong> και 6 γρήγορες όψεις (Όλα, 7 ημέρες, Σε κίνδυνο, Πύλες, Cutover, Ανοιχτά).</div>
+      <div class="g-tip">💡 Η Συνολική πρόοδος εδώ σταθμίζεται με τις εργάσιμες ημέρες κάθε εργασίας, ενώ το ποσοστό στην κεφαλίδα του project είναι απλός μέσος όρος — γι' αυτό μπορεί να διαφέρουν. Και τα δύο είναι σωστά.</div>
+
+      <div class="g-subsection">📋 Καρτέλα Πλάνο</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Οι στήλες ακολουθούν το Excel — <strong>Από/Έως</strong> με ώρες, <strong>Ημ.</strong> (εργάσιμες), <strong>Εργασία</strong>, <strong>Περιβάλλον</strong>, <strong>Ομάδα</strong>, <strong>Παρατηρήσεις</strong>, <strong>Πρόοδος</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Οι δύο <strong>μωβ</strong> στήλες (<strong>Κατάσταση</strong>, <strong>Απόκλ.</strong>) υπολογίζονται αυτόματα — η Κατάσταση δείχνει πού βρίσκεται η εργασία σε σχέση με την Ημ. αναφοράς, η Απόκλ. πόσες εργάσιμες ημέρες είναι πίσω από το πρόγραμμα.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Κλικ σε οποιαδήποτε γραμμή ανοίγει τη <strong>φόρμα της εργασίας</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Το <strong>◆</strong> σημαίνει πύλη έγκρισης (sign-off).</div></div>
+      </div>
+      <div class="g-tip">💡 Το <strong>Excel parity</strong> κρύβει τις υπολογιζόμενες στήλες για πιστή αντιστοίχιση με το αρχικό Excel. Η <strong>Εξαγωγή</strong> κατεβάζει .tsv που ανοίγει απευθείας στο Excel — η στήλη Status είναι σε μορφή 0–1 όπως το πρωτότυπο.</div>
+
+      <div class="g-subsection">📅 Καρτέλα Χρονοδιάγραμμα</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Ομαδοποίηση <strong>ανά φάση, ομάδα ή περιβάλλον</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Zoom <strong>Ημέρα/Εβδομάδα/Μήνας</strong> — και με <strong>Ctrl + κύλιση</strong> ή pinch σε οθόνη αφής.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Σαββατοκύριακα και ελληνικές αργίες σκιάζονται· η <strong>κόκκινη γραμμή</strong> δείχνει την Ημ. αναφοράς.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>Τα <strong>πορτοκαλί διακεκομμένα πλαίσια</strong> είναι τα παράθυρα cutover· το <strong>«Μετάβαση στο σήμερα»</strong> σε πάει εκεί με ένα κλικ.</div></div>
+      </div>
+
+      <div class="g-subsection">🌙 Καρτέλα Cutover</div>
+      <div class="g-desc">Τα παράθυρα cutover (Παρασκευή→Κυριακή) ως αναλυτικό runbook — κάθε βήμα με ώρα, διάρκεια και ομάδα, με διαχωριστικά ανά ημέρα. Ο τίτλος δείχνει τη συνολική διάρκεια του παραθύρου σε ώρες.</div>
+      <div class="g-tip">🔒 Η <strong>Μετατόπιση</strong> (λεπτά) είναι δοκιμή what-if: ξαναϋπολογίζει όλες τις ώρες του runbook στην οθόνη σου, <strong>ΔΕΝ</strong> αλλάζει το αποθηκευμένο πλάνο και μηδενίζεται όταν φύγεις από τη σελίδα.</div>
+
+      <div class="g-subsection">📈 Καρτέλα KPIs</div>
+      <div class="g-desc">Πύλες έγκρισης με κατάσταση και εκκρεμότητες · Φόρτος ανά ομάδα (εργασία με πολλές ομάδες μοιράζεται ισομερώς) · Κάλυψη περιβαλλόντων · Αυτόματες ειδοποιήσεις με άμεση μετάβαση στην εργασία.</div>
+      <div class="g-tip">🔒 Το <strong>Σενάριο καθυστέρησης</strong> είναι προσομοίωση: δείχνει τι θα γινόταν αν μια εργασία καθυστερούσε X εργάσιμες (με εξαίρεση των ελληνικών αργιών), χωρίς να αλλάζει τίποτα στα δεδομένα. Η <strong>Επαναφορά</strong> καθαρίζει το σενάριο.</div>
+
+      <div class="g-subsection">🔌 Καρτέλα Ενσωμάτωση</div>
+      <div class="g-desc">Τεχνική αναφορά — πώς αντιστοιχίζεται το αρχικό Excel στο σύστημα και τι προστέθηκε στη βάση. Απευθύνεται σε διαχειριστές· δεν χρειάζεται για την καθημερινή χρήση.</div>
+
+      <div class="g-tip">💡 Γενικός κανόνας: ό,τι αλλάζεις στην ίδια την εργασία (πρόοδος, ημερομηνίες, ώρες) αποθηκεύεται. Ό,τι αλλάζεις στα εργαλεία της προβολής (Ημ. αναφοράς, φίλτρα, Μετατόπιση, Σενάριο, Excel parity) είναι προσωρινό και δικό σου — δεν το βλέπει κανείς άλλος.</div>
+    </div>
+
+    <!-- ── WORK PLAN EN ── -->
+    <div v-if="activeTab === 'workplan' && locale !== 'el'" class="guide-panel">
+      <div class="g-section-title">📋 Work Plan</div>
+      <div class="g-desc">A dedicated plan-tracking view with times, working days, sign-off gates and cutover windows. It appears ONLY on projects where an administrator has enabled it — if you don't see it on a project, that project doesn't use it.</div>
+
+      <div class="g-subsection">📊 Indicators &amp; filters</div>
+      <div class="g-desc">Six indicators above every tab:<br>
+        · <strong>Overall progress</strong> — weighted by each task's working days.<br>
+        · <strong>Schedule variance</strong> — in percentage points (pp) against the planned value.<br>
+        · <strong>To next gate</strong> — days until the next pending sign-off gate.<br>
+        · <strong>Gates</strong> — how many have passed out of the total (x/y).<br>
+        · <strong>At risk</strong> — overdue and blocked tasks.<br>
+        · <strong>Working days</strong> — total working days in the plan.<br>
+        Filters: <strong>reference date</strong>, <strong>environment</strong>, <strong>team</strong> and 6 quick views (All, 7 days, At risk, Gates, Cutover, Open).</div>
+      <div class="g-tip">💡 Overall progress here is weighted by each task's working days, while the percentage in the project header is a plain average — that's why they can differ. Both are correct.</div>
+
+      <div class="g-subsection">📋 Plan tab</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Columns follow the workbook — <strong>From/To</strong> with times, <strong>Days</strong> (working), <strong>Task</strong>, <strong>Environment</strong>, <strong>Team</strong>, <strong>Remarks</strong>, <strong>Progress</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>The two <strong>purple</strong> columns (<strong>Health</strong>, <strong>Var</strong>) are computed automatically — Health shows where a task stands against the reference date, Var how many working days it is behind schedule.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Clicking any row opens the <strong>task form</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>The <strong>◆</strong> marks a sign-off gate.</div></div>
+      </div>
+      <div class="g-tip">💡 <strong>Excel parity</strong> hides the computed columns for a faithful match with the original workbook. <strong>Export</strong> downloads a .tsv that opens directly in Excel — the Status column uses the 0–1 format of the original.</div>
+
+      <div class="g-subsection">📅 Timeline tab</div>
+      <div class="g-steps">
+        <div class="g-step"><span class="g-step-num">1</span><div>Group <strong>by phase, team or environment</strong>.</div></div>
+        <div class="g-step"><span class="g-step-num">2</span><div>Zoom <strong>Day/Week/Month</strong> — also with <strong>Ctrl + scroll</strong> or pinch on a touch screen.</div></div>
+        <div class="g-step"><span class="g-step-num">3</span><div>Weekends and Greek public holidays are shaded; the <strong>red line</strong> marks the reference date.</div></div>
+        <div class="g-step"><span class="g-step-num">4</span><div>The <strong>orange dashed frames</strong> are the cutover windows; <strong>"Jump to today"</strong> takes you there in one click.</div></div>
+      </div>
+
+      <div class="g-subsection">🌙 Cutover tab</div>
+      <div class="g-desc">The cutover windows (Friday→Sunday) as a detailed runbook — every step with its time, duration and team, separated by day. The header shows the window's total length in hours.</div>
+      <div class="g-tip">🔒 <strong>Shift start</strong> (minutes) is a what-if trial: it recomputes every runbook time on your screen, does <strong>NOT</strong> change the saved plan, and resets when you leave the page.</div>
+
+      <div class="g-subsection">📈 KPIs tab</div>
+      <div class="g-desc">Sign-off gates with their state and pending work · Effort by team (a task shared by several teams is split evenly) · Environment coverage · Automatic alerts with one-click access to the task.</div>
+      <div class="g-tip">🔒 The <strong>Slip scenario</strong> is a simulation: it shows what would happen if a task slipped by X working days (skipping Greek holidays) without changing any data. <strong>Reset</strong> clears the scenario.</div>
+
+      <div class="g-subsection">🔌 Integration tab</div>
+      <div class="g-desc">Technical reference — how the original workbook maps onto the system and what was added to the database. Aimed at administrators; not needed for everyday use.</div>
+
+      <div class="g-tip">💡 Rule of thumb: whatever you change on the task itself (progress, dates, times) is saved. Whatever you change in the view's tools (reference date, filters, Shift start, Slip scenario, Excel parity) is temporary and yours alone — nobody else sees it.</div>
+    </div>
+
         <!-- ── ΣΥΜΒΑΣΕΙΣ ── -->
     <div v-if="activeTab === 'contracts' && locale === 'el'" class="guide-panel">
       <div class="g-section-title">📄 Διαχείριση Συμβάσεων</div>
@@ -1939,6 +2033,7 @@ const tabs = computed(() => [
   { id: 'companies',     label: t('guide.tabs.companies'),    icon: '🏢' },
   { id: 'projects',      label: 'Projects',     icon: '⬡' },
   { id: 'tasks',         label: 'Tasks',        icon: '✅' },
+  { id: 'workplan',      label: 'Work Plan',    icon: '📋', style: 'color: var(--dev);' },
   { id: 'contracts',     label: t('guide.tabs.contracts'),    icon: '📄' },
   { id: 'ai',            label: 'AI Features',  icon: '✦', style: 'background:rgba(139,92,246,0.1);border-color:rgba(139,92,246,0.3);color:#7c3aed;' },
   { id: 'notifications', label: 'Notifications', icon: '🔔', style: 'background:rgba(220,38,38,0.07);border-color:rgba(220,38,38,0.25);color:var(--red);' },
