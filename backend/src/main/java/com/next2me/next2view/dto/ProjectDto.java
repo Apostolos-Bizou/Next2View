@@ -1,5 +1,6 @@
 package com.next2me.next2view.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.next2me.next2view.model.Project;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,9 +16,10 @@ public record ProjectDto(
     String companyColor,
     Project.Category category,
     Project.Status status,
-    BigDecimal budget,
-    BigDecimal paid,
-    BigDecimal invoiced,
+    // v5.18.0: null for callers without viewFinancials -> omitted from JSON
+    @JsonInclude(JsonInclude.Include.NON_NULL) BigDecimal budget,
+    @JsonInclude(JsonInclude.Include.NON_NULL) BigDecimal paid,
+    @JsonInclude(JsonInclude.Include.NON_NULL) BigDecimal invoiced,
     LocalDate startDate,
     LocalDate deadline,
     String contractDesc,

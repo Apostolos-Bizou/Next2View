@@ -40,6 +40,9 @@ public class AiController {
         prompt.append("Ανάλυσε τα παρακάτω projects και δώσε αναφορά στα Ελληνικά.\n\n");
         prompt.append("PROJECTS:\n");
 
+        // v5.18.0: no money fields sent — keep it that way.
+        // (findAll masks budget/paid/invoiced per caller's viewFinancials; this prompt
+        // must never append them regardless.)
         for (ProjectDto p : projects) {
             prompt.append(String.format("- %s | %s | %s | %d%% | %s | Tasks: %d/%d\n",
                 p.title(), p.companyName(), p.category(), p.completion(),

@@ -9,6 +9,7 @@ import com.next2me.next2view.security.PermissionEvaluator;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +18,7 @@ import java.util.*;
 import java.util.LinkedHashMap;
 import java.util.stream.IntStream;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProjectService {
@@ -70,12 +72,13 @@ public class ProjectService {
         // user_company_scope and user_project_scope tables.
         java.util.Set<UUID> companyScope = permissions.allowedCompanyIds(actor);
         java.util.Set<UUID> projectScope = permissions.allowedProjectIds(actor);
+        boolean fin = permissions.canViewFinancials(actor);
 
         return projects.stream()
                 .filter(p -> companyScope.isEmpty()
                           || (p.getCompany() != null && companyScope.contains(p.getCompany().getId())))
                 .filter(p -> projectScope.isEmpty() || projectScope.contains(p.getId()))
-                .map(this::toDto)
+                .map(p -> toDto(p, fin))
                 .toList();
     }
 
@@ -85,7 +88,7 @@ public class ProjectService {
         Project p = projectRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Project not found"));
         permissions.requireCanRead(actor, p);
-        return toDto(p);
+        return toDto(p, permissions.canViewFinancials(actor));
     }
 
     @Transactional
@@ -95,13 +98,16 @@ public class ProjectService {
         Company company = companyRepository.findById(req.companyId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company not found"));
 
+        // v5.18.0: money fields only from callers with viewFinancials; others get
+        // budget=null, paid=0, invoiced=0 regardless of what they sent.
+        boolean fin = permissions.canViewFinancials(actor);
         Project p = Project.builder()
                 .title(req.title())
                 .company(company)
                 .category(req.category())
-                .budget(req.budget())
-                .paid(req.paid() != null ? req.paid() : java.math.BigDecimal.ZERO)
-                .invoiced(req.invoiced() != null ? req.invoiced() : java.math.BigDecimal.ZERO)
+                .budget(fin ? req.budget() : null)
+                .paid(fin && req.paid() != null ? req.paid() : java.math.BigDecimal.ZERO)
+                .invoiced(fin && req.invoiced() != null ? req.invoiced() : java.math.BigDecimal.ZERO)
                 .startDate(req.startDate())
                 .deadline(req.deadline())
                 .contractDesc(req.contractDesc())
@@ -115,6 +121,10 @@ public class ProjectService {
         applySpecs(p, req.specs());
         applyModules(p, req.modules());
         projectRepository.save(p);
+        if (!fin && sentMoney(req)) {
+            log.warn("Ignored money fields from user {} without viewFinancials on create of project {}",
+                    actor.getId(), p.getId());
+        }
 
         auditLogRepository.save(AuditLog.builder()
                 .userEmail(actorEmail).action("CREATE")
@@ -122,7 +132,7 @@ public class ProjectService {
                 .newValue(Map.of("title", p.getTitle()))
                 .build());
 
-        return toDto(p);
+        return toDto(p, fin);
     }
 
     @Transactional
@@ -145,9 +155,18 @@ public class ProjectService {
         p.setTitle(req.title());
         p.setCompany(company);
         p.setCategory(req.category());
-        p.setBudget(req.budget());
-        if (req.paid() != null) p.setPaid(req.paid());
-        if (req.invoiced() != null) p.setInvoiced(req.invoiced());
+        // v5.18.0 write guard: callers without viewFinancials can never change or
+        // erase money. Stale bundles always send budget:0, so ignore (no 403).
+        // Null-guarded: a permitted caller cannot clear budget to null, only set 0.
+        boolean fin = permissions.canViewFinancials(actor);
+        if (fin) {
+            if (req.budget() != null)   p.setBudget(req.budget());
+            if (req.paid() != null)     p.setPaid(req.paid());
+            if (req.invoiced() != null) p.setInvoiced(req.invoiced());
+        } else if (sentMoney(req)) {
+            log.warn("Ignored money fields from user {} without viewFinancials on update of project {}",
+                    actor.getId(), p.getId());
+        }
         p.setStartDate(req.startDate());
         p.setDeadline(req.deadline());
         p.setContractDesc(req.contractDesc());
@@ -196,7 +215,7 @@ public class ProjectService {
         // Granular task-level logging
         logTaskDiffs(actor, p, oldTasks);
 
-        return toDto(p);
+        return toDto(p, fin);
     }
 
     @Transactional
@@ -223,6 +242,10 @@ public class ProjectService {
     }
 
     // ── Helpers ──
+
+    private static boolean sentMoney(ProjectRequest req) {
+        return req.budget() != null || req.paid() != null || req.invoiced() != null;
+    }
 
     private void applySpecs(Project p, List<ProjectRequest.SpecRequest> specs) {
         if (specs == null) return;
@@ -401,7 +424,8 @@ public class ProjectService {
         return (int) countable.stream().mapToInt(Task::getProgress).average().orElse(0);
     }
 
-    private ProjectDto toDto(Project p) {
+    // v5.18.0: fin=false nulls budget/paid/invoiced (omitted from JSON via @JsonInclude).
+    private ProjectDto toDto(Project p, boolean fin) {
         // v5.2.0: deadline-anchored completion (does not affect updateStatus()).
         int completion = calcCompletionWithinDeadline(p);
         // v5.2.0: tasks whose endDate is strictly after the project deadline.
@@ -438,7 +462,9 @@ public class ProjectService {
                 p.getCompany().getId(), p.getCompany().getName(),
                 p.getCompany().getCode(), p.getCompany().getColor(),
                 p.getCategory(), p.getStatus(),
-                p.getBudget(), p.getPaid(), p.getInvoiced(),
+                fin ? p.getBudget() : null,
+                fin ? p.getPaid() : null,
+                fin ? p.getInvoiced() : null,
                 p.getStartDate(), p.getDeadline(), p.getContractDesc(),
                 p.getDescription(),
                 completion, (int) tasksTotal, (int) tasksDone,
