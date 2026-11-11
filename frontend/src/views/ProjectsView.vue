@@ -25,7 +25,7 @@
             <th style="width:110px;">{{ t('projects.category') }}</th>
             <th style="width:80px;">Status</th>
             <th style="width:130px;">Progress</th>
-            <th style="width:70px;">Budget</th>
+            <th v-if="permStore.can('viewFinancials')" style="width:70px;">Budget</th>
             <th style="width:60px;">Tasks</th>
             <th style="width:100px;">Deadline</th>
             <th style="width:80px;">Update</th>
@@ -58,7 +58,7 @@
                   <div class="mbar-fill" :style="`width:${p.completion}%;background:var(--${p.category});`"></div>
                 </div>
               </td>
-              <td class="td-num">{{ p.budget ? "€" + (p.budget/1000).toFixed(0) + "k" : "—" }}</td>
+              <td v-if="permStore.can('viewFinancials')" class="td-num">{{ p.budget ?"€" + (p.budget/1000).toFixed(0) + "k" : "—" }}</td>
               <td class="td-num">
                 <span :class="p.tasksDone === p.tasksTotal && p.tasksTotal > 0 ? 'tasks-done' : 'tasks-pend'">
                   {{ p.tasksDone }}/{{ p.tasksTotal }}

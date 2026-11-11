@@ -67,7 +67,7 @@ public class ReportController {
         }
 
         try {
-            ReportDataDTO data = reportService.generatePreviewData(templateId);
+            ReportDataDTO data = reportService.generatePreviewData(templateId, user);
             return ResponseEntity.ok(data);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -89,7 +89,7 @@ public class ReportController {
 
         try {
             // For now, return preview data as JSON
-            ReportDataDTO data = reportService.generatePreviewData(templateId);
+            ReportDataDTO data = reportService.generatePreviewData(templateId, user);
             byte[] content = pdfReportGenerator.generatePdf(data);
 
             HttpHeaders headers = new HttpHeaders();
@@ -122,7 +122,7 @@ public class ReportController {
 
         try {
             // Build context from all data
-            var data = reportService.generateExecSummaryData();
+            var data = reportService.generateExecSummaryData(user);
             StringBuilder context = new StringBuilder();
             context.append("PLATFORM DATA (Next2View - Next2me Group):\n");
             if (data.getSummary() != null) {
