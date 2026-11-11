@@ -22,7 +22,7 @@
               <span>{{ project.companyName }}</span>
               <span v-if="project.startDate || project.deadline" :title="timelineTooltip">📅 {{ formatDateRange(project.startDate, project.deadline) }}</span>
               <span v-if="daysRemainingLabel" :class="['ch-days-pill', daysRemainingClass]">{{ daysRemainingLabel }}</span>
-              <span v-if="project.budget">Budget: €{{ Number(project.budget).toLocaleString() }}</span>
+              <span v-if="project.budget && permStore.can('viewFinancials')">Budget: €{{ Number(project.budget).toLocaleString() }}</span>
             </div>
           </div>
             <div style="display:flex;align-items:center;gap:8px;">
@@ -44,7 +44,7 @@
             <div class="cs-lbl">Status</div>
             <div class="cs-val" :style="`color:${smartStatus.color};font-size:13px;`">{{ smartStatus.icon }} {{ smartStatus.label }}</div>
           </div>
-          <div v-if="project.budget" class="cs-item">
+          <div v-if="project.budget && permStore.can('viewFinancials')" class="cs-item">
             <div class="cs-lbl">Budget</div>
             <div class="cs-val">€{{ Number(project.budget).toLocaleString() }}</div>
           </div>
@@ -458,7 +458,7 @@
               <option value="marketing">Marketing</option>
             </select>
           </div>
-          <div class="form-group">
+          <div v-if="permStore.can('viewFinancials')" class="form-group">
             <label>Budget (€)</label>
             <input v-model="editForm.budget" type="number" class="form-input" />
           </div>
@@ -687,7 +687,11 @@ function buildProjectPayload(source, overrides = {}) {
     title: source.title,
     companyId: source.companyId,
     category: source.category,
-    budget: source.budget || 0,
+    // v5.18.0: budget only for viewFinancials users, and never coerced to 0
+    // (server ignores money from everyone else and keeps the stored value).
+    ...(permStore.can('viewFinancials')
+      ? { budget: (source.budget ?? '') === '' ? null : Number(source.budget) }
+      : {}),
     startDate: source.startDate || null,
     deadline: source.deadline || null,
     contractDesc: source.contractDesc || '',
@@ -1126,7 +1130,7 @@ async function openEditModal() {
     title: project.value.title || "",
     companyId: project.value.companyId || "",
     category: project.value.category || "dev",
-    budget: project.value.budget || 0,
+    budget: project.value.budget ?? null,
     startDate: project.value.startDate || "",
     deadline: project.value.deadline || "",
     contractDesc: project.value.contractDesc || "",

@@ -197,7 +197,7 @@
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
+            <div v-if="permStore.can('viewFinancials')" class="form-group">
               <label>Budget (€)</label>
               <input v-model="form.budget" type="number" placeholder="0" class="form-input" />
             </div>
@@ -624,7 +624,8 @@ async function submitProject() {
       title: form.value.title,
       companyId: form.value.companyId,
       category: form.value.category,
-      budget: form.value.budget ? Number(form.value.budget) : null,
+      // v5.18.0: budget only sent by viewFinancials users
+      ...(permStore.can('viewFinancials') && form.value.budget ? { budget: Number(form.value.budget) } : {}),
       deadline: form.value.deadline || null,
       contractDesc: form.value.contractDesc || null,
       description: form.value.description || null,

@@ -161,6 +161,19 @@ public class PermissionEvaluator {
         return true;
     }
 
+    /**
+     * v5.18.0: May this user see project money fields (budget / paid / invoiced)?
+     * CEO: always. Others: UserPermission.viewFinancials == TRUE. No row: false.
+     * Server-side source of truth; the frontend gate is cosmetic only.
+     */
+    public boolean canViewFinancials(User user) {
+        if (user == null) return false;
+        if (isCeo(user)) return true;
+        return userPermissionRepository.findByUserId(user.getId())
+                .map(p -> Boolean.TRUE.equals(p.getViewFinancials()))
+                .orElse(false);
+    }
+
     public void requireMfaForLegal(Project project, boolean mfaVerified) {
             if (project != null && project.getCategory() == Project.Category.legal && !mfaVerified) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN,

@@ -8,6 +8,7 @@ import com.next2me.next2view.repository.*;
 import com.next2me.next2view.model.Project;
 import com.next2me.next2view.model.ContractFile;
 import com.next2me.next2view.model.Company;
+import com.next2me.next2view.security.PermissionEvaluator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class ReportService {
     private final CompanyRepository companyRepository;
     private final ContractFileRepository contractFileRepository;
     private final ReportGenerationLogRepository reportLogRepository;
+    private final PermissionEvaluator permissions;
     // Will inject more repos as we add templates
 
     // ── Template Registry ──
@@ -242,21 +244,25 @@ public class ReportService {
     }
 
     // ── Preview router ──
-    public ReportDataDTO generatePreviewData(String templateId) {
+    public ReportDataDTO generatePreviewData(String templateId, User actor) {
         return switch (templateId) {
             case "security-snapshot" -> generateSecuritySnapshotData();
             case "mfa-status" -> generateMfaStatusData();
-            case "exec-summary" -> generateExecSummaryData();
+            case "exec-summary" -> generateExecSummaryData(actor);
             case "legal-activity" -> generateLegalActivityData();
             default -> throw new IllegalArgumentException("Unknown template: " + templateId);
         };
     }
 
     // ── Executive Summary Data ──
-    public ReportDataDTO generateExecSummaryData() {
+    // v5.18.0: scoped to projects the actor can read; money totals only with viewFinancials.
+    public ReportDataDTO generateExecSummaryData(User actor) {
         log.info("Generating Executive Summary data");
 
-        List<Project> projects = projectRepository.findAllByActiveTrueOrderByUpdatedAtDesc();
+        List<Project> projects = projectRepository.findAllByActiveTrueOrderByUpdatedAtDesc().stream()
+            .filter(p -> permissions.canRead(actor, p))
+            .toList();
+        boolean fin = permissions.canViewFinancials(actor);
         List<Company> companies = companyRepository.findAllByActiveTrueOrderByName();
 
         int total = projects.size();
@@ -265,16 +271,6 @@ public class ReportService {
         long delayed = projects.stream().filter(p -> p.getStatus() == Project.Status.delayed).count();
         long onTrack = projects.stream().filter(p -> p.getStatus() == Project.Status.on_track).count();
 
-        java.math.BigDecimal totalBudget = projects.stream()
-            .map(p -> p.getBudget() != null ? p.getBudget() : java.math.BigDecimal.ZERO)
-            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-        java.math.BigDecimal totalPaid = projects.stream()
-            .map(p -> p.getPaid() != null ? p.getPaid() : java.math.BigDecimal.ZERO)
-            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-        java.math.BigDecimal totalInvoiced = projects.stream()
-            .map(p -> p.getInvoiced() != null ? p.getInvoiced() : java.math.BigDecimal.ZERO)
-            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
-
         Map<String, Object> summary = new LinkedHashMap<>();
         summary.put("totalProjects", total);
         summary.put("completed", completed);
@@ -282,9 +278,20 @@ public class ReportService {
         summary.put("delayed", delayed);
         summary.put("atRisk", atRisk);
         summary.put("companies", companies.size());
-        summary.put("totalBudget", "\u20ac" + totalBudget.toPlainString());
-        summary.put("totalPaid", "\u20ac" + totalPaid.toPlainString());
-        summary.put("totalInvoiced", "\u20ac" + totalInvoiced.toPlainString());
+        if (fin) {
+            java.math.BigDecimal totalBudget = projects.stream()
+                .map(p -> p.getBudget() != null ? p.getBudget() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+            java.math.BigDecimal totalPaid = projects.stream()
+                .map(p -> p.getPaid() != null ? p.getPaid() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+            java.math.BigDecimal totalInvoiced = projects.stream()
+                .map(p -> p.getInvoiced() != null ? p.getInvoiced() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+            summary.put("totalBudget", "\u20ac" + totalBudget.toPlainString());
+            summary.put("totalPaid", "\u20ac" + totalPaid.toPlainString());
+            summary.put("totalInvoiced", "\u20ac" + totalInvoiced.toPlainString());
+        }
 
         // Projects by category
         List<Map<String, Object>> sections = new ArrayList<>();
